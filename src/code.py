@@ -96,10 +96,8 @@ output.Name = func2str(options.Algorithm);
 '''
     
 def f(U, M):
-    D = M[0] - (U[0].dot(kr(U[:0:-1]))).T
-    #D = M{1}-U{1}*kr(U(end:-1:2)).';
+    D = M[0] - U[0].dot(kr(U[:0:-1]).T)
     fval = 0.5 * np.sum(D*D)
-    #fval = 0.5*sum(D(:)'*D(:));
     return fval
 
 '''
