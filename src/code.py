@@ -24,63 +24,59 @@ def cpd_nls(T,U0,options):
     
     # Check the initial factor matrices U0.
     N = T.ndim
-
-    # A(:) <- matlab -> a.flatten('F') 'F' = fortran = eerste index eerst verhogen
-    #TODO: U = U0.flatten('F').T;
-    #TODO: 
-    U = U0.flatten('F').T
-    #OR U0.flatten().T;
+    
+    U = []
+    for i in range(len(U0)):
+        U.append(U0[i].copy())
     
     R = U0[1].shape[1]
 
-    #OR (afhankelijk van wat daarboven staat)
-    #R = U[1].shape(1);
     size_tens = T.shape
-    
-    print size_tens
     
     for e in U:
         if e.shape[1] != R:
             raise RuntimeError('cpd_nls:U0 size(U0{n},2) should be the same for all n.')
     
-    for i in range(0, len(U)):
+    for i in range(len(U)):
         if U[i].shape[0] != size_tens[i]:
             raise RuntimeError('cpd_nls:U0 size(T,n) should equal size(U0{n},1).')
     
     '''
     TODO
 
-% Check the options structure.
-isfunc = @(f)isa(f,'function_handle');
-xsfunc = @(f)isfunc(f)&&exist(func2str(f),'file');
-if nargin < 3, options = struct; end
-if ~isfield(options,'Algorithm')
-    funcs = {@nls_gndl,@nls_gncgs,@nls_lm};
-    options.Algorithm = funcs{find(cellfun(xsfunc,funcs),1)};
-end
-options.CGMaxIter = 10
-options.Display = 0
-options.JHasFullRank = false
-options.LargeScale = true
-options.M = 'block-Jacobi'
-/TODO
-    '''
-    #TEST
-    # Cache some intermediate variables.
-    M = []
-    for n in range(0, N):
-        M.append(tens2mat(T, n))
+    CGMaxIter = 10
+    Display = 0
+    JHasFullRank = false
+    LargeScale = true
+    M = 'block-Jacobi'
     
-    #/TEST
-    '''
-    TODO    
-    M = arrayfun(@(n)tens2mat(T,n),1:N,'UniformOutput',false);
-    offset = [0 cumsum(size_tens)]*R;
-    UHU = []; updateUHU(U);
-    T2 = T(:)'*T(:);
+    
+    % Check the options structure.
+
+    CGTol = 1e-6;
+    MaxIter = 200;
+    PlaneSearch = false;
+    PlaneSearchOptions = struct;
+    TolFun = 1e-12;
+    TolX = 1e-6;
+    Delta = nan;
     
     /TODO
     '''
+
+    # Cache some intermediate variables.
+    M = []
+    for n in range(N):
+        M.append(tens2mat(T, n))
+    
+    offset = np.hstack((np.array([0]), np.array(size_tens))) * R
+    
+    UHU = np.array([])
+    (U, U0, UHU) = updateUHU(U, U0, UHU, N, R)
+    
+    T2 = T.flatten('F').T.dot(T.flatten('F'))
+
+
 
 '''
 TODO 
@@ -110,18 +106,6 @@ function grad = g(U)
     end
 end
 
-function [alpha,output] = ls(~,~,z,p,state,options)
-    state.UHU = UHU;
-    state.T2 = T2;
-    [alpha,output] = linesearch(T,z,p,state,options);
-end
-
-function [alpha,output] = ps(~,~,z,p,q,state,options)
-    state.UHU = UHU;
-    state.T2 = T2;
-    [alpha,output] = planesearch(T,z,p,q,state,options);
-end
-
 
 function y = JHJx(U,x)
 % Compute JHJ*x.
@@ -149,34 +133,50 @@ function y = JHJx(U,x)
     end
 end
 
-function x = M_Jacobi(~,b)
-% Solve Mx = b, where M is a diagonal approximation for JHJ.
+function x = M_blockJacobi(~,b)
+% Solve Mx = b, where M is a block-diagonal approximation for JHJ.
+% Equivalent to simultaneous ALS updates for each of the factor matrices.
     x = zeros(size(b));
-    W = zeros(size(b));
     for n = 1:N
-        idx = bsxfun(@plus,R*R*(([1:n-1 n+1:N]).'-1),1+(R+1)*(0:R-1));
-        Wn = prod(UHU(idx),1).';
+        Wn = conj(prod(UHU(:,:,[1:n-1 n+1:N]),3));
         idx = offset(n)+1:offset(n+1);
-        W(idx) = kron(Wn,ones(size_tens(n),1));
-    end
-    idx = W > 1e-6*max(W);
-    x(idx) = b(idx)./W(idx);
-end
-
-function updateUHU(U)
-% Cache the Gramians U{n}'*U{n}.
-    newState = isempty(UHU);
-    for n = 1:N
-        if newState, break; end
-        newState = any(U0{n}(:) ~= U{n}(:));
-    end
-    if newState
-        U0 = U;
-        if isempty(UHU), UHU = zeros(R,R,N); end
-        for n = 1:N, UHU(:,:,n) = U{n}'*U{n}; end
+        x(idx) = reshape(b(idx),size_tens(n),R)/Wn;
     end
 end
+'''
+    
 
+def updateUHU(Unew, Uold, UHU, N, R):
+    '''
+    Updates UHU
+    
+    @param Unew: The new U
+    @param Uold: The old U
+    @param UHU: UHU to update
+    @param N: The number of dimensions
+    @param R: The rank of the decomposition
+    
+    @return: (Unew, Uold, UHU)
+    '''
+    
+    
+    # Cache the Gramians U{n}'*U{n}.
+    newState = (UHU.size == 0)
+    for n in range(N):
+        if newState:
+            break
+        
+        newState = np.array_equal(Uold[n], Unew[n])
+    
+    if newState:        
+        if UHU.size == 0:
+            UHU = np.zeros((R,R,N))
+        for n in range(N):
+            UHU[:,:,n] = Unew[n].T.dot(Unew[n])
+
+    return (Unew, Unew, UHU)
+
+'''
 end
 
 function [z,output] = nls_gndl(F,dF,z0,options)
@@ -320,18 +320,7 @@ function x = PC(b) % = M_blockJacobi
     x = dF.M(z,b);
 end
 
-% Check the options structure.
-options.CGMaxIter = 10;
-options.CGTol = 1e-6;
-options.JHasFullRank = false;
-options.MaxIter = 200;
 
-options.PlaneSearch = false; end
-options.PlaneSearchOptions = struct;
-
-options.TolFun = 1e-12;
-options.TolX = 1e-6;
-options.Delta = nan;
 
 % Gauss-Newton with dogleg trust region.
 output.alpha = [];
@@ -471,17 +460,3 @@ function dim = structure(z)
     end
 end
 '''
-
-#Some testingdata
-U=[]
-U.append(np.array([[1,2],[3,4]]))
-U.append(np.array([[1,2],[3,4],[3,4]]))
-U.append(np.array([[1,2],[3,4],[1,2],[3,4]]))
-
-T = np.array([[[111,112,113,114],[121,122,123,124],[131,132,133,134]],[[211,212,213,214],[221,222,223,224],[231,232,233,234]]])
-
-print T[0,1,2]
-
-print T[1,:,:].shape
-
-cpd_nls(T, U, 0)
