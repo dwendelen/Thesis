@@ -21,18 +21,16 @@ def kr(U):
     %            Lieven De Lathauwer (Lieven.DeLathauwer@kuleuven-kulak.be)
     '''
 
-
     (J, K) = U[-1].shape
     
-    '''
-    X = reshape(U[-1],[J 1 K]);
-    for n = length(U)-1:-1:1
-        I = size(U{n},1);
-        A = reshape(U{n},[1 I K]);
-        X = reshape(bsxfun(@times,A,X),[I*J 1 K]);
-        J = I*J;
-    end
-    X = reshape(X,[size(X,1) K]);
-    '''
+    X = U[-1].copy().reshape((J, 1, K), order = 'F')
+
+    for n in range(len(U)-2, -1, -1):
+        I = U[n].shape[0]
+        A = U[n].reshape((1, I, K), order='F')
+        X = (A*X).reshape((I*J, 1, K), order='F')
+        J = I*J
+        
+    X = X.reshape((X.shape[0], K), order='F')
     
-    #return X
+    return X
