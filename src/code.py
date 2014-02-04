@@ -1,5 +1,6 @@
 import numpy as np
 from tens2mat import tens2mat
+from kr import kr
 
 '''
 Numpy arrays definieren werkt met laatste index eerst verhogen, eerst in index laatst verhogen,
@@ -71,12 +72,14 @@ def cpd_nls(T,U0,options):
     
     offset = np.hstack((np.array([0]), np.array(size_tens))) * R
     
+    print "U1:"; print U
     UHU = np.array([])
     (U, U0, UHU) = updateUHU(U, U0, UHU, N, R)
     
     T2 = T.flatten('F').T.dot(T.flatten('F'))
 
-
+    print "F:"; print f(U, M)
+    
 
 '''
 TODO 
@@ -90,12 +93,16 @@ dF.M = @M_blockJacobi;
 
 [U,output] = options.Algorithm(@f,dF,U,options);
 output.Name = func2str(options.Algorithm);
+'''
+    
+def f(U, M):
+    D = M[0] - (U[0].dot(kr(U[:0:-1]))).T
+    #D = M{1}-U{1}*kr(U(end:-1:2)).';
+    fval = 0.5 * np.sum(D*D)
+    #fval = 0.5*sum(D(:)'*D(:));
+    return fval
 
-function fval = f(U)
-    D = M{1}-U{1}*kr(U(end:-1:2)).';
-    fval = 0.5*sum(D(:)'*D(:));
-end
-
+'''
 function grad = g(U)
     updateUHU(U);
     grad = cell(1,N);
@@ -460,3 +467,4 @@ function dim = structure(z)
     end
 end
 '''
+
