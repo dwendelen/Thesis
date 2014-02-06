@@ -72,13 +72,10 @@ def cpd_nls(T,U0,options):
     
     offset = np.hstack((np.array([0]), np.array(size_tens))) * R
     
-    print "U1:"; print U
     UHU = np.array([])
     (U, U0, UHU) = updateUHU(U, U0, UHU, N, R)
     
     T2 = T.flatten('F').T.dot(T.flatten('F'))
-
-    print "F:"; print f(U, M)
     
 
 '''
@@ -88,11 +85,9 @@ dF.JHJx = @JHJx
 dF.JHF = @g;
 dF.M = @M_blockJacobi;
 
-
-
-
 [U,output] = options.Algorithm(@f,dF,U,options);
 output.Name = func2str(options.Algorithm);
+/TODO
 '''
     
 def f(U, M):
@@ -100,17 +95,45 @@ def f(U, M):
     fval = 0.5 * np.sum(D*D)
     return fval
 
-'''
-function grad = g(U)
-    updateUHU(U);
-    grad = cell(1,N);
-    for n = 1:N
-        G1 = U{n}*conj(prod(UHU(:,:,[1:n-1 n+1:N]),3));
-        G2 = M{n}*conj(kr(U([N:-1:n+1 n-1:-1:1])));
-        grad{n} = G1-G2;
-    end
-end
+def g(U, UHU, N, M):
+    grad = [];
+    for n in range(N):
+        allButN = np.vstack((range(n), range(n+1, N)))
+        G1 = U[n].dot(np.prod(UHU[:,:,allButN],axis = 3))
+        G2 = M[n].dot(kr(U[reversed(allButN)]))
+        grad.append(G1-G2)
+    return grad
 
+def JHJx(U, UHU, N, R, offset, size_tens, x):
+    # Compute JHJ*x.
+    XHU = np.zeros(UHU.shape);
+    y = np.zeros(x.shape);
+    
+    for n in range(N):
+        allButN = np.vstack((range(n), range(n+1, N)))
+        idx = range(offset[n], offset[n+1])
+        Wn = np.prod(UHU[:,:,allButN],axis = 3)
+        Xn = x[idx].copy().reshape((size_tens[n],R))
+        XHU[:,:,n] = Xn.T.dot(U[n])
+        y[idx] = Xn.dot(Wn)
+    
+    for n in range(N-1):
+        idxn = range(offset[n], offset[n+1])
+        Wn = np.zeros(R)
+        
+        for m in range(n+1, N):
+            allButNAndM = np.vstack((range(n), range(n+1, m), range(m+1, N)))
+            idxm = range(offset[m], offset[m+1])
+            Wnm = np.prod(UHU[:,:,allButNAndM],axis = 3)
+            Wn = Wn+Wnm*XHU[:,:,m]
+            JHJmnx = U[m].dot(Wnm*XHU[:,:,n])
+            y[idxm] = y[idxm]+JHJmnx[:]
+        
+        JHJnx = U[n].dot(Wn)
+        y[idxn] = y[idxn]+JHJnx[:]
+    return y
+
+'''
 
 function y = JHJx(U,x)
 % Compute JHJ*x.
@@ -344,6 +367,7 @@ while ~output.info
     % Compute the (in)exact Gauss-Newton step pgn.
 
     % Compute the Cauchy point pcp = -alpha*grad.
+    updateUHU(U)
     grad = serialize(dF.JHF(z));
     gg = grad'*grad;
     gBg = real(grad'*dF.JHJx(z,grad));
