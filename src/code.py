@@ -21,18 +21,37 @@ Heeft als laatste element T[1,2,3] en is gelijk aan 234 (0-based indexering)
 T.shape is gelijk aan (2,3,4)
 '''
 
-def cpd_nls(T,U0,options):
+def getNbOfDimensions(tensor):
+    return tensor.ndim
     
-    # Check the initial factor matrices U0.
-    N = T.ndim
+def getRank(U):
+    return U[0].shape[1]
+
+def getM(U, T):
+    M = []
+    for n in range(getNbOfDimensions(T)):
+        M.append(tens2mat(T, n))
+    return M
     
+def copyU(U0):
     U = []
     for i in range(len(U0)):
         U.append(U0[i].copy())
     
-    R = U0[1].shape[1]
+    return U
 
-    size_tens = T.shape
+def getDimensions(tensor):
+    return tensor.shape
+    
+def cpd_nls(T,U0,options):
+    
+    # Check the initial factor matrices U0.
+    N = getNbOfDimensions(T)
+    
+    U = copyU(U0)
+    R = getRank(U0)
+
+    size_tens = getDimensions(T)
     
     for e in U:
         if e.shape[1] != R:
@@ -66,9 +85,7 @@ def cpd_nls(T,U0,options):
     '''
 
     # Cache some intermediate variables.
-    M = []
-    for n in range(N):
-        M.append(tens2mat(T, n))
+    M = getM(U, T)
     
     offset = np.hstack((np.array([0]), np.array(size_tens))) * R
     
@@ -77,6 +94,7 @@ def cpd_nls(T,U0,options):
     
     T2 = T.flatten('F').T.dot(T.flatten('F'))
     
+    print f(U, M)
 
 '''
 TODO 
