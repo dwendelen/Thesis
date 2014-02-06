@@ -113,7 +113,7 @@ def JHJx(U, UHU, N, R, offset, size_tens, x):
         allButN = np.vstack((range(n), range(n+1, N)))
         idx = range(offset[n], offset[n+1])
         Wn = np.prod(UHU[:,:,allButN],axis = 3)
-        Xn = x[idx].copy().reshape((size_tens[n],R))
+        Xn = x[idx].copy().reshape((size_tens[n],R), order = 'F')
         XHU[:,:,n] = Xn.T.dot(U[n])
         y[idx] = Xn.dot(Wn)
     
@@ -124,7 +124,7 @@ def JHJx(U, UHU, N, R, offset, size_tens, x):
         for m in range(n+1, N):
             allButNAndM = np.vstack((range(n), range(n+1, m), range(m+1, N)))
             idxm = range(offset[m], offset[m+1])
-            Wnm = np.prod(UHU[:,:,allButNAndM],axis = 3)
+            Wnm = np.prod(UHU[:,:,allButNAndM], axis = 3)
             Wn = Wn+Wnm*XHU[:,:,m]
             JHJmnx = U[m].dot(Wnm*XHU[:,:,n])
             y[idxm] = y[idxm]+JHJmnx[:]
