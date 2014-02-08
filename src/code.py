@@ -514,13 +514,27 @@ function z = serialize(z)
     end
 end
 
-function dim = structure(z)
-    if iscell(z)
-        dim = cellfun(@size,z,'UniformOutput',false);
-    else
-        dim = size(z);
-        if numel(z) == dim(1), dim = []; end
-    end
-end
 '''
+def deserialize(z, dim):
+    pass
 
+def serialize(z):
+    s = []
+    for i in range(len(z)):
+        s.append(z[i].size)
+    
+    o = np.hstack((0, np.cumsum(np.array(s), axis = 0)))
+    r = np.zeros((o[-1]))
+
+    for i in range(len(s)):
+        elements = o[i] + np.array(range(s[i]))
+        r[elements] = z[i].flatten(order = 'F')
+        
+    return r
+    
+def structure(z):
+    dim = []
+    for i in range(len(z)):
+        dim.append(z[i].shape)
+    
+    return dim

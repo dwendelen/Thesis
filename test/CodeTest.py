@@ -3,6 +3,7 @@ import numpy as np
 from code import *
 
 class CodeTest(unittest.TestCase):
+        
 
     def setUp(self):
         unittest.TestCase.setUp(self)
@@ -38,6 +39,13 @@ class CodeTest(unittest.TestCase):
     
     def test_blockJacobi(self):
         pass
+    
+    def test_serialize(self):
+        r = serialize(self.U1)
+        
+        s =  np.array([1, 2, 1, 3, 2, 4, 1, 3, 5, 2, 4, 6])
+        
+        self.assertTrue(np.array_equal(r, s), "Serialisation is wrong")
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
