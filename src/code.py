@@ -190,7 +190,23 @@ function x = M_blockJacobi(~,b)
     end
 end
 '''
+
+def M_blockJacobi(b, N, UHU, offset, size_tens, R):    
+    # Solve Mx = b, where M is a block-diagonal approximation for JHJ.
+    # Equivalent to simultaneous ALS updates for each of the factor matrices.
+    x = np.zeros(b.shape)
     
+    for n in range(N):
+        allButN = np.vstack((range(n), range(n+1, N)))
+        Wn = np.prod(UHU[:,:,allButN],axis = 3)
+        
+        idx = range(offset[n], offset[n+1])
+        
+        #A/B = (B'\A')'
+        A = b[idx].copy().reshape((size_tens[n],R), order = 'F')
+        x[idx] = np.linalg.solve(Wn.T, A.T).T
+    
+    return x
 
 def updateUHU(Unew, Uold, UHU, N, R):
     '''

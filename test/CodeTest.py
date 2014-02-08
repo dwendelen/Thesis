@@ -32,6 +32,12 @@ class CodeTest(unittest.TestCase):
 
     def test_g(self):
         pass
+    
+    def test_jhjx(self):
+        pass
+    
+    def test_blockJacobi(self):
+        pass
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
