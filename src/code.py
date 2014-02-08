@@ -33,7 +33,7 @@ def getM(U, T):
         M.append(tens2mat(T, n))
     return M
     
-def copyU(U0):
+def copyListOfArray(U0):
     U = []
     for i in range(len(U0)):
         U.append(U0[i].copy())
@@ -48,7 +48,7 @@ def cpd_nls(T,U0,options):
     # Check the initial factor matrices U0.
     N = getNbOfDimensions(T)
     
-    U = copyU(U0)
+    U = copyListOfArray(U0)
     R = getRank(U0)
 
     size_tens = getDimensions(T)
@@ -504,19 +504,20 @@ function z = deserialize(z,dim)
     end
 end
 
-function z = serialize(z)
-    if iscell(z)
-        s = cellfun(@numel,z(:)); o = [0; cumsum(s)];
-        c = z; z = zeros(o(end),1);
-        for i = 1:length(s), ci = c{i}; z(o(i)+(1:s(i))) = ci(:); end
-    else
-        z = z(:);
-    end
-end
-
 '''
 def deserialize(z, dim):
-    pass
+    r = []
+    #s = cellfun(@(s)prod(s(:)),dim(:)); o = [0; cumsum(s)];
+    s = []
+    for i in range(len(dim)):
+        s.append(np.prod(dim[i]))
+    
+    o = np.hstack((0, np.cumsum(np.array(s), axis = 0)))
+    for i in range(len(s)):
+        elements = o[i] + np.array(range(s[i]))
+        r.append(z[elements].reshape(dim[i], order = 'F'))
+    
+    return r
 
 def serialize(z):
     s = []
