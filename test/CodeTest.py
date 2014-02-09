@@ -9,6 +9,8 @@ class CodeTest(unittest.TestCase):
         unittest.TestCase.setUp(self)
         self.initU1()
         self.initT1()
+        self.N1 = getNbOfDimensions(self.T1)
+        self.R1 = getRank(self.U1)
 
     def initT1(self):
         T = np.zeros((1,2,3));
@@ -37,6 +39,15 @@ class CodeTest(unittest.TestCase):
 
     def test_g(self):
         pass
+    
+    def test_calculateUHU(self):
+        e = np.zeros((self.R1, self.R1, self.N1))
+        e[:,:,0] = np.array([[1, 2], [2, 4]])
+        e[:,:,1] = np.array([[10, 14], [14, 20]])
+        e[:,:,2] = np.array([[35, 44], [44, 56]])
+        
+        r = calculateUHU(self.U1, self.N1, self.R1)
+        self.assertTrue(np.array_equal(e, r), "Elements do not match")
     
     def test_jhjx(self):
         pass

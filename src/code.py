@@ -89,8 +89,7 @@ def cpd_nls(T,U0,options):
     
     offset = np.hstack((np.array([0]), np.array(size_tens))) * R
     
-    UHU = np.array([])
-    (U, U0, UHU) = updateUHU(U, U0, UHU, N, R)
+    UHU = calculateUHU(U, N, R)
     
     T2 = T.flatten('F').T.dot(T.flatten('F'))
     
@@ -434,13 +433,11 @@ def M_blockJacobi(b, N, UHU, offset, size_tens, R):
     
     return x
 
-def updateUHU(Unew, Uold, UHU, N, R):
+def calculateUHU(U, N, R):
     '''
-    Updates UHU
+    calculates UHU
     
-    @param Unew: The new U
-    @param Uold: The old U
-    @param UHU: UHU to update
+    @param U: U
     @param N: The number of dimensions
     @param R: The rank of the decomposition
     
@@ -449,20 +446,11 @@ def updateUHU(Unew, Uold, UHU, N, R):
     
     
     # Cache the Gramians U{n}'*U{n}.
-    newState = (UHU.size == 0)
+    UHU = np.zeros((R,R,N))
     for n in range(N):
-        if newState:
-            break
-        
-        newState = np.array_equal(Uold[n], Unew[n])
-    
-    if newState:        
-        if UHU.size == 0:
-            UHU = np.zeros((R,R,N))
-        for n in range(N):
-            UHU[:,:,n] = Unew[n].T.dot(Unew[n])
+        UHU[:,:,n] = U[n].T.dot(U[n])
 
-    return (Unew, Unew, UHU)
+    return UHU
 
 def f(U, M):
     D = M[0] - U[0].dot(kr(U[:0:-1]).T)
