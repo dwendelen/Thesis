@@ -41,10 +41,4 @@ def tens2mat(T, mode_row):
   
 def complement(mode_row,N):
     return range(0, mode_row) + range(mode_row + 1,N);
-
-
-T = np.array([[[111,112,113,114],[121,122,123,124],[131,132,133,134]],[[211,212,213,214],[221,222,223,224],[231,232,233,234]]])
-print tens2mat(T, 0);
-print tens2mat(T, 1);
-print tens2mat(T, 2);
     

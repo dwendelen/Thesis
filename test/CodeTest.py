@@ -11,6 +11,7 @@ class CodeTest(unittest.TestCase):
         self.initT1()
         self.N1 = getNbOfDimensions(self.T1)
         self.R1 = getRank(self.U1)
+        self.M1 = getM(self.U1, self.T1)
 
     def initT1(self):
         T = np.zeros((1,2,3));
@@ -32,13 +33,22 @@ class CodeTest(unittest.TestCase):
         self.U1r = copyListOfArray(U)
 
     def test_f(self):
-        r = f(self.U1, getM(self.U1, self.T1))
+        r = f(self.U1, self.M1)
         
         self.testUUnchanged()
         self.assertEqual(23337, r, "F is not correct")
 
     def test_g(self):
-        pass
+        e = []
+        e.append(np.array([[-2736, -5712]]))
+        e.append(np.array([[-801, -2160], [-645, -1776]]))
+        e.append(np.array([[-408, -1224],[-336, -1020], [-264, -816]]))
+    
+        UHU = calculateUHU(self.U1, self.N1, self.R1)
+    
+        r = g(self.U1, UHU, self.N1, self.M1)
+        
+        self.assertListOfArraysEquals(r, e, "Gradient is wrong")
     
     def test_calculateUHU(self):
         e = np.zeros((self.R1, self.R1, self.N1))
