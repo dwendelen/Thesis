@@ -40,6 +40,9 @@ def copyListOfArray(U0):
     
     return U
 
+def calculateOffset(size_tens, R):
+    return np.hstack((np.array([0]), np.cumsum(np.array(size_tens)))) * R
+
 def getDimensions(tensor):
     return tensor.shape
     
@@ -420,16 +423,17 @@ def M_blockJacobi(b, N, UHU, offset, size_tens, R):
     # Solve Mx = b, where M is a block-diagonal approximation for JHJ.
     # Equivalent to simultaneous ALS updates for each of the factor matrices.
     x = np.zeros(b.shape)
-    
+    r = np.array(range(N))
+
     for n in range(N):
-        allButN = np.vstack((range(n), range(n+1, N)))
-        Wn = np.prod(UHU[:,:,allButN],axis = 3)
+        allButN = np.hstack((r[:n], r[n+1:N]))
+        Wn = np.prod(UHU[:,:,allButN],axis = 2)
         
         idx = range(offset[n], offset[n+1])
-        
+
         #A/B = (B'\A')'
         A = b[idx].copy().reshape((size_tens[n],R), order = 'F')
-        x[idx] = np.linalg.solve(Wn.T, A.T).T
+        x[idx] = np.linalg.solve(Wn.T, A.T).T.reshape((len(idx)), order = 'F')
     
     return x
 

@@ -9,9 +9,18 @@ class CodeTest(unittest.TestCase):
         unittest.TestCase.setUp(self)
         self.initU1()
         self.initT1()
+        self.initB2()
         self.N1 = getNbOfDimensions(self.T1)
         self.R1 = getRank(self.U1)
         self.M1 = getM(self.U1, self.T1)
+        self.UHU1 = calculateUHU(self.U1, self.N1, self.R1)
+        self.offset1 = calculateOffset(getDimensions(self.T1), self.R1)
+        
+        self.N2 = getNbOfDimensions(self.T2)
+        self.R2 = getRank(self.U2)
+        self.M2 = getM(self.U2, self.T2)
+        self.UHU2 = calculateUHU(self.U2, self.N2, self.R2)
+        self.offset2 = calculateOffset(getDimensions(self.T2), self.R2)
 
     def initT1(self):
         T = np.zeros((1,2,3));
@@ -22,6 +31,7 @@ class CodeTest(unittest.TestCase):
         T[0, 0, 2] = 113;
         T[0, 1, 2] = 123;
         self.T1 = T
+        self.T2 = T
         self.T1r = copyListOfArray(T)
 
     def initU1(self):
@@ -29,15 +39,32 @@ class CodeTest(unittest.TestCase):
         U.append(np.array([[1,2]]))
         U.append(np.array([[1,2],[3,4]]))
         U.append(np.array([[1,2],[3,4],[5,6]]))
+        
         self.U1 = U
         self.U1r = copyListOfArray(U)
+        
+        U2=[]
+        U2.append(np.array([[101,102]]))
+        U2.append(np.array([[201,202],[203,204]]))
+        U2.append(np.array([[301,302],[303,304],[305,306]]))
+        
+        self.U2 = U2
+
+    def initB2(self):
+        self.b2 = np.array([101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112])
 
     def test_f(self):
         r = f(self.U1, self.M1)
         
         self.testUUnchanged()
         self.assertEqual(23337, r, "F is not correct")
-
+    
+    def test_offset(self):
+        r = np.array([0, 2, 6, 12])
+        s = calculateOffset(getDimensions(self.T1), self.R1)
+    
+        self.assertTrue(np.array_equal(r, s))
+    
     def test_g(self):
         e = []
         e.append(np.array([[-2736, -5712]]))
@@ -63,7 +90,17 @@ class CodeTest(unittest.TestCase):
         pass
     
     def test_blockJacobi(self):
-        pass
+        
+        r = np.array([-0.0080, 0.0079, -0.7119, -0.6971,
+                      0.7026, 0.6880, -2.7976, -2.7680,
+                      -2.7383, 2.7565, 2.7273, 2.6981])
+        
+        s = M_blockJacobi(self.b2, self.N2, self.UHU2, self.offset2, getDimensions(self.T2), self.R2)
+        
+        print r
+        print s
+        
+        self.assertTrue(np.array_equal(r, s))
     
     def test_serialize(self):
         r = serialize(self.U1)
