@@ -88,7 +88,12 @@ class CodeTest(unittest.TestCase):
         self.assertTrue(np.array_equal(e, r), "Elements do not match")
     
     def test_jhjx(self):
-        pass
+        x = np.array([1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144])
+        r = np.array([35539, 64740, 5047, 10164,
+                      12876, 25932, 1835, 3053,
+                      4909, 5240, 8720, 14020])
+        s = JHJx(self.U1, self.UHU1, self.N1, self.R1, self.offset1, getDimensions(self.T1), x)
+        npt.assert_array_equal(r, s)
     
     def test_blockJacobi(self):
         

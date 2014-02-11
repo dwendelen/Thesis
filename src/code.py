@@ -484,27 +484,27 @@ def JHJx(U, UHU, N, R, offset, size_tens, x):
     y = np.zeros(x.shape);
     r = np.array(range(N))
     
-    for n in r:
+    for n in range(N):
         allButN = np.hstack((r[:n], r[n+1:N]))
 
         idx = range(offset[n], offset[n+1])
         Wn = np.prod(UHU[:,:,allButN],axis = 2)
         Xn = x[idx].copy().reshape((size_tens[n],R), order = 'F')
         XHU[:,:,n] = Xn.T.dot(U[n])
-        y[idx] = Xn.dot(Wn)
+        y[idx] = Xn.dot(Wn).reshape((len(idx)), order='F')
     
     for n in range(N-1):
         idxn = range(offset[n], offset[n+1])
         Wn = np.zeros(R)
         
         for m in range(n+1, N):
-            allButNAndM = np.vstack((r[:n], r[n+1:m], r[m+1:N]))
+            allButNAndM = np.hstack((r[:n], r[n+1:m], r[m+1:N]))
             idxm = range(offset[m], offset[m+1])
             Wnm = np.prod(UHU[:,:,allButNAndM], axis = 2)
             Wn = Wn+Wnm*XHU[:,:,m]
             JHJmnx = U[m].dot(Wnm*XHU[:,:,n])
-            y[idxm] = y[idxm]+JHJmnx[:]
+            y[idxm] = y[idxm]+JHJmnx.flatten(order = 'F')
         
         JHJnx = U[n].dot(Wn)
-        y[idxn] = y[idxn]+JHJnx[:]
+        y[idxn] = y[idxn]+JHJnx.flatten(order = 'F')
     return y
