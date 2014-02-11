@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 from code import *
+import numpy.testing as npt
 
 class CodeTest(unittest.TestCase):
         
@@ -97,10 +98,9 @@ class CodeTest(unittest.TestCase):
         
         s = M_blockJacobi(self.b2, self.N2, self.UHU2, self.offset2, getDimensions(self.T2), self.R2)
         
-        print r
-        print s
-        
-        self.assertTrue(np.array_equal(r, s))
+        npt.assert_array_almost_equal(r, s, 4)
+    
+    
     
     def test_serialize(self):
         r = serialize(self.U1)
@@ -108,7 +108,7 @@ class CodeTest(unittest.TestCase):
         s =  np.array([1, 2, 1, 3, 2, 4, 1, 3, 5, 2, 4, 6])
         
         self.testUUnchanged()
-        self.assertTrue(np.array_equal(r, s), "Serialisation is wrong")
+        npt.assert_array_equal(r, s, "Serialisation is wrong")
         
     def test_serializeAndDeserialize(self):
         r = serialize(self.U1)
@@ -126,7 +126,7 @@ class CodeTest(unittest.TestCase):
         self.assertEqual(len(a), len(b), msg + ": The sizes do not match")
         
         for i in range(len(a)):
-            self.assertTrue(np.array_equal(a[i], b[i]), msg + ": The elements do not match")
+            npt.assert_array_equal(a[i], b[i], msg + ": The elements do not match")
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
