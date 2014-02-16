@@ -46,14 +46,7 @@ function [x,flag,relres,iter] = mpcg(A,b,tol,maxit,M,~,x0)
 def mpcg(A,b,M,x0,tol = 1e-6, maxit = 20):
     
     maxit = min((maxit, b.size))
-
-    '''    
-    A is een functie, niet numeriek.
-    Idem voor M
     
-    TODO: algemeen: dimensie-check
-    
-    '''
     x = x0.copy()
     r = A(x)-b
     
@@ -66,8 +59,6 @@ def mpcg(A,b,M,x0,tol = 1e-6, maxit = 20):
     for iter in range(maxit):
         Ad = A(d)
         
-        #TODO check dimensions
-        #alpha = rr/(d'*Ad);
         alpha = rr/(d.T.dot(Ad))
         
         x = x+alpha*d
