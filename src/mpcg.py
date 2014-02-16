@@ -20,7 +20,7 @@ function [x,flag,relres,iter] = mpcg(A,b,tol,maxit,M,~,x0)
 %   mpcg(A,b,tol,maxit,M) uses a symmetric positive definite preconditioner
 %   M and effectively solve the system inv(M)*A*x = inv(M)*b for x. If M is
 %   [] then mpcg applies no preconditioner. M can be a function handle mfun
-%   such that mfun(x) returns M\x. If M is 'SSOR', then mpcg applies a
+%   such that mfun(x) returns M \ x. If M is 'SSOR', then mpcg applies a
 %   Symmetric Successive Over-Relaxation preconditioner.
 %
 %   mpcg(A,b,tol,maxit,M,[],x0) specifies the initial guess. If x0 is [],
@@ -44,6 +44,7 @@ function [x,flag,relres,iter] = mpcg(A,b,tol,maxit,M,~,x0)
 '''
 
 def mpcg(A,b,M,x0,tol = 1e-6, maxit = 20):
+    
     maxit = min((maxit, b.size))
 
     '''    
@@ -55,6 +56,7 @@ def mpcg(A,b,M,x0,tol = 1e-6, maxit = 20):
     '''
     x = x0.copy()
     r = A(x)-b
+    
     y = M(r)
     d = -y
     rr = r.T.dot(y)
@@ -63,6 +65,7 @@ def mpcg(A,b,M,x0,tol = 1e-6, maxit = 20):
     
     for iter in range(maxit):
         Ad = A(d)
+        
         #TODO check dimensions
         #alpha = rr/(d'*Ad);
         alpha = rr/(d.T.dot(Ad))
@@ -72,7 +75,7 @@ def mpcg(A,b,M,x0,tol = 1e-6, maxit = 20):
         rr1 = rr.copy()
         y = M(r)
         rr = r.T.dot(y)
-        
+
         relres = np.linalg.norm(r)/normb
         if(relres < tol):
             break

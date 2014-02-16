@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 from code import *
 import numpy.testing as npt
+from mpcg import mpcg
 
 class CodeTest(unittest.TestCase):
         
