@@ -1,6 +1,7 @@
 import numpy as np
 from tens2mat import tens2mat
 from kr import kr
+from math import isinf
 
 '''
 Numpy arrays definieren werkt met laatste index eerst verhogen, eerst in index laatst verhogen,
@@ -63,29 +64,21 @@ def cpd_nls(T,U0,options):
     for i in range(len(U)):
         if U[i].shape[0] != size_tens[i]:
             raise RuntimeError('cpd_nls:U0 size(T,n) should equal size(U0{n},1).')
-    
-    '''
-    TODO
+
 
     CGMaxIter = 10
     Display = 0
-    JHasFullRank = false
-    LargeScale = true
-    M = 'block-Jacobi'
+    JHasFullRank = False
+    LargeScale = True
+    #M = 'block-Jacobi'
     
     
-    % Check the options structure.
-
-    CGTol = 1e-6;
-    MaxIter = 200;
-    PlaneSearch = false;
-    PlaneSearchOptions = struct;
-    TolFun = 1e-12;
-    TolX = 1e-6;
-    Delta = nan;
-    
-    /TODO
-    '''
+    # Check the options structure.
+    CGTol = 1e-6
+    MaxIter = 200
+    TolFun = 1e-12
+    TolX = 1e-6
+    Delta = NaN
 
     # Cache some intermediate variables.
     M = getM(U, T)
@@ -108,170 +101,15 @@ def cpd_nls(T,U0,options):
     output.Name = func2str(options.Algorithm);
     /TODO
     '''
-        
+    z0 = U    
     
-    
-    '''
-    
-    function y = JHJx(U,x)
-    % Compute JHJ*x.
-        XHU = zeros(size(UHU));
-        y = zeros(size(x));
-        for n = 1:N
-            idx = offset(n)+1:offset(n+1);
-            Wn = conj(prod(UHU(:,:,[1:n-1 n+1:N]),3));
-            Xn = reshape(x(idx),size_tens(n),R);
-            XHU(:,:,n) = Xn'*U{n};
-            y(idx) = Xn*Wn;
-        end
-        for n = 1:N-1
-            idxn = offset(n)+1:offset(n+1);
-            Wn = zeros(R);
-            for m = n+1:N
-                idxm = offset(m)+1:offset(m+1);
-                Wnm = conj(prod(UHU(:,:,[1:n-1 n+1:m-1 m+1:N]),3));
-                Wn = Wn+Wnm.*conj(XHU(:,:,m));
-                JHJmnx = U{m}*(Wnm.*conj(XHU(:,:,n)));
-                y(idxm) = y(idxm)+JHJmnx(:);
-            end
-            JHJnx = U{n}*Wn;
-            y(idxn) = y(idxn)+JHJnx(:);
-        end
-    end
-    
-    function x = M_blockJacobi(~,b)
-    % Solve Mx = b, where M is a block-diagonal approximation for JHJ.
-    % Equivalent to simultaneous ALS updates for each of the factor matrices.
-        x = zeros(size(b));
-        for n = 1:N
-            Wn = conj(prod(UHU(:,:,[1:n-1 n+1:N]),3));
-            idx = offset(n)+1:offset(n+1);
-            x(idx) = reshape(b(idx),size_tens(n),R)/Wn;
-        end
-    end
-    '''
-    
-    
-    
-    '''
-    end
-    
-    function [z,output] = nls_gndl(F,dF,z0,options)
-    %NLS_GNDL Nonlinear least squares by Gauss-Newton with dogleg trust region.
-    %   [z,output] = nls_gndl(F,dF,z0) starts at z0 and attempts to find a
-    %   local minimizer of the real-valued function f(z), which is the
-    %   nonlinear least squares objective function f(z) := 0.5*(F(z)'*F(z)).
-    %   The input variable z may be a scalar, vector, matrix, tensor or even a
-    %   cell array of tensors and its contents may be real or complex. This
-    %   method may be applied in the following ways:
-    %
-    %
-    %      Method 4: analytic problems in a large number of variables z and
-    %                large number of residuals F(z).
-    %      nls_gndl(f,dF,z0) where f(z) := 0.5*(F(z)'*F(z)) and dF is a
-    %      structure containing:
-    %
-    %         dF.JHF     - The function dF.JHF(zk) should return
-    %                      [dF(zk)/d(z^T)]'*F(zk), which is also equal to
-    %                      2*df(zk)/d(conj(z)) = 2*conj(df(zk)/d(z)) if z is
-    %                      complex, or equal to df(xk)/dx if it is real.
-    %         dF.JHJx    - The function dF.JHF(zk,x) should return the matrix-
-    %                      vector product ([dF(zk)/d(z^T)]'*[dF(zk)/d(z^T)])*x.
-    %
-    %   The structure output returns additional information:
-    %
-    %      output.alpha        - The plane search step lengths in every
-    %                            iteration, if a plane search is selected.
-    %      output.cgiterations - The number of CG/LSQR iterations to compute
-    %                            the Gauss-Newton step in every iteration.
-    %                            (large-scale methods only).
-    %      output.cgrelres     - The relative residual norm of the computed
-    %                            Gauss-Newton step (large-scale methods only).
-    %      output.delta        - The trust region radius at every step attempt.
-    %      output.fval         - The value of the objective function f in every
-    %                            iteration.
-    %      output.info         - The circumstances under which the procedure
-    %                            terminated:
-    %                               1: Objective function tolerance reached.
-    %                               2: Step size tolerance reached.
-    %                               3: Maximum number of iterations reached.
-    %      output.infops       - The circumstances under which the plane search
-    %                            terminated in every iteration.
-    %      output.iterations   - The number of iterations.
-    %      output.relfval      - The difference in objective function value
-    %                            between every two successive iterates,
-    %                            relativeto its initial value.
-    %      output.relstep      - The step size relative to the norm of the 
-    %                            current iterate in every iteration.
-    %      output.rho          - The trustworthiness at every step attempt.
-    %
-    %   nls_gndl(F,dF,z0,options) may be used to set the following options:
-    %
-    %      options.CGMaxIter = 15     - The maximum number of CG/LSQR
-    %                                   iterations for computing the
-    %                                   Gauss-Newton step (large-scale methods
-    %                                   only).
-    %      options.CGTol = 1e-6       - The tolerance for the CG/LSQR method to
-    %                                   compute the Gauss-Newton step
-    %                                   (large-scale methods only).
-    %      options.Delta = 'auto'     - The initial trust region radius. On
-    %                                   'auto', the radius is equal to the norm
-    %                                   of the first Gauss-Newton step.
-    %      options.Display = 1        - Displays the objective function value,
-    %                                   its difference with the previous
-    %                                   iterate relative to the first iterate
-    %                                   and the relative step size each
-    %                                   options.Display iterations. Set to 0 to
-    %                                   disable.
-    %      options.JHasFullRank       - If set to true, the Gauss-Newton step
-    %      = false                      is computed as a least squares
-    %                                   solution, if possible. Otherwise, it is
-    %                                   computed using a more expensive
-    %                                   pseudo-inverse.
-    %      options.MaxIter = 200      - The maximum number of iterations.
-    %      options.PlaneSearch        - The plane search used to minimize the
-    %      = false                      objective function in the plane spanned
-    %                                   by the steepest descent direction and
-    %                                   the Gauss-Newton step. Disables dogleg
-    %                                   trust region strategy. The method
-    %                                   should have the function signature
-    %                                   options.PlaneSearch(F,dF,z,p1,p2, ...
-    %                                   state,options.PlaneSearchOptions).
-    %      options.PlaneSearchOptions - The options structure passed to the
-    %                                   plane search search routine.
-    %      options.TolFun = 1e-12     - The tolerance for output.relfval. Note
-    %                                   that because the objective function is
-    %                                   a squared norm, TolFun can be as small
-    %                                   as eps^2.
-    %      options.TolX = 1e-6        - The tolerance for output.relstep.
-    
-    %   Authors: Laurent Sorber (Laurent.Sorber@cs.kuleuven.be)
-    %            Marc Van Barel (Marc.VanBarel@cs.kuleuven.be)
-    %            Lieven De Lathauwer (Lieven.DeLathauwer@kuleuven-kulak.be)
-    %
-    %   References:
-    %   [1] L. Sorber, M. Van Barel, L. De Lathauwer, "Unconstrained
-    %       optimization of real functions in complex variables", SIAM J. Opt.,
-    %       Vol. 22, No. 3, 2012, pp. 879-898.
-    
-    % Check the objective function f, derivative dF and first iterate z0.
-    
+
     # Evaluate the function value at z0.
-    dim = structure(z0);
-    z = z0;
-    z0 = serialize(z0);
+    dim = structure(z0)
+    z = z0.copy()
+    z0 = serialize(z0)
     
-    % In the case 'f+JHJx+JHF', compute JHJ*x.
-    function y = JHJx(x)
-        y = dF.JHJx(z,x);
-    end
-    
-    % Modify the preconditioner, if available.
-    function x = PC(b) % = M_blockJacobi
-        x = dF.M(z,b);
-    end
-    
-    
+    '''
     
     % Gauss-Newton with dogleg trust region.
     output.alpha = [];
@@ -285,17 +123,20 @@ def cpd_nls(T,U0,options):
     output.relfval = [];
     output.relstep = [];
     output.rho = [];
-    while ~output.info
+    '''
     
-        % Compute the (in)exact Gauss-Newton step pgn.
+    info = False
     
-        % Compute the Cauchy point pcp = -alpha*grad.
-        updateUHU(U)
-        grad = serialize(dF.JHF(z));
-        gg = grad'*grad;
-        gBg = real(grad'*dF.JHJx(z,grad));
-        alpha = gg/gBg;
-        if ~isfinite(alpha), alpha = 1; end;
+    while not info:
+        UHU = calculateUHU(U, N, R)
+        grad = serialize(g(U, UHU, N, M))
+        gg = grad.T.dot(grad)
+        gBg = grad.T.dot(JHJx(z, UHU, N, R, offset, size_tens, grad))
+        alpha = gg/gBg
+        
+        if not isinf(alpha):
+            alpha = 1
+        '''
         
         % Compute the Gauss-Newton step pgn.
         [pgn,~,output.cgrelres(end+1),output.cgiterations(end+1)] = ...
@@ -383,7 +224,7 @@ def cpd_nls(T,U0,options):
         if output.iterations >= options.MaxIter, output.info = 3; end
     end
 
-'''
+    '''
 def deserialize(z, dim):
     r = []
     #s = cellfun(@(s)prod(s(:)),dim(:)); o = [0; cumsum(s)];
