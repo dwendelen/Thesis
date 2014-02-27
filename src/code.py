@@ -2,6 +2,9 @@ import numpy as np
 from tens2mat import tens2mat
 from kr import kr
 from math import isinf
+from mpcg import mpcg
+from numpy import Inf, isnan, sqrt, ceil, log2, exp
+from numpy.linalg.linalg import norm
 
 '''
 Numpy arrays definieren werkt met laatste index eerst verhogen, eerst in index laatst verhogen,
@@ -79,6 +82,7 @@ def cpd_nls(T,U0,options):
     TolFun = 1e-12
     TolX = 1e-6
     Delta = NaN
+    delta = Delta
 
     # Cache some intermediate variables.
     M = getM(U, T)
@@ -109,6 +113,9 @@ def cpd_nls(T,U0,options):
     z = z0.copy()
     z0 = serialize(z0)
     
+    fval = f(z)
+    fval1 = fval
+    
     '''
     
     % Gauss-Newton with dogleg trust region.
@@ -126,6 +133,7 @@ def cpd_nls(T,U0,options):
     '''
     
     info = False
+    iterations = 0
     
     while not info:
         UHU = calculateUHU(U, N, R)
@@ -136,95 +144,89 @@ def cpd_nls(T,U0,options):
         
         if not isinf(alpha):
             alpha = 1
-        '''
         
-        % Compute the Gauss-Newton step pgn.
-        [pgn,~,output.cgrelres(end+1),output.cgiterations(end+1)] = ...
-            mpcg(@JHJx,-grad,options.CGTol,options.CGMaxIter,dF.PC, ...
-                 [],-alpha*grad);
-    
-        rho = -inf;
-    
+        def JHJxs(x):
+            JHJx(U, UHU, N, R, offset, size_tens, x)
         
-        % Dogleg trust region.
-        normpgn = norm(pgn);
-        if isnan(output.delta(end)), output.delta(end) = max(1,normpgn); end
-        while rho <= 0
-    
-            % Compute the dogleg step p.
-            delta = output.delta(end);
-            if normpgn <= delta
-                p = pgn;
-                dfval = -0.5*real(grad'*pgn);
-            elseif alpha*sqrt(gg) >= delta
-                p = (-delta/sqrt(gg))*grad;
-                dfval = delta*(sqrt(gg)-0.5*delta/alpha);
-            else
-                bma = pgn+alpha*grad; bmabma = bma'*bma;
-                a = -alpha*grad; aa = alpha^2*gg;
-                c = real(a'*bma);
-                if c <= 0
-                    beta = (-c+sqrt(c^2+bmabma*(delta^2-aa)))/bmabma;
-                else
-                    beta = (delta^2-aa)/(c+sqrt(c^2+bmabma*(delta^2-aa)));
-                end
-                p = a+beta*bma;
-                dfval = 0.5*alpha*(1-beta)^2*gg- ...
-                        0.5*beta *(2-beta)*real(grad'*pgn);
-            end
-    
-            % Compute the trustworthiness rho.
-            if dfval > 0
-                z = deserialize(z0+p,dim);
-               
-                fval = f(z);
-    
-                rho = (output.fval(end)-fval)/dfval;
-                if isnan(rho), rho = -inf; end
-                output.rho(end+1) = rho;
-            end
-    
-            % Update trust region radius delta.
-            if rho > 0.5
-                output.delta(end+1) = max(delta,2*norm(p));
-            else
-                sigma = (1-0.25)/(1+exp(-14*(rho-0.25)))+0.25;
-                if normpgn < sigma*delta && rho < 0
-                    e = ceil(log2(normpgn/delta)/log2(sigma));
-                    output.delta(end+1) = sigma^e*delta;
-                else
-                    output.delta(end+1) = sigma*delta;
-                end
-            end
+        def PC(x):
+            M_blockJacobi(x, N, UHU, offset, size_tens, R)
             
-            % Check for convergence.
-            relstep = norm(p)/norm(z0); if isnan(relstep), relstep = 0; end
-            if rho <= 0 && relstep <= options.TolX
-                output.rho(end+1) = rho;
-                fval = output.fval(end);
-                z = deserialize(z0,dim);
-                break;
-            end
-    
-        end
-    
-        % Save current state.
-        if rho > 0
-            z0 = serialize(z);
-        end
+        pgn = mpcg(JHJxs, -1 * grad, PC, -alpha * grad, CGTol, CGMaxIter)
         
-        % Update the output structure.
-        output.fval(end+1) = fval;
-        output.iterations = output.iterations+1;
-        output.relfval(end+1) = ...
-            abs(diff(output.fval(end:-1:end-1)))/abs(output.fval(1));
-        output.relstep(end+1) = relstep;
-        if output.relfval(end) <= options.TolFun, output.info = 1; end
-        if output.relstep(end) <= options.TolX, output.info = 2; end
-        if output.iterations >= options.MaxIter, output.info = 3; end
-    end
+        rho = -Inf
+        
+        normpgn = norm(pgn)
+        
+        if isnan(delta):
+            delta = max(1, normpgn)
+        
+        while rho <= 0:
+            if normpgn <= delta:
+                p = pgn
+                dfval = -0.5*grad.T.dot(pgn)
+            elif alpha*sqrt(gg) >= delta:
+                p = (-delta/sqrt(gg))*grad
+                dfval = delta*(sqrt(gg)-0.5*delta/alpha)
+            else:
+                bma = pgn+alpha*grad
+                bmabma = bma.T.dot(bma)
+                a = -alpha*grad
+                aa = alpha*alpha*gg
+                c = a.T.dot(bma)
+                
+                if(c <= 0):
+                    beta = (-c + sqrt(c*c + bmabma*(delta*delta-aa)))/bmabma
+                else:
+                    beta = (delta*delta-aa)/(c+sqrt(c*c+bmabma*(delta*delta-aa)))
+                
+                p = a+beta*bma
+                dfval = 0.5*alpha*(1-beta)*(1-beta)*gg - 0.5*beta*(2-beta)*(grad.T.dot(pgn))
+            
+            if dfval > 0:
+                z = deserialize(z0 + p, dim)
+                
+                fvalO = fval
+                fval = f(z)
+                
+                rho = (fvalO - fval)/dfval
+                if isnan(rho):
+                    rho = -Inf
+                
+            if rho > 0.5:
+                delta = max(delta, 2*norm(p))
+            else:
+                sigma = (1-0.25)/(1+np.exp(-14*(rho-0.25)))+0.25
+                if normpgn < sigma*delta and rho < 0:
+                    e = ceil(log2(normpgn/delta)/log2(sigma))
+                    delta = sigma^(exp(1)*delta)
+                else:
+                    delta = sigma * delta
+            
+            #Check for convergence.
+            relstep = norm(p)/norm(z0)
+            
+            if isnan(relstep):
+                relstep = 0
+                
+            if rho <= 0 and relstep <= TolX:
+                z = deserialize(z0, dim)
+                break
+         
+        if rho > 0:
+            z0 = serialize(z)
+        
+        iterations = iterations + 1
+        relfval = abs((fval - fvalO)/fval1)
+        
+        if relfval <= TolFun:
+            info = 1
+        
+        if relstep <= TolX:
+            info = 2
+            
+        if iterations >= MaxIter:
+            info = 3
 
-    '''
 def deserialize(z, dim):
     r = []
     #s = cellfun(@(s)prod(s(:)),dim(:)); o = [0; cumsum(s)];
