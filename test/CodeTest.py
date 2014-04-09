@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 from code import *
 import numpy.testing as npt
+import scipy.io
 
 class CodeTest(unittest.TestCase):
         
@@ -133,6 +134,41 @@ class CodeTest(unittest.TestCase):
         for i in range(len(a)):
             npt.assert_array_equal(a[i], b[i], msg + ": The elements do not match")
 
+
+    def testFull(self):
+        
+        '''
+        Generate test cases with:
+        size_tens = [4 6 8 2];
+        R = 4;
+        
+        for i = 1:5
+            U = cpd_rnd(size_tens, R);
+            T = cpdgen(U);
+            
+            options.Algorithm = @nls_gndl;
+            options.M = 'block-Jacobi';
+            options.LargeScale = true;
+            
+            S = cpd_nls(T,U,options);
+            
+            save(strcat('test',int2str(i)), 'U', 'T', 'S', 'size_tens', 'R');
+        end
+        '''
+        
+        for i in range(1, 6):
+            mat = scipy.io.loadmat('test' + str(i) + '.mat');
+            size_tens = mat['size_tens']
+            R = mat['R']
+            S = self.accessList(mat, 'S')
+            U = self.accessList(mat, 'U')
+            T = mat['T']
+            S1 = cpd_nls(T, U)
+            self.assertListOfArraysEquals(S, S1, 'Test ' + str(i) + ' Failed.')
+            
+    def accessList(self, mat, name):
+        return mat[name][0].tolist()
+    
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

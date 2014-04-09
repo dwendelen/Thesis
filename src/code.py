@@ -50,7 +50,7 @@ def calculateOffset(size_tens, R):
 def getDimensions(tensor):
     return tensor.shape
     
-def cpd_nls(T,U0,options):
+def cpd_nls(T,U0):
     
     # Check the initial factor matrices U0.
     N = getNbOfDimensions(T)
@@ -81,13 +81,13 @@ def cpd_nls(T,U0,options):
     MaxIter = 200
     TolFun = 1e-12
     TolX = 1e-6
-    Delta = NaN
+    Delta = np.NaN
     delta = Delta
 
     # Cache some intermediate variables.
     M = getM(U, T)
     
-    offset = np.hstack((np.array([0]), np.array(size_tens))) * R
+    offset = calculateOffset(size_tens, R)
     
     UHU = calculateUHU(U, N, R)
     
@@ -110,10 +110,11 @@ def cpd_nls(T,U0,options):
 
     # Evaluate the function value at z0.
     dim = structure(z0)
-    z = z0.copy()
+    z = copyListOfArray(z0)
+    #z = z0.copy()
     z0 = serialize(z0)
     
-    fval = f(z)
+    fval = f(z, M)
     fval1 = fval
     
     '''
@@ -146,10 +147,10 @@ def cpd_nls(T,U0,options):
             alpha = 1
         
         def JHJxs(x):
-            JHJx(U, UHU, N, R, offset, size_tens, x)
+            return JHJx(U, UHU, N, R, offset, size_tens, x)
         
         def PC(x):
-            M_blockJacobi(x, N, UHU, offset, size_tens, R)
+            return M_blockJacobi(x, N, UHU, offset, size_tens, R)
             
         pgn = mpcg(JHJxs, -1 * grad, PC, -alpha * grad, CGTol, CGMaxIter)
         
@@ -186,7 +187,7 @@ def cpd_nls(T,U0,options):
                 z = deserialize(z0 + p, dim)
                 
                 fvalO = fval
-                fval = f(z)
+                fval = f(z, M)
                 
                 rho = (fvalO - fval)/dfval
                 if isnan(rho):
@@ -198,7 +199,7 @@ def cpd_nls(T,U0,options):
                 sigma = (1-0.25)/(1+np.exp(-14*(rho-0.25)))+0.25
                 if normpgn < sigma*delta and rho < 0:
                     e = ceil(log2(normpgn/delta)/log2(sigma))
-                    delta = sigma^(exp(1)*delta)
+                    delta = np.power(sigma, exp(1)*delta)
                 else:
                     delta = sigma * delta
             
@@ -226,6 +227,7 @@ def cpd_nls(T,U0,options):
             
         if iterations >= MaxIter:
             info = 3
+    return z
 
 def deserialize(z, dim):
     r = []
