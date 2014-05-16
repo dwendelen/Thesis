@@ -17,7 +17,7 @@ class Platform:
 
 class NumPyPlatform (Platform):
     def __init__(self, T, M):
-        super.__init__(T)
+        Platform.__init__(T)
         self.M = M
     
     def init(self):
@@ -30,7 +30,7 @@ class NumPyPlatform (Platform):
     
 class OpenCLPlatform (Platform):
     def __init__(self, T):
-        super.__init__(T)
+        Platform.__init__(T)
         
     def init(self):
         device = cl.get_platforms[0].get_devices(cl.device_type.GPU)[0]
