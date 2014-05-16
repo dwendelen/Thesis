@@ -3,6 +3,7 @@ import numpy as np
 from code import *
 import numpy.testing as npt
 import scipy.io
+from Platform import NumPyPlatform, OpenCLPlatform
 
 class CodeTest(unittest.TestCase):
         
@@ -56,10 +57,21 @@ class CodeTest(unittest.TestCase):
         self.b2 = np.array([101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112])
 
     def test_f(self):
-        r = f(self.U1, self.M1)
+        exp = 23337
         
+        npPlatform = NumPyPlatform(None, self.M1)
+        npPlatform.init()
+        self.test_f_impl(npPlatform)
+        
+        clPlatform = OpenCLPlatform(None)
+        clPlatform.init()
+        self.test_f_impl(clPlatform)
+    
+    def test_f_impl(self, platform):
+        exp = 23337
+        r = platform.f(self.U1)
         self.testUUnchanged()
-        self.assertEqual(23337, r, "F is not correct")
+        self.assertEqual(exp, r, "F is not correct")
     
     def test_offset(self):
         r = np.array([0, 2, 6, 12])
