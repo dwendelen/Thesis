@@ -65,9 +65,9 @@ class CodeTest(unittest.TestCase):
         
         clPlatform = OpenCLPlatform(None)
         clPlatform.init()
-        self.test_f_impl(clPlatform)
+        self.f_impl(clPlatform)
     
-    def test_f_impl(self, platform):
+    def f_impl(self, platform):
         exp = 23337
         r = platform.f(self.U1)
         self.testUUnchanged()
