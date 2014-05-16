@@ -61,7 +61,7 @@ class CodeTest(unittest.TestCase):
         
         npPlatform = NumPyPlatform(None, self.M1)
         npPlatform.init()
-        self.test_f_impl(npPlatform)
+        self.f_impl(npPlatform)
         
         clPlatform = OpenCLPlatform(None)
         clPlatform.init()

@@ -17,7 +17,7 @@ class Platform:
 
 class NumPyPlatform (Platform):
     def __init__(self, T, M):
-        Platform.__init__(T)
+        Platform.__init__(self, T)
         self.M = M
     
     def init(self):
@@ -30,11 +30,11 @@ class NumPyPlatform (Platform):
     
 class OpenCLPlatform (Platform):
     def __init__(self, T):
-        Platform.__init__(T)
+        Platform.__init__(self, T)
         
     def init(self):
-        device = cl.get_platforms[0].get_devices(cl.device_type.GPU)[0]
-        context = cl.Context(device)
+        devices = cl.get_platforms()[0].get_devices(cl.device_type.GPU)
+        context = cl.Context(devices)
         queue = cl.CommandQueue(context)
         
         prg = cl.Program(context, """
@@ -48,23 +48,24 @@ class OpenCLPlatform (Platform):
             
         self.prg = prg
         self.queue = queue
-    
+	self.context = context    	
+
     def f(self, U):
         
 
 
-        a = numpy.random.rand(50000).astype(numpy.float32)
-        b = numpy.random.rand(50000).astype(numpy.float32)
+        a = np.random.rand(50000).astype(np.float32)
+        b = np.random.rand(50000).astype(np.float32)
         
         mf = cl.mem_flags
-        a_buf = cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=a)
-        b_buf = cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=b)
-        dest_buf = cl.Buffer(ctx, mf.WRITE_ONLY, b.nbytes)
+        a_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=a)
+        b_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=b)
+        dest_buf = cl.Buffer(self.context, mf.WRITE_ONLY, b.nbytes)
         
         self.prg.sum(self.queue, a.shape, None, a_buf, b_buf, dest_buf)
         
-        a_plus_b = numpy.empty_like(a)
-        cl.enqueue_copy(queue, a_plus_b, dest_buf)
+        a_plus_b = np.empty_like(a)
+        cl.enqueue_copy(self.queue, a_plus_b, dest_buf)
         
         print(la.norm(a_plus_b - (a+b)), la.norm(a_plus_b))
         return 0;
