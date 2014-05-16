@@ -31,7 +31,7 @@ def getNbOfDimensions(tensor):
 def getRank(U):
     return U[0].shape[1]
 
-def getM(U, T):
+def getM(T):
     M = []
     for n in range(getNbOfDimensions(T)):
         M.append(tens2mat(T, n))
@@ -85,7 +85,7 @@ def cpd_nls(T,U0):
     delta = Delta
 
     # Cache some intermediate variables.
-    M = getM(U, T)
+    M = getM(T)
     
     offset = calculateOffset(size_tens, R)
     
