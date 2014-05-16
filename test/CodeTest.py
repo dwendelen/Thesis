@@ -59,7 +59,9 @@ class CodeTest(unittest.TestCase):
     def test_g(self):
         npPlatform = NumPyPlatform(self.T1)
         npPlatform.init()
+
         self.g_impl(npPlatform)
+
         
         '''clPlatform = OpenCLPlatform(self.T1)
         clPlatform.init()

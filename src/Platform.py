@@ -26,6 +26,7 @@ class Platform:
         self.UHU = UHU
         
 class NumPyPlatform (Platform):
+
     def __init__(self, T):
         Platform.__init__(self, T)
         self.M = getM(T)
@@ -57,11 +58,11 @@ class NumPyPlatform (Platform):
     
 class OpenCLPlatform (Platform):
     def __init__(self, T):
-        Platform.__init__(T)
+        Platform.__init__(self, T)
         
     def init(self):
-        device = cl.get_platforms[0].get_devices(cl.device_type.GPU)[0]
-        context = cl.Context(device)
+        devices = cl.get_platforms()[0].get_devices(cl.device_type.GPU)
+        context = cl.Context(devices)
         queue = cl.CommandQueue(context)
         
         prg = cl.Program(context, """
