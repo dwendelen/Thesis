@@ -9,6 +9,8 @@ print a[0][1]
 print a[1][0]
 print a[1][1]
 
+print a.shape
+
 ctx = cl.create_some_context()
 queue = cl.CommandQueue(ctx)
 
@@ -23,7 +25,7 @@ prg = cl.Program(ctx, """
         b[i] = a[i];
     }""").build()
 
-prg.sum(queue, [4], None, a_buf, b_buf)
+prg.sum(queue, (4, 1), None, a_buf, b_buf)
 
 c = np.array([[0,0, 0,0]], dtype = np.float32)
 cl.enqueue_copy(queue, c, b_buf)
