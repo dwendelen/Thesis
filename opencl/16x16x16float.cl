@@ -13,7 +13,7 @@ T   The 3D-tensor to approximate. Expected shape: I0 x I1 x I2
 */
 __kernel void float16x16x16(__global const float *T,
     __global const float4 *U0, __global const float4 *U1, __global const float4 *U2,
-    __local float4 *l, int R, int I0, int I1, int I2)
+    __local float4 *l, int R, int I0, int I1, int I2, __global sum)
 {   
     float4 a;
     float4 b[4];
@@ -119,5 +119,10 @@ __kernel void float16x16x16(__global const float *T,
     c[0] += c[2];
     c[1] += c[3];
     
-    c[0] += c[1];
+    bool b = get_global_id(0) == 0 &&
+             get_global_id(1) == 0 &&
+             get_global_id(2) == 0;
+    
+    if(b)
+        sum[0] = c[0] + c[1];
 }

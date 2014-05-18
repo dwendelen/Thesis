@@ -93,27 +93,25 @@ class OpenCLPlatform (Platform):
         T = np.zeros(g, order='F', dtype=np.float32)
         T[:self.T.shape[0], :self.T.shape[1], :self.T.shape[2]] = self.T        
 
-        print 'Create Buffers'
         mf = cl.mem_flags
         T_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=T)
         U0_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U0)
         U1_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U1)
         U2_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U2)
         l_buf = cl.LocalMemory(64)
-        print 'Buffers created'
-        
-        print 'Launch'
-        print self.I        
-        
-	print g
+        sum_buf = cl.Buffer(self.context, mf.WRITE_ONLY, size=1)
 
         kernel = self.prg.float16x16x16
-        print kernel
         kernel.set_scalar_arg_dtypes([None, None, None, None, None,
-                                      np.int32, np.int32, np.int32, np.int32])
+                                      np.int32, np.int32, np.int32, np.int32, None])
         kernel(self.queue, (4,4,4), (4,4,4), T_buf, U0_buf, U1_buf, U2_buf, l_buf,
-                               self.R, self.I[0], self.I[1], self.I[2])
+                               self.R, self.I[0], self.I[1], self.I[2], sum_buf)
 
-        return 0;
+        s = np.zeros((1))
+        cl.enqueue_copy(queue, s, sum_buf)
+        
+        print s
+        
+        return s[0]
     
     
