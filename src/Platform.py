@@ -3,6 +3,7 @@ import numpy as np
 import numpy.linalg as la
 from kr import kr
 from code import *
+from math import *
 
 '''
 PLATFORM
@@ -90,7 +91,10 @@ class OpenCLPlatform (Platform):
         print 'Buffers created'
         
         print 'Launch'
-        self.prg.float16x16x16(self.queue, T.shape/4, (4,4,4), T_buf, U0_buf, U1_buf, U2_buf, l_buf,
+        
+        g = (ceil(T.shape[0]/4.0), ceil(T.shape[1]/4.0), ceil(T.shape[2]/4.0))
+        
+        self.prg.float16x16x16(self.queue, g, (4,4,4), T_buf, U0_buf, U1_buf, U2_buf, l_buf,
                                self.R, self.I[0], self.I[1], self.I[2])
 
         return 0;
