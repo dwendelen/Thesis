@@ -2,7 +2,8 @@ import pyopencl as cl
 import numpy as np
 import numpy.linalg as la
 
-a = np.array([[201,202],[203,204],[205, 206]], dtype = np.float32)
+a1 = np.array([[201,202],[203,204],[205, 206]], dtype = np.float32)
+a = np.array(a1, order='F')
 
 print a[0][0]
 print a[0][1]
@@ -40,7 +41,9 @@ T[0, 1, 1] = 122;
 T[0, 0, 2] = 113;
 T[0, 1, 2] = 123;
 
-a_buf = cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=T)
+T1 = np.array(T, order='F')
+
+a_buf = cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=T1)
 b_buf = cl.Buffer(ctx, mf.WRITE_ONLY, a.nbytes)
 
 prg.sum(queue, (6, 1), None, a_buf, b_buf)

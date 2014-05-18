@@ -3,7 +3,7 @@ import numpy as np
 from code import *
 import numpy.testing as npt
 import scipy.io
-from Platform import NumPyPlatform#, OpenCLPlatform
+from Platform import *
 
 class CodeTest(unittest.TestCase):
         
@@ -57,13 +57,13 @@ class CodeTest(unittest.TestCase):
         self.b2 = np.array([101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112])
 
     def test_g(self):
-        npPlatform = NumPyPlatform()
+        npPlatform = NumPyPlatform(self.T1)
         npPlatform.init()
 
         self.g_impl(npPlatform)
 
         
-        '''clPlatform = OpenCLPlatform()
+        '''clPlatform = OpenCLPlatform(self.T1)
         clPlatform.init()
         self.g_impl(clPlatform)'''
         
@@ -83,13 +83,13 @@ class CodeTest(unittest.TestCase):
         self.assertListOfArraysEquals(r, e, "Gradient is wrong")
     
     def test_f(self):
-        npPlatform = NumPyPlatform()
+        npPlatform = NumPyPlatform(self.T1)
         npPlatform.init()
         self.f_impl(npPlatform)
         
-        '''clPlatform = OpenCLPlatform()
+        clPlatform = OpenCLPlatform(self.T1)
         clPlatform.init()
-        self.f_impl(clPlatform)'''
+        self.f_impl(clPlatform)
     
     def f_impl(self, platform):
         exp = 23337

@@ -1,4 +1,4 @@
-#import pyopencl as cl
+import pyopencl as cl
 import numpy as np
 import numpy.linalg as la
 from kr import kr
@@ -87,11 +87,10 @@ class OpenCLPlatform (Platform):
         U1_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U1)
         U2_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U2)
         l_buf = cl.Buffer(self.context, mf.WRITE_ONLY, size = 64)
-        dest_buf = cl.Buffer(self.context, mf.WRITE_ONLY, b.nbytes)
         print 'Buffers created'
         
         print 'Launch'
-        self.prg.float16x16x16(T_buf, U0_buf, U1_buf, U2_buf, l_buf,
+        self.prg.float16x16x16(self.queue, T.shape/4, (4,4,4), T_buf, U0_buf, U1_buf, U2_buf, l_buf,
                                self.R, self.I[0], self.I[1], self.I[2])
 
         return 0;

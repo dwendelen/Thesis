@@ -13,20 +13,21 @@ T   The 3D-tensor to approximate. Expected shape: I0 x I1 x I2
 */
 __kernel void float16x16x16(__global const float *T,
     __global const float4 *U0, __global const float4 *U1, __global const float4 *U2,
-    __local float l, int R, int I0, int I1, int I2)
+    __local float4 *l, int R, int I0, int I1, int I2)
 {   
     float4 a;
     float4 b[4];
     float4 c[16];
+    float4 f;
     
     for(int i = 0; i < 16; i++)
     {
         c[i] = 0;
     }
     
-    int gId0 = get_global_id(0)
-    int gId1 = get_global_id(1)
-    int gId2 = get_global_id(2)
+    int gId0 = get_global_id(0);
+    int gId1 = get_global_id(1);
+    int gId2 = get_global_id(2);
     
     for(int r = 0; r < R; r++)
     {
@@ -36,7 +37,7 @@ __kernel void float16x16x16(__global const float *T,
         barrier(CLK_LOCAL_MEM_FENCE);
         
         //Fetch volgende 16 met n=1
-        float4 f = U1[gId1];
+        f = U1[gId1];
         
         b[0] = a * f.x;
         b[1] = a * f.y;
@@ -75,7 +76,7 @@ __kernel void float16x16x16(__global const float *T,
         4*gIdx2 * jumpI2;
     
     #pragma unroll
-    for(int i1 = 0, int j = 0; i1 < 4; i1++)
+    for(int i1 = 0, j = 0; i1 < 4; i1++)
     {
         #pragma unroll
         for(int i2 = 0; i2 < 4; i2++, j++)
@@ -84,11 +85,11 @@ __kernel void float16x16x16(__global const float *T,
             f = T[idx];
             c[j] -= f;
             //Jump to next group along the 1-axis
-            idx += jumpI1
+            idx += jumpI1;
         }
         //Jump to next group along the 2-axis,
         //and undo jumps along the 1-axis
-        idx += jumpI2 - 4*jumpI1
+        idx += jumpI2 - 4*jumpI1;
     }
     
     //Som berekenen
