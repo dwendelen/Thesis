@@ -4,9 +4,9 @@ from code import *
 import numpy.testing as npt
 import scipy.io
 from Platform import *
+#from OpenCLPlatform import *
 
 class CodeTest(unittest.TestCase):
-        
 
     def setUp(self):
         unittest.TestCase.setUp(self)
@@ -24,6 +24,10 @@ class CodeTest(unittest.TestCase):
         self.M2 = getM(self.T2)
         self.UHU2 = calculateUHU(self.U2, self.N2, self.R2)
         self.offset2 = calculateOffset(getDimensions(self.T2), self.R2)
+
+        self.platform = NumPyPlatform()
+        self.platform.init()
+        self.platform.setT(self.T1)
 
     def initT1(self):
         T = np.zeros((1,2,3));
@@ -57,17 +61,6 @@ class CodeTest(unittest.TestCase):
         self.b2 = np.array([101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112])
 
     def test_g(self):
-        npPlatform = NumPyPlatform(self.T1)
-        npPlatform.init()
-
-        self.g_impl(npPlatform)
-
-        
-        '''clPlatform = OpenCLPlatform(self.T1)
-        clPlatform.init()
-        self.g_impl(clPlatform)'''
-        
-    def g_impl(self, platform):
         e = []
         e.append(np.array([[-2736, -5712]]))
         e.append(np.array([[-801, -2160], [-645, -1776]]))
@@ -75,26 +68,17 @@ class CodeTest(unittest.TestCase):
     
         UHU = calculateUHU(self.U1, self.N1, self.R1)
         
-        platform.setU(self.U1)
-        platform.setUHU(UHU)
+        self.platform.setU(self.U1)
+        self.platform.setUHU(UHU)
     
-        r = platform.g()
+        r = self.platform.g()
         
         self.assertListOfArraysEquals(r, e, "Gradient is wrong")
     
     def test_f(self):
-        npPlatform = NumPyPlatform(self.T1)
-        npPlatform.init()
-        self.f_impl(npPlatform)
-        
-        clPlatform = OpenCLPlatform(self.T1)
-        clPlatform.init()
-        self.f_impl(clPlatform)
-    
-    def f_impl(self, platform):
         exp = 23337
-        platform.setU(self.U1)
-        r = platform.f()
+        self.platform.setU(self.U1)
+        r = self.platform.f()
         self.testUUnchanged()
         self.assertEqual(exp, r, "F is not correct")
     
