@@ -7,10 +7,7 @@ from math import *
 
 from Platform import Platform
 
-class OpenCLPlatform (Platform):
-    def __init__(self, T):
-        Platform.__init__(self, T)
-        
+class OpenCLPlatform (Platform):        
     def init(self):
         devices = cl.get_platforms()[0].get_devices(cl.device_type.GPU)
         context = cl.Context([devices[0]])
@@ -69,3 +66,6 @@ class OpenCLPlatform (Platform):
         cl.enqueue_copy(self.queue, s, sum_buf)
         
         return s[0]/2
+        
+    def g(self):
+        return []
