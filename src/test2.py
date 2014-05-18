@@ -2,7 +2,7 @@ import pyopencl as cl
 import numpy as np
 import numpy.linalg as la
 
-a = np.array([[201,202],[203,204]], dtype = np.float32)
+a = np.array([[201,202],[203,204],[205, 206]], dtype = np.float32)
 
 print a[0][0]
 print a[0][1]
@@ -25,9 +25,9 @@ prg = cl.Program(ctx, """
         b[i] = a[i];
     }""").build()
 
-prg.sum(queue, (4, 1), None, a_buf, b_buf)
+prg.sum(queue, (6, 1), None, a_buf, b_buf)
 
-c = np.array([[0,0, 0,0]], dtype = np.float32)
+c = np.array([0,0, 0,0, 0, 0], dtype = np.float32)
 cl.enqueue_copy(queue, c, b_buf)
 
 print c
