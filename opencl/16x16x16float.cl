@@ -1,3 +1,5 @@
+#pragma OPENCL EXTENSION cl_amd_printf : enable
+
 /*
 I0  The number of elements along the 0-axis
 I1  The number of elements along the 1-axis
@@ -10,16 +12,23 @@ U2  Expected shape: I2 x R
 
 T   The 3D-tensor to approximate. Expected shape: I0 x I1 x I2
     Expected serialization: idx = idx0 + I0(idx1 + I1(idx2))
+    
+This kernel MUST be run with a local 4x4x4 workspace
 */
-__kernel void float16x16x16(__global const float *T,
+__kernel void float16x16x16(__global const float4 *T,
     __global const float4 *U0, __global const float4 *U1, __global const float4 *U2,
-    __local float4 *l, int R, int I0, int I1, int I2, __global sum)
+    __local float4 *l, int R, int I0, int I1, int I2,
+    __global float *sum)
 {   
     float4 a;
     float4 b[4];
     float4 c[16];
     float4 f;
-    
+
+    bool bo = get_global_id(0) == 0  && 
+              get_global_id(1) == 0 &&
+              get_global_id(2) == 0;
+
     for(int i = 0; i < 16; i++)
     {
         c[i] = 0;
@@ -28,9 +37,9 @@ __kernel void float16x16x16(__global const float *T,
     int gId0 = get_global_id(0);
     int gId1 = get_global_id(1);
     int gId2 = get_global_id(2);
-    
+
     for(int r = 0; r < R; r++)
-    {
+    {   
         //Fetch eerste 16 met n=0
         a = U0[gId0];
 
@@ -68,13 +77,18 @@ __kernel void float16x16x16(__global const float *T,
     int gIdx2 = get_global_id(2);
     
     int jumpI1 = I0;
-    int jumpI2 = I0*I1;
+    int jumpI2 = 4*I0*I1;
     
     //Calculate first index
     int idx = gIdx0 + 
         4*gIdx1 * jumpI1 +
         4*gIdx2 * jumpI2;
     
+	
+
+	float4 s = (float4)(0.0f,0.0f,0.0f,0.0f);
+	float4 t;
+
     #pragma unroll
     for(int i1 = 0, j = 0; i1 < 4; i1++)
     {
@@ -83,7 +97,9 @@ __kernel void float16x16x16(__global const float *T,
         {
             //Handle the 4 floats along the 0-axis
             f = T[idx];
-            c[j] -= f;
+            t = c[j] - f;
+			s += t*t;
+			
             //Jump to next group along the 1-axis
             idx += jumpI1;
         }
@@ -91,38 +107,9 @@ __kernel void float16x16x16(__global const float *T,
         //and undo jumps along the 1-axis
         idx += jumpI2 - 4*jumpI1;
     }
-    
-    //Som berekenen
-    #pragma unroll
-    for(int i = 0; i < 32; i++)
-    {
-        c[i] += c[32 + i];
+
+    if(bo)
+    {   
+        sum[0] = s.x + s.y + s.z + s.w;
     }
-    
-    #pragma unroll
-    for(int i = 0; i < 16; i++)
-    {
-        c[i] += c[16 + i];
-    }
-    
-    #pragma unroll
-    for(int i = 0; i < 8; i++)
-    {
-        c[i] += c[8 + i];
-    }
-    
-    c[0] += c[4];
-    c[1] += c[5];
-    c[2] += c[6];
-    c[3] += c[7];
-    
-    c[0] += c[2];
-    c[1] += c[3];
-    
-    bool b = get_global_id(0) == 0 &&
-             get_global_id(1) == 0 &&
-             get_global_id(2) == 0;
-    
-    if(b)
-        sum[0] = c[0] + c[1];
 }

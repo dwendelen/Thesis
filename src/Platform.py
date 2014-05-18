@@ -76,11 +76,15 @@ class OpenCLPlatform (Platform):
         self.context = context
     
     def globalSize(self, (i1, i2, i3)):
-	return (int(ceil(i1/16.0))*16, int(ceil(i2/16.0))*16, int(ceil(i3/16.0))*16)
-    
+        return (int(ceil(i1/16.0))*4, int(ceil(i2/16.0))*4, int(ceil(i3/16.0))*4)
+
+    def getTShape(self, (i1, i2, i3)):
+        return (int(ceil(i1/16.0))*16, int(ceil(i2/16.0))*16, int(ceil(i3/16.0))*16)
+
     def createU(self, U):
-        elements = int(ceil(U.shape[0]/4.0))*4
+        elements = int(ceil(U.shape[0]/16.0))*16
         r = np.zeros((elements, U.shape[1]), order='F', dtype=np.float32)
+        #r = np.zeros((elements, U.shape[1]), dtype=np.float32)
         r[:U.shape[0],:] = U
         return r
 
@@ -90,7 +94,12 @@ class OpenCLPlatform (Platform):
         U2 = self.createU(self.U[2])
         
         g = self.globalSize(self.T.shape)
-        T = np.zeros(g, order='F', dtype=np.float32)
+        gs = self.getTShape(self.T.shape)
+
+        T = np.zeros(gs, order='F', dtype=np.float32)
+        #T = np.zeros(gs, dtype=np.float32)        
+
+
         T[:self.T.shape[0], :self.T.shape[1], :self.T.shape[2]] = self.T        
 
         mf = cl.mem_flags
@@ -98,20 +107,16 @@ class OpenCLPlatform (Platform):
         U0_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U0)
         U1_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U1)
         U2_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U2)
-        l_buf = cl.LocalMemory(64)
-        sum_buf = cl.Buffer(self.context, mf.WRITE_ONLY, size=1)
+        l_buf = cl.LocalMemory(64*4)
+        sum_buf = cl.Buffer(self.context, mf.WRITE_ONLY, size=4)
 
         kernel = self.prg.float16x16x16
         kernel.set_scalar_arg_dtypes([None, None, None, None, None,
-                                      np.int32, np.int32, np.int32, np.int32, None])
-        kernel(self.queue, (4,4,4), (4,4,4), T_buf, U0_buf, U1_buf, U2_buf, l_buf,
-                               self.R, self.I[0], self.I[1], self.I[2], sum_buf)
-
-        s = np.zeros((1))
-        cl.enqueue_copy(queue, s, sum_buf)
+                np.int32, np.int32, np.int32, np.int32, None])
+        kernel(self.queue, g, (4,4,4), T_buf, U0_buf, U1_buf, U2_buf, l_buf,
+               self.R, g[0], g[1], g[2], sum_buf)
         
-        print s
+        s = np.zeros((1), dtype = np.float32)
+        cl.enqueue_copy(self.queue, s, sum_buf)
         
-        return s[0]
-    
-    
+        return s[0]/2
