@@ -94,6 +94,7 @@ class OpenCLPlatform (Platform):
         
         g = (ceil(T.shape[0]/4.0), ceil(T.shape[1]/4.0), ceil(T.shape[2]/4.0))
         
+        self.prg.float16x16x16.set_scalar_arg_dtypes(np.int32)
         self.prg.float16x16x16(self.queue, g, (4,4,4), T_buf, U0_buf, U1_buf, U2_buf, l_buf,
                                self.R, self.I[0], self.I[1], self.I[2])
 
