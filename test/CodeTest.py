@@ -57,13 +57,13 @@ class CodeTest(unittest.TestCase):
         self.b2 = np.array([101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112])
 
     def test_g(self):
-        npPlatform = NumPyPlatform(self.T1)
+        npPlatform = NumPyPlatform()
         npPlatform.init()
 
         self.g_impl(npPlatform)
 
         
-        '''clPlatform = OpenCLPlatform(self.T1)
+        '''clPlatform = OpenCLPlatform()
         clPlatform.init()
         self.g_impl(clPlatform)'''
         
@@ -74,6 +74,7 @@ class CodeTest(unittest.TestCase):
         e.append(np.array([[-408, -1224],[-336, -1020], [-264, -816]]))
     
         UHU = calculateUHU(self.U1, self.N1, self.R1)
+        
         platform.setU(self.U1)
         platform.setUHU(UHU)
     
@@ -82,11 +83,11 @@ class CodeTest(unittest.TestCase):
         self.assertListOfArraysEquals(r, e, "Gradient is wrong")
     
     def test_f(self):
-        npPlatform = NumPyPlatform(self.T1)
+        npPlatform = NumPyPlatform()
         npPlatform.init()
         self.f_impl(npPlatform)
         
-        '''clPlatform = OpenCLPlatform(self.T1)
+        '''clPlatform = OpenCLPlatform()
         clPlatform.init()
         self.f_impl(clPlatform)'''
     
