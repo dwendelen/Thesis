@@ -2,8 +2,7 @@
 import numpy as np
 import numpy.linalg as la
 from kr import kr
-from code import getM
-from code import getNbOfDimensions
+from code import *
 
 '''
 PLATFORM
@@ -18,9 +17,11 @@ class Platform:
     def __init__(self, T):
         self.T = T;
         self.N = getNbOfDimensions(T)
+        self.I = getDimensions(T)
         
     def setU(self, U):
         self.U = U
+        self.R = getRank(U)
     
     def setUHU(self, UHU):
         self.UHU = UHU
@@ -65,35 +66,34 @@ class OpenCLPlatform (Platform):
         context = cl.Context([devices[0]])
         queue = cl.CommandQueue(context)
         
-        prg = cl.Program(context, """
-            __kernel void sum(__global const float *a,
-            __global const float *b, __global float *c)
-            {
-              int gid = get_global_id(0);
-              c[gid] = a[gid] + b[gid];
-            }
-            """).build()
+        file = open('../opencl/16x16x16float.cl', 'r')
+        
+        prg = cl.Program(context, file.read()).build()
             
         self.prg = prg
         self.queue = queue
         self.context = context
     
     def f(self):
-        U0 = self.U[0].T
-        U1 = self.U[1].T
-        U2 = self.U[2].T
+        U0 = np.array(self.U[0], order='F', dtype = np.float32)
+        U1 = np.array(self.U[1], order='F', dtype = np.float32)
+        U2 = np.array(self.U[2], order='F', dtype = np.float32)
         
+        T = np.array(self.T, order='F', dtype=np.float32)
+        print 'Create Buffers'
         mf = cl.mem_flags
-        a_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=a)
-        b_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=b)
+        T_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=T)
+        U0_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U0)
+        U1_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U1)
+        U2_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U2)
+        l_buf = cl.Buffer(self.context, mf.WRITE_ONLY, size = 64)
         dest_buf = cl.Buffer(self.context, mf.WRITE_ONLY, b.nbytes)
+        print 'Buffers created'
         
-        self.prg.sum(self.queue, a.shape, None, a_buf, b_buf, dest_buf)
-        
-        a_plus_b = np.empty_like(a)
-        cl.enqueue_copy(self.queue, a_plus_b, dest_buf)
-        
-        print(la.norm(a_plus_b - (a+b)), la.norm(a_plus_b))
+        print 'Launch'
+        self.prg.float16x16x16(T_buf, U0_buf, U1_buf, U2_buf, l_buf,
+                               self.R, self.I[0], self.I[1], self.I[2])
+
         return 0;
     
     
