@@ -18,7 +18,7 @@ class Platform:
     def __init__(self, T):
         self.T = T;
         self.N = getNbOfDimensions(T)
-
+        
     def setU(self, U):
         self.U = U
     
@@ -62,7 +62,7 @@ class OpenCLPlatform (Platform):
         
     def init(self):
         devices = cl.get_platforms()[0].get_devices(cl.device_type.GPU)
-        context = cl.Context(devices)
+        context = cl.Context([devices[0]])
         queue = cl.CommandQueue(context)
         
         prg = cl.Program(context, """
@@ -79,8 +79,9 @@ class OpenCLPlatform (Platform):
         self.context = context
     
     def f(self):
-        a = np.random.rand(50000).astype(np.float32)
-        b = np.random.rand(50000).astype(np.float32)
+        U0 = self.U[0].T
+        U1 = self.U[1].T
+        U2 = self.U[2].T
         
         mf = cl.mem_flags
         a_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=a)
