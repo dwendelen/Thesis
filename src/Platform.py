@@ -75,27 +75,43 @@ class OpenCLPlatform (Platform):
         self.queue = queue
         self.context = context
     
+    def globalSize(self, (i1, i2, i3)):
+	return (int(ceil(i1/16.0))*16, int(ceil(i2/16.0))*16, int(ceil(i3/16.0))*16)
+    
+    def createU(self, U):
+        elements = int(ceil(U.shape[0]/4.0))*4
+        r = np.zeros((elements, U.shape[1]), order='F', dtype=np.float32)
+        r[:U.shape[0],:] = U
+        return r
+
     def f(self):
-        U0 = np.array(self.U[0], order='F', dtype = np.float32)
-        U1 = np.array(self.U[1], order='F', dtype = np.float32)
-        U2 = np.array(self.U[2], order='F', dtype = np.float32)
+        U0 = self.createU(self.U[0])
+        U1 = self.createU(self.U[1])
+        U2 = self.createU(self.U[2])
         
-        T = np.array(self.T, order='F', dtype=np.float32)
+        g = self.globalSize(self.T.shape)
+        T = np.zeros(g, order='F', dtype=np.float32)
+        T[:self.T.shape[0], :self.T.shape[1], :self.T.shape[2]] = self.T        
+
         print 'Create Buffers'
         mf = cl.mem_flags
         T_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=T)
         U0_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U0)
         U1_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U1)
         U2_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U2)
-        l_buf = cl.Buffer(self.context, mf.WRITE_ONLY, size = 64)
+        l_buf = cl.LocalMemory(64)
         print 'Buffers created'
         
         print 'Launch'
+        print self.I        
         
-        g = (ceil(T.shape[0]/4.0), ceil(T.shape[1]/4.0), ceil(T.shape[2]/4.0))
-        
-        self.prg.float16x16x16.set_scalar_arg_dtypes(np.int32)
-        self.prg.float16x16x16(self.queue, g, (4,4,4), T_buf, U0_buf, U1_buf, U2_buf, l_buf,
+	print g
+
+        kernel = self.prg.float16x16x16
+        print kernel
+        kernel.set_scalar_arg_dtypes([None, None, None, None, None,
+                                      np.int32, np.int32, np.int32, np.int32])
+        kernel(self.queue, (4,4,4), (4,4,4), T_buf, U0_buf, U1_buf, U2_buf, l_buf,
                                self.R, self.I[0], self.I[1], self.I[2])
 
         return 0;
