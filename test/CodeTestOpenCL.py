@@ -67,8 +67,8 @@ class CodeTest(unittest.TestCase):
     
         UHU = calculateUHU(self.U1, self.N1, self.R1)
         
-        platform.setU(self.U1)
-        platform.setUHU(UHU)
+        self.OpenCLPlatform.setU(self.U1)
+        self.OpenCLPlatform.setUHU(UHU)
     
         r = self.OpenCLPlatform.g()
         
@@ -78,11 +78,18 @@ class CodeTest(unittest.TestCase):
     def test_f(self):
         exp = 23337
         self.OpenCLPlatform.setU(self.U1)
-        r = platform.f()
+        r = self.OpenCLPlatform.f()
         self.testUUnchanged()
         self.assertEqual(exp, r, "F is not correct")
     
-   
+    def testUUnchanged(self):
+        self.assertListOfArraysEquals(self.U1, self.U1r, "U changed")
+        
+    def assertListOfArraysEquals(self, a, b, msg):
+        self.assertEqual(len(a), len(b), msg + ": The sizes do not match")
+        
+        for i in range(len(a)):
+            npt.assert_array_equal(a[i], b[i], msg + ": The elements do not match")
     
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
