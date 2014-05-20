@@ -2,22 +2,20 @@ import numpy as np
 from OpenCLPlatform import OpenCLPlatform
 from simulators import float16x16x16SlechtsEenKeerFetchen,\
     float16x16x16ElkeKeerNieuweFetch
+R = 16
+I = 400
 
-(_, _, t1, _) = float16x16x16SlechtsEenKeerFetchen(160, 100)
-(_, _, t2, _) = float16x16x16ElkeKeerNieuweFetch(160, 100)
+(_, _, _, t1) = float16x16x16SlechtsEenKeerFetchen(I, R)
+(_, _, _, t2) = float16x16x16ElkeKeerNieuweFetch(I, R)
 
 print str(t1*1000) + ' ~ ' + str(t2*1000)
 
-T = np.array(np.random.rand(160, 160, 160), dtype=np.float32)
+T = np.array(np.random.rand(I, I, I), dtype=np.float32)
 
-U = np.array(np.random.rand(160, 100), dtype=np.float32)
+U = np.array(np.random.rand(I, R), dtype=np.float32)
 
 p = OpenCLPlatform()
+p.init()
 p.setT(T)
 p.setU([U, U, U])
 p.f()
-
-(_, _, t1, _) = float16x16x16SlechtsEenKeerFetchen(160, 100)
-(_, _, t2, _) = float16x16x16ElkeKeerNieuweFetch(160, 100)
-
-print str(t1*1000) + ' ~ ' + str(t2*1000)

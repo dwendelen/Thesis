@@ -11,7 +11,7 @@ class OpenCLPlatform (Platform):
     def init(self):
         devices = cl.get_platforms()[0].get_devices(cl.device_type.GPU)
         context = cl.Context([devices[0]])
-        queue = cl.CommandQueue(context)
+        queue = cl.CommandQueue(context, properties=cl.command_queue_properties.PROFILING_ENABLE)
         
         file = open('../opencl/16x16x16float.cl', 'r')
         
@@ -71,7 +71,7 @@ class OpenCLPlatform (Platform):
         s = np.zeros((1), dtype = np.float32)
         cl.enqueue_copy(self.queue, s, sum_buf)
         
-        print e.profile.info
+        print str((e.profile.end - e.profile.start)/ 1000000.0)
         
         return s[0]/2
         

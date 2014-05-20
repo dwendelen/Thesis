@@ -1,4 +1,4 @@
-#pragma OPENCL EXTENSION cl_amd_printf : enable
+
 
 /*
 I0  The number of elements along the 0-axis
@@ -15,6 +15,7 @@ T   The 3D-tensor to approximate. Expected shape: I0 x I1 x I2
     
 This kernel MUST be run with a local 4x4x4 workspace
 */
+__attribute__((reqd_work_group_size(4, 4, 4)))
 __kernel void float16x16x16(__global const float4 *T,
     __global const float4 *U0, __global const float4 *U1, __global const float4 *U2,
     __local float4 *l, int R, int I0, int I1, int I2,
@@ -28,7 +29,7 @@ __kernel void float16x16x16(__global const float4 *T,
     bool bo = get_global_id(0) == 0  && 
               get_global_id(1) == 0 &&
               get_global_id(2) == 0;
-
+    #pragma unroll
     for(int i = 0; i < 16; i++)
     {
         c[i] = 0;
@@ -43,7 +44,7 @@ __kernel void float16x16x16(__global const float4 *T,
         //Fetch eerste 16 met n=0
         a = U0[gId0];
 
-        barrier(CLK_LOCAL_MEM_FENCE);
+        //barrier(CLK_LOCAL_MEM_FENCE);
         
         //Fetch volgende 16 met n=1
         f = U1[gId1];
@@ -53,7 +54,7 @@ __kernel void float16x16x16(__global const float4 *T,
         b[2] = a * f.z;
         b[3] = a * f.w;
 
-        barrier(CLK_LOCAL_MEM_FENCE);
+        //barrier(CLK_LOCAL_MEM_FENCE);
         
         //Fetch laatste 16 met n=2
         f = U2[gId2];
