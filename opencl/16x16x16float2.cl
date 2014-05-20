@@ -1,4 +1,4 @@
-
+#pragma OPENCL EXTENSION cl_amd_printf : enable
 
 /*
 I0  The number of elements along the 0-axis
@@ -37,19 +37,21 @@ __kernel void float16x16x16(__global const float4 *T,
     int iterations1 = I1/4;
     int iterations2 = I2/4;
     
-    int gIdx0 = get_global_id(0) * iterations0;
-    int gIdx1 = get_global_id(1) * iterations1;
-    int gIdx2 = get_global_id(2) * iterations2;
+    //printf("Its %i", iterations0);
+    
+    int gIdx0 = get_global_id(0);// * iterations0;
+    int gIdx1 = get_global_id(1);// * iterations1;
+    int gIdx2 = get_global_id(2);// * iterations2;
     
     int jumpI1 = I0;
     int jumpI2 = 4*I0*I1;
     
-    for(int e2 = 0; e2 < iterations2; e2++)
-    {
-        for(int e1 = 0; e1 < iterations1; e1++)
-        {
-            for(int e0 = 0; e0 < iterations0; e0++)
-            {
+    //for(int e2 = 0; e2 < iterations2; e2++)
+    //{
+        //for(int e1 = 0; e1 < iterations1; e1++)
+        //{
+            //for(int e0 = 0; e0 < iterations0; e0++)
+            //{
                 #pragma unroll
                 for(int i = 0; i < 16; i++)
                 {
@@ -119,12 +121,12 @@ __kernel void float16x16x16(__global const float4 *T,
                     idx += jumpI2 - 4*jumpI1;
                 }
                 
-                gIdx0++;
-            }
-            gIdx1++;
-        }
-        gIdx2++;
-    }
+                //gIdx0++;
+            //}
+            //gIdx1++;
+        //}
+        //gIdx2++;
+    //}
 
     if(bo)
     {   

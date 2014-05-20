@@ -32,11 +32,17 @@ class OpenCLPlatform (Platform):
         r = np.zeros((elements, U.shape[1]), order='F', dtype=np.float32)
         r[:U.shape[0],:] = U
         return r
-
+    def setU2(self, U):
+        self.U2 = U
+        
     def f(self):
         U0 = self.createU(self.U[0])
         U1 = self.createU(self.U[1])
         U2 = self.createU(self.U[2])
+        
+        U02 = self.createU(self.U2[0])
+        U12 = self.createU(self.U2[1])
+        U22 = self.createU(self.U2[2])
         
         g = self.globalSize(self.T.shape)
         gs = self.getTShape(self.T.shape)
@@ -50,6 +56,9 @@ class OpenCLPlatform (Platform):
         U0_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U0)
         U1_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U1)
         U2_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U2)
+        U02_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U0)
+        U12_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U1)
+        U22_buf = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U2)
         l_buf = cl.LocalMemory(64*4)
         sum_buf = cl.Buffer(self.context, mf.WRITE_ONLY, size=4)
 
@@ -68,10 +77,15 @@ class OpenCLPlatform (Platform):
         
         e = cl.enqueue_nd_range_kernel(self.queue, kernel, g, (4,4,4))
         
+        kernel.set_arg(1, U02_buf)
+        kernel.set_arg(2, U12_buf)
+        kernel.set_arg(3, U22_buf)
+        
+        e2 = cl.enqueue_nd_range_kernel(self.queue, kernel, g, (4,4,4))
         s = np.zeros((1), dtype = np.float32)
         cl.enqueue_copy(self.queue, s, sum_buf)
         
-        print str((e.profile.end - e.profile.start)/ 1000000.0)
+        self.time = (e2.profile.end - e2.profile.start)/ 1000000.0
         
         return s[0]/2
         

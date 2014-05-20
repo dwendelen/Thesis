@@ -7,28 +7,30 @@ from math import *
 
 from Platform import Platform
 
-class OpenCLPlatform (Platform):        
+class OpenCLPlatform2 (Platform):        
     def init(self):
         devices = cl.get_platforms()[0].get_devices(cl.device_type.GPU)
         context = cl.Context([devices[0]])
         queue = cl.CommandQueue(context, properties=cl.command_queue_properties.PROFILING_ENABLE)
         
-        file = open('../opencl/16x16x16float.cl2', 'r')
+        file = open('../opencl/16x16x16float2.cl', 'r')
         
         prg = cl.Program(context, file.read()).build()
+            
+        self.a = 4
             
         self.prg = prg
         self.queue = queue
         self.context = context
     
     def globalSize(self, (i1, i2, i3)):
-        return (int(ceil(i1/16.0))*4, int(ceil(i2/16.0))*4, int(ceil(i3/16.0))*4)
+        return (int(ceil(i1/(16.0*self.a)))*4*self.a, int(ceil(i2/(16.0)))*4, int(ceil(i3/(16.0)))*4)
 
     def getTShape(self, (i1, i2, i3)):
-        return (int(ceil(i1/16.0))*16, int(ceil(i2/16.0))*16, int(ceil(i3/16.0))*16)
+        return (int(ceil(i1/(16.0*self.a)))*16*self.a, int(ceil(i2/(16.0)))*16, int(ceil(i3/(16.0)))*16)
 
     def createU(self, U):
-        elements = int(ceil(U.shape[0]/16.0))*16
+        elements = int(ceil(U.shape[0]/(16.0*self.a)))*16*self.a
         r = np.zeros((elements, U.shape[1]), order='F', dtype=np.float32)
         r[:U.shape[0],:] = U
         return r
@@ -66,12 +68,12 @@ class OpenCLPlatform (Platform):
         kernel.set_arg(8, np.int32(g[2]))
         kernel.set_arg(9, sum_buf)
         
-        e = cl.enqueue_nd_range_kernel(self.queue, kernel, (4,4,4), (4,4,4))
+        e = cl.enqueue_nd_range_kernel(self.queue, kernel, (g[0],g[1],g[2]), (4,4,4))
         
         s = np.zeros((1), dtype = np.float32)
         cl.enqueue_copy(self.queue, s, sum_buf)
         
-        print str((e.profile.end - e.profile.start)/ 1000000.0)
+        self.time = (e.profile.end - e.profile.start)/ 1000000.0
         
         return s[0]/2
         

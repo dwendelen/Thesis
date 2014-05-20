@@ -42,33 +42,34 @@ def cpu(I, R):
     
     return (tcalcPBasicElem, tmemPBasicElem, tcalc, tmem)
 
-N = 100
-offset = 10
+if __name__ == "__main__":
+    N = 100
+    offset = 10
 
-calc1 = np.zeros((N))
-mem1 = np.zeros((N))
+    calc1 = np.zeros((N))
+    mem1 = np.zeros((N))
 
-calcCpu = np.zeros((N))
-memCpu = np.zeros((N))
+    calcCpu = np.zeros((N))
+    memCpu = np.zeros((N))
 
-R = 26
-for i in range(0, N):
-    (calc1[i], mem1[i], _, _) = float16x16x16SlechtsEenKeerFetchen(i+offset, R)
-    (calcCpu[i], memCpu[i], _, _) = cpu(i+offset, R)
-    
-calc2 = np.zeros((N))
-mem2 = np.zeros((N))
-R = 20
-for i in range(0, N):
-    (calc2[i], mem2[i], _, _) = float16x16x16ElkeKeerNieuweFetch(i+offset, R)
+    R = 26
+    for i in range(0, N):
+        (calc1[i], mem1[i], _, _) = float16x16x16SlechtsEenKeerFetchen(i+offset, R)
+        (calcCpu[i], memCpu[i], _, _) = cpu(i+offset, R)
+        
+    calc2 = np.zeros((N))
+    mem2 = np.zeros((N))
+    R = 20
+    for i in range(0, N):
+        (calc2[i], mem2[i], _, _) = float16x16x16ElkeKeerNieuweFetch(i+offset, R)
 
-x = range(offset, N+offset)
+    x = range(offset, N+offset)
 
-plt.hold(True)
-plt.plot(x, mem1, 'b')
-plt.plot(x, calc1, 'r')
+    plt.hold(True)
+    plt.plot(x, mem1, 'b')
+    plt.plot(x, calc1, 'r')
 
-#plt.plot(x, memCpu, 'r')
-#plt.plot(x, calcCpu, 'b')
-plt.show()
-plt.plot(False)
+    #plt.plot(x, memCpu, 'r')
+    #plt.plot(x, calcCpu, 'b')
+    plt.show()
+    plt.plot(False)
