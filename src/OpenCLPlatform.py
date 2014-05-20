@@ -33,7 +33,6 @@ class OpenCLPlatform (Platform):
     def createU(self, U):
         elements = int(ceil(U.shape[0]/16.0))*16
         r = np.zeros((elements, U.shape[1]), order='F', dtype=np.float32)
-        #r = np.zeros((elements, U.shape[1]), dtype=np.float32)
         r[:U.shape[0],:] = U
         return r
 
@@ -45,9 +44,7 @@ class OpenCLPlatform (Platform):
         g = self.globalSize(self.T.shape)
         gs = self.getTShape(self.T.shape)
 
-        T = np.zeros(gs, order='F', dtype=np.float32)
-        #T = np.zeros(gs, dtype=np.float32)        
-
+        T = np.zeros(gs, order='F', dtype=np.float32)      
 
         T[:self.T.shape[0], :self.T.shape[1], :self.T.shape[2]] = self.T        
 
@@ -60,12 +57,23 @@ class OpenCLPlatform (Platform):
         sum_buf = cl.Buffer(self.context, mf.WRITE_ONLY, size=4)
 
         kernel = self.prg.float16x16x16
-        kernel.set_scalar_arg_dtypes([None, None, None, None, None,
-                np.int32, np.int32, np.int32, np.int32, None])
-        kernel(self.queue, g, (4,4,4), T_buf, U0_buf, U1_buf, U2_buf, l_buf,
-               self.R, g[0], g[1], g[2], sum_buf)
+
+        kernel.set_arg(0, T_buf)
+        kernel.set_arg(1, U0_buf)
+        kernel.set_arg(2, U1_buf)
+        kernel.set_arg(3, U2_buf)
+        kernel.set_arg(4, l_buf)
+        kernel.set_arg(5, np.int32(self.R))
+        kernel.set_arg(6, np.int32(g[0]))
+        kernel.set_arg(7, np.int32(g[1]))
+        kernel.set_arg(8, np.int32(g[2]))
+        kernel.set_arg(9, sum_buf)
+        
+        e = cl.enqueue_nd_range_kernel(self.queue, kernel, g, (4,4,4))
         
         s = np.zeros((1), dtype = np.float32)
         cl.enqueue_copy(self.queue, s, sum_buf)
+        
+        print e.profile.info
         
         return s[0]/2
