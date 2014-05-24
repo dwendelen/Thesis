@@ -3,7 +3,7 @@ import numpy as np
 from code import *
 import numpy.testing as npt
 import scipy.io
-from OpenCLPlatform import *
+from Platform.OpenCLPlatform import *
 
 class CodeTest(unittest.TestCase):
 

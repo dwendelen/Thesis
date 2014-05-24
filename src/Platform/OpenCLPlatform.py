@@ -13,7 +13,7 @@ class OpenCLPlatform (Platform):
         context = cl.Context([devices[0]])
         queue = cl.CommandQueue(context, properties=cl.command_queue_properties.PROFILING_ENABLE)
         
-        file = open('../opencl/16x16x16float.cl', 'r')
+        file = open('../opencl/float16x16x16.cl', 'r')
         
         prg = cl.Program(context, file.read()).build()
             

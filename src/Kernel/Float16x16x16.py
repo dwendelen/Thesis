@@ -39,11 +39,11 @@ class Factory():
         tb = TBuffer(cq.context)
         tb.setT(T)
         f.setTBuffer(tb)
-        
+
         ub = UBuffer(cq.context)
         ub.setU(U)
         f.setUBuffer(ub)
-        
+
         sm = SumBuffer(cq.context)
         sm.init(f.getNbWGs())
         f.setSumBuffer(sm)
