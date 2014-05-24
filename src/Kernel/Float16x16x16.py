@@ -25,7 +25,7 @@ class Float16x16x16(Float16x16x16Kernel):
         return 'float16x16x16'
 
     def getNbWGs(self):
-        return (self.I*self.I*self.I)/(16*16*16)
+        return (self.I[0]*self.I[1]*self.I[2])/(16*16*16)
     
 class Factory():
     def create(self, U, T):
@@ -44,7 +44,8 @@ class Factory():
         ub.setU(U)
         f.setUBuffer(ub)
         
-        sm = SumBuffer(f.getNbWGs())
+        sm = SumBuffer(cq.context)
+        sm.init(f.getNbWGs())
         f.setSumBuffer(sm)
         
         return f
