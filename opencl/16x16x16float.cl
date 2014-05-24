@@ -1,4 +1,8 @@
-
+/*
+Mogelijk issue: Channel conflict omdat er gesprongen wordt
+met een veelvoud van 4x16=64 bytes en een veelvoud van
+64x4 = 256 bytes voor T.
+*/
 
 /*
 I0  The number of elements along the 0-axis
@@ -18,7 +22,7 @@ This kernel MUST be run with a local 4x4x4 workspace
 __attribute__((reqd_work_group_size(4, 4, 4)))
 __kernel void float16x16x16(__global const float4 *T,
     __global const float4 *U0, __global const float4 *U1, __global const float4 *U2,
-    __local float4 *l, int R, int I0, int I1, int I2,
+    __local float *l, int R, int I0, int I1, int I2,
     __global float *sum)
 {   
     float4 a;
@@ -26,9 +30,7 @@ __kernel void float16x16x16(__global const float4 *T,
     float4 c[16];
     float4 f;
 
-    bool bo = get_global_id(0) == 0  && 
-              get_global_id(1) == 0 &&
-              get_global_id(2) == 0;
+    
     #pragma unroll
     for(int i = 0; i < 16; i++)
     {
@@ -84,8 +86,6 @@ __kernel void float16x16x16(__global const float4 *T,
     int idx = gIdx0 + 
         4*gIdx1 * jumpI1 +
         4*gIdx2 * jumpI2;
-    
-	
 
 	float4 s = (float4)(0.0f,0.0f,0.0f,0.0f);
 	float4 t;
@@ -109,8 +109,285 @@ __kernel void float16x16x16(__global const float4 *T,
         idx += jumpI2 - 4*jumpI1;
     }
 
+    bool bo = get_local_id(0) == 0 && 
+              get_local_id(1) == 0 &&
+              get_local_id(2) == 0;
+    
+    //By doing the index times two, every work-item uses another bank (2.411778 -> 2.343779)
+    int index = 2*(get_local_id(0) + 4 * get_local_id(1) + 16 * get_local_id(2));
+    l[index] = s.x + s.y + s.z + s.w;
+    
+    barrier(CLK_LOCAL_MEM_FENCE);
+    
     if(bo)
-    {   
-        sum[0] = s.x + s.y + s.z + s.w;
+    {
+        float sss = 0;
+        #pragma unroll
+        for(int i = 0; i < 64; i+=2)
+        {
+            sss += l[i];
+        }
+        
+        index = get_group_id(0) + get_num_groups(0) * (get_group_id(1) + get_num_groups(1) * get_group_id(2));
+        sum[index] = sss;
     }
 }
+
+/*
+Voor:
+R = 4
+I = 360 -> 368 elementen
+
+Enkel begin:
+Adressen 0,1,3,4,5, 7,8
+
+
+
+Workitem (0 0 0)
+Initial byte address: 0
+That is channel: 0
+
+Workitem (1 0 0)
+Initial byte address: 4
+That is channel: 0
+
+Workitem (2 0 0)
+Initial byte address: 8
+That is channel: 0
+
+Workitem (3 0 0)
+Initial byte address: 12
+That is channel: 0
+
+Workitem (0 1 0)
+Initial byte address: 1472
+That is channel: 5
+
+Workitem (1 1 0)
+Initial byte address: 1476
+That is channel: 5
+
+Workitem (2 1 0)
+Initial byte address: 1480
+That is channel: 5
+
+Workitem (3 1 0)
+Initial byte address: 1484
+That is channel: 5
+
+Workitem (0 2 0)
+Initial byte address: 2944
+That is channel: 3
+
+Workitem (1 2 0)
+Initial byte address: 2948
+That is channel: 3
+
+Workitem (2 2 0)
+Initial byte address: 2952
+That is channel: 3
+
+Workitem (3 2 0)
+Initial byte address: 2956
+That is channel: 3
+
+Workitem (0 3 0)
+Initial byte address: 4416
+That is channel: 1
+
+Workitem (1 3 0)
+Initial byte address: 4420
+That is channel: 1
+
+Workitem (2 3 0)
+Initial byte address: 4424
+That is channel: 1
+
+Workitem (3 3 0)
+Initial byte address: 4428
+That is channel: 1
+
+Workitem (0 0 1)
+Initial byte address: 541696
+That is channel: 4
+
+Workitem (1 0 1)
+Initial byte address: 541700
+That is channel: 4
+
+Workitem (2 0 1)
+Initial byte address: 541704
+That is channel: 4
+
+Workitem (3 0 1)
+Initial byte address: 541708
+That is channel: 4
+
+Workitem (0 1 1)
+Initial byte address: 543168
+That is channel: 1
+
+Workitem (1 1 1)
+Initial byte address: 543172
+That is channel: 1
+
+Workitem (2 1 1)
+Initial byte address: 543176
+That is channel: 1
+
+Workitem (3 1 1)
+Initial byte address: 543180
+That is channel: 1
+
+Workitem (0 2 1)
+Initial byte address: 544640
+That is channel: 7
+
+Workitem (1 2 1)
+Initial byte address: 544644
+That is channel: 7
+
+Workitem (2 2 1)
+Initial byte address: 544648
+That is channel: 7
+
+Workitem (3 2 1)
+Initial byte address: 544652
+That is channel: 7
+
+Workitem (0 3 1)
+Initial byte address: 546112
+That is channel: 5
+
+Workitem (1 3 1)
+Initial byte address: 546116
+That is channel: 5
+
+Workitem (2 3 1)
+Initial byte address: 546120
+That is channel: 5
+
+Workitem (3 3 1)
+Initial byte address: 546124
+That is channel: 5
+
+Workitem (0 0 2)
+Initial byte address: 1083392
+That is channel: 0
+
+Workitem (1 0 2)
+Initial byte address: 1083396
+That is channel: 0
+
+Workitem (2 0 2)
+Initial byte address: 1083400
+That is channel: 0
+
+Workitem (3 0 2)
+Initial byte address: 1083404
+That is channel: 0
+
+Workitem (0 1 2)
+Initial byte address: 1084864
+That is channel: 5
+
+Workitem (1 1 2)
+Initial byte address: 1084868
+That is channel: 5
+
+Workitem (2 1 2)
+Initial byte address: 1084872
+That is channel: 5
+
+Workitem (3 1 2)
+Initial byte address: 1084876
+That is channel: 5
+
+Workitem (0 2 2)
+Initial byte address: 1086336
+That is channel: 3
+
+Workitem (1 2 2)
+Initial byte address: 1086340
+That is channel: 3
+
+Workitem (2 2 2)
+Initial byte address: 1086344
+That is channel: 3
+
+Workitem (3 2 2)
+Initial byte address: 1086348
+That is channel: 3
+
+Workitem (0 3 2)
+Initial byte address: 1087808
+That is channel: 1
+
+Workitem (1 3 2)
+Initial byte address: 1087812
+That is channel: 1
+
+Workitem (2 3 2)
+Initial byte address: 1087816
+That is channel: 1
+
+Workitem (3 3 2)
+Initial byte address: 1087820
+That is channel: 1
+
+Workitem (0 0 3)
+Initial byte address: 1625088
+That is channel: 4
+
+Workitem (1 0 3)
+Initial byte address: 1625092
+That is channel: 4
+
+Workitem (2 0 3)
+Initial byte address: 1625096
+That is channel: 4
+
+Workitem (3 0 3)
+Initial byte address: 1625100
+That is channel: 4
+
+Workitem (0 1 3)
+Initial byte address: 1626560
+That is channel: 1
+
+Workitem (1 1 3)
+Initial byte address: 1626564
+That is channel: 1
+
+Workitem (2 1 3)
+Initial byte address: 1626568
+That is channel: 1
+
+Workitem (3 1 3)
+Initial byte address: 1626572
+That is channel: 1
+
+Workitem (0 2 3)
+Initial byte address: 1628032
+That is channel: 7
+
+Workitem (1 2 3)
+Initial byte address: 1628036
+That is channel: 7
+
+Workitem (2 2 3)
+Initial byte address: 1628040
+That is channel: 7
+
+Workitem (3 2 3)
+Initial byte address: 1628044
+That is channel: 7
+
+Workitem (0 3 3)
+Initial byte address: 1629504
+That is channel: 5
+
+Workitem (1 3 3)
+Initial byte address: 1629508
+That is channel: 5
+*/
