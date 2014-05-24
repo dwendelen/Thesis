@@ -30,9 +30,9 @@ class Float16x16x16(Float16x16x16Kernel):
 class Factory():
     def create(self, U, T):
         cq = ContextQueue()
-        f = Float16x16x16(cq)
-        
         cq.init()
+        
+        f = Float16x16x16(cq)
         f.compile()
         f.init()
         
