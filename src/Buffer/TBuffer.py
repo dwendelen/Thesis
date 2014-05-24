@@ -3,6 +3,9 @@ from BlockPadder import blockPad
 import numpy as np
 
 class TBuffer:
+    def __init__(self, context):
+        self.context = context
+        
     def a(self):
         pass
     def setT(self, T):

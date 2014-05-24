@@ -3,12 +3,15 @@ from code import getRank
 from BlockPadder import blockPad
 import pyopencl as cl
 
-class UBuffer:    
+class UBuffer:
+    def __init__(self, context):
+        self.context = context
+        
     def setU(self, U):
         if(len(U) != 3):
             raise Exception("Illegal shape.")
         
-        self.R = getRank(U)
+        self.R = np.int32(getRank(U))
         
         self.U = list()
         mf = cl.mem_flags

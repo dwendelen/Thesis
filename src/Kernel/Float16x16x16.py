@@ -33,11 +33,11 @@ class Factory():
         f.compile()
         f.init()
         
-        tb = TBuffer()
+        tb = TBuffer(cq.context)
         tb.setT(T)
         f.setTBuffer(tb)
         
-        ub = UBuffer()
+        ub = UBuffer(cq.context)
         ub.setU(U)
         f.setUBuffer(ub)
         

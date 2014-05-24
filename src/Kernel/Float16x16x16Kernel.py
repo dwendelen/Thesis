@@ -41,5 +41,3 @@ class Float16x16x16Kernel(Kernel):
         l_buf = cl.LocalMemory(64*2)
         self.kernel.set_arg(4, l_buf)
         
-        sum_buf = cl.Buffer(self.context, mf.WRITE_ONLY, size=4)
-        
