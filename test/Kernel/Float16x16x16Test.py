@@ -1,6 +1,7 @@
 import numpy as np
 import unittest
 from Kernel.Float16x16x16 import Factory
+from Buffer import GCBlocker
 
 class Float16x16x16Test(unittest.TestCase):
 
@@ -19,7 +20,8 @@ class Float16x16x16Test(unittest.TestCase):
         U.append(np.array([[1,2],[3,4]]))
         U.append(np.array([[1,2],[3,4],[5,6]]))
         
-        f = Factory()
+        gcBlocker = GCBlocker()
+        f = Factory(gcBlocker)
         kernel = f.create(U, T)
         kernel.run()
         

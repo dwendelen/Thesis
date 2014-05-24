@@ -28,6 +28,12 @@ class Float16x16x16(Float16x16x16Kernel):
         return (self.I[0]*self.I[1]*self.I[2])/(16*16*16)
     
 class Factory():
+    def __init__(self, gcBlocker):
+        '''
+        @type gcBlocker: Buffer.GCBlocker.GCBlocker
+        '''
+        self.gcBlocker = gcBlocker
+        
     def create(self, U, T):
         cq = ContextQueue()
         cq.init()
@@ -36,11 +42,11 @@ class Factory():
         f.compile()
         f.init()
         
-        tb = TBuffer(cq.context)
+        tb = TBuffer(cq.context, self.gcBlocker)
         tb.setT(T)
         f.setTBuffer(tb)
         
-        ub = UBuffer(cq.context)
+        ub = UBuffer(cq.context, self.gcBlocker)
         ub.setU(U)
         f.setUBuffer(ub)
 
@@ -49,8 +55,8 @@ class Factory():
         f.setSumBuffer(sm)
         
         #Avoid garbage collection
-        self.__tb = tb
-        self.__ub = ub
-        self.__sm = sm
+        self.gcBlocker.remember(tb)
+        self.gcBlocker.remember(ub)
+        self.gcBlocker.remember(sm)
         
         return f
