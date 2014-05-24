@@ -6,8 +6,6 @@ class TBuffer:
     def __init__(self, context):
         self.context = context
         
-    def a(self):
-        pass
     def setT(self, T):
         if(len(T.shape) != 3):
             raise Exception("Illegal shape.")
@@ -15,7 +13,7 @@ class TBuffer:
         T1 = blockPad(T, [16,16,16])
         self.Ibuffers = [np.int32(T1.shape[0]),
                          np.int32(T1.shape[1]),
-                         np.int32(T1.shape[0])]
+                         np.int32(T1.shape[2])]
         
         self.I = T1.shape
         
