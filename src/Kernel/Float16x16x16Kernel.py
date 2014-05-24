@@ -14,22 +14,22 @@ class Float16x16x16Kernel(Kernel):
         return (I*I*I*R)
     
     def run(self):
-        e = cl.enqueue_nd_range_kernel(self.contextQueue.queue, self.kernel, self.I, (4,4,4))
+        e = cl.enqueue_nd_range_kernel(self.contextQueue.queue, self.kernel, (self.I[0]/4, self.I[1]/4, self.I[2]/4), (4,4,4))
         self.time = (e.profile.end - e.profile.start)/ 1000000.0
     
     def setUBuffer(self, UBuffer):       
         self.kernel.set_arg(5, UBuffer.R)
-
+        
         for i in range(3):
-            self.kernel.set_arg(i + 1, UBuffer.U[i]) 
-      
+            self.kernel.set_arg(i + 1, UBuffer.U[i])
+            
     def setTBuffer(self, Tbuffer):
         """
         @type Tbuffer:TBuffer
         """ 
         self.kernel.set_arg(0, Tbuffer.T)
         self.I = Tbuffer.I
-
+        
         for i in range(3):
             self.kernel.set_arg(6 + i, Tbuffer.Ibuffers[i]) 
             

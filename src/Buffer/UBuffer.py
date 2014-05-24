@@ -13,9 +13,13 @@ class UBuffer:
         
         self.R = np.int32(getRank(U))
         
-        self.U = list()
         mf = cl.mem_flags
-        for i in range(3):
-            Ui = blockPad(U[i], [16, 1])
-            Uibuf = (cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=Ui))
-            self.U.append(Uibuf)
+        
+        U0 = blockPad(U[0], [16, 1])
+        U1 = blockPad(U[1], [16, 1])
+        U2 = blockPad(U[2], [16, 1])
+        buf0 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U0)
+        buf1 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U1)
+        buf2 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U2)
+        
+        self.U = (buf0, buf1, buf2)
