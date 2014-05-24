@@ -31,7 +31,7 @@ class Float16x16x16Kernel(Kernel):
         self.I = Tbuffer.I
 
         for i in range(3):
-            self.kernel.set_arg(6 + i, Tbuffer.I[i]) 
+            self.kernel.set_arg(6 + i, Tbuffer.Ibuffers[i]) 
             
     def setSumBuffer(self, sumBuffer):
         self.kernel.set_arg(9, sumBuffer.sum)
