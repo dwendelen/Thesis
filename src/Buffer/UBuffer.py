@@ -17,5 +17,6 @@ class UBuffer:
         mf = cl.mem_flags
         for i in range(3):
             Ui = blockPad(U[i], [16, 1])
+            print Ui
             Uibuf = (cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=Ui))
             self.U.append(Uibuf)
