@@ -55,8 +55,8 @@ class Factory():
         f.setSumBuffer(sm)
         
         #Avoid garbage collection
-        self.gcBlocker.remember(tb)
-        self.gcBlocker.remember(ub)
-        self.gcBlocker.remember(sm)
+        #self.gcBlocker.remember(tb)
+        #self.gcBlocker.remember(ub)
+        #self.gcBlocker.remember(sm)
         
         return f
