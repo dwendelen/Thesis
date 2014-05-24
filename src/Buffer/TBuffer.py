@@ -29,4 +29,4 @@ class TBuffer:
         
         mf = cl.mem_flags
 
-        self.T = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=self.__T1)
+        self.T = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=T1)

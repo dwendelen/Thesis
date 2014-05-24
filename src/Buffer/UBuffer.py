@@ -28,8 +28,8 @@ class UBuffer:
         self.gcBlocker.remember(U1)
         self.gcBlocker.remember(U2)
         
-        buf0 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=self.__U0)
-        buf1 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=self.__U1)
-        buf2 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=self.__U2)
+        buf0 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U0)
+        buf1 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U1)
+        buf2 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U2)
         
         self.U = (buf0, buf1, buf2)
