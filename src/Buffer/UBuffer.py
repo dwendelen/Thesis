@@ -18,8 +18,15 @@ class UBuffer:
         U0 = blockPad(U[0], [16, 1])
         U1 = blockPad(U[1], [16, 1])
         U2 = blockPad(U[2], [16, 1])
-        buf0 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U0)
-        buf1 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U1)
-        buf2 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=U2)
+        
+        #Avoid garbage collection
+        self.__U0 = U0
+        self.__U1 = U1
+        self.__U2 = U2
+        print "ubuf"
+        print self.context
+        buf0 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=self.__U0)
+        buf1 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=self.__U1)
+        buf2 = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=self.__U2)
         
         self.U = (buf0, buf1, buf2)

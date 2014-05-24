@@ -19,7 +19,8 @@ class Float16x16x16Test(unittest.TestCase):
         U.append(np.array([[1,2],[3,4]]))
         U.append(np.array([[1,2],[3,4],[5,6]]))
         
-        kernel = Factory().create(U, T)
+        f = Factory()
+        kernel = f.create(U, T)
         kernel.run()
         
 if __name__ == "__main__":
