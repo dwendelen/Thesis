@@ -7,7 +7,7 @@ from math import *
 
 from Platform import Platform
 
-class OpenCLPlatform (Platform):        
+class OpenCLPlatformE (Platform):        
     def init(self):
         devices = cl.get_platforms()[0].get_devices(cl.device_type.GPU)
         context = cl.Context([devices[0]])
@@ -71,7 +71,7 @@ class OpenCLPlatform (Platform):
         s = np.zeros((1), dtype = np.float32)
         cl.enqueue_copy(self.queue, s, sum_buf)
         
-        print str((e.profile.end - e.profile.start)/ 1000000.0)
+        self.time = (e.profile.end - e.profile.start)/ 1000000.0
         
         return s[0]/2
         

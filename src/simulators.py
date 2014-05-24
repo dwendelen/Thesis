@@ -1,4 +1,3 @@
-import math
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -55,5 +54,8 @@ def simAndPlotKernels(kernels, start, length, R, n):
     plt.show()
     plt.plot(False)
 
-R=40    
-simAndPlotKernels([Float3DElement(), Float16x16x16()], 10, 20, R, 3)
+
+if __name__ == "__main__":
+    R=40    
+    simAndPlotKernels([Float3DElement(), Float16x16x16()], 10, 20, R, 3)
+
