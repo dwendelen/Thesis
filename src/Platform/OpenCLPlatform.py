@@ -8,12 +8,15 @@ from math import *
 from Platform import Platform
 
 class OpenCLPlatform (Platform):        
+    def __init__(self, fkernel = None):
+        self.fkernel = fkernel
+    
     def init(self):
         devices = cl.get_platforms()[0].get_devices(cl.device_type.GPU)
         context = cl.Context([devices[0]])
         queue = cl.CommandQueue(context, properties=cl.command_queue_properties.PROFILING_ENABLE)
         
-        file = open('../opencl/16x16x16float.cl2', 'r')
+        file = open('../opencl/float16x16x16.cl', 'r')
         
         prg = cl.Program(context, file.read()).build()
             
@@ -66,7 +69,7 @@ class OpenCLPlatform (Platform):
         kernel.set_arg(8, np.int32(g[2]))
         kernel.set_arg(9, sum_buf)
         
-        e = cl.enqueue_nd_range_kernel(self.queue, kernel, (4,4,4), (4,4,4))
+        e = cl.enqueue_nd_range_kernel(self.queue, kernel, g, (4,4,4))
         
         s = np.zeros((1), dtype = np.float32)
         cl.enqueue_copy(self.queue, s, sum_buf)
