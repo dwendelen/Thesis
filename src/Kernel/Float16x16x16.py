@@ -7,7 +7,7 @@ import pyopencl as cl
 from Platform.ContextQueue import ContextQueue
 from Buffer.TBuffer import TBuffer
 from Buffer.UBuffer import UBuffer
-from Buffer.SumBuffer import SumBuffer
+from Buffer.SumBuffer import TempBuffer
 
 
 class Float16x16x16(Float16x16x16Kernel):
@@ -50,7 +50,7 @@ class Factory():
         ub.setU(U)
         f.setUBuffer(ub)
 
-        sm = SumBuffer(cq.context)
+        sm = TempBuffer(cq.context)
         sm.init(f.getNbWGs())
         f.setSumBuffer(sm)
         
