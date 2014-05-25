@@ -17,13 +17,13 @@ class Float16x16x16Kernel(Kernel):
         e = cl.enqueue_nd_range_kernel(self.contextQueue.queue, self.kernel, (self.I[0]/4, self.I[1]/4, self.I[2]/4), (4,4,4))
         self.time = (e.profile.end - e.profile.start)/ 1000000.0
     
-    def setUBuffer(self, UBuffer):       
+    def updatedUBuffer(self, UBuffer):       
         self.kernel.set_arg(5, UBuffer.R)
         
         for i in range(3):
             self.kernel.set_arg(i + 1, UBuffer.U[i])
             
-    def setTBuffer(self, Tbuffer):
+    def updatedTBuffer(self, Tbuffer):
         """
         @type Tbuffer:TBuffer
         """ 

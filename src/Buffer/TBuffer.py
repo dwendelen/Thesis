@@ -1,12 +1,10 @@
 import pyopencl as cl
 from BlockPadder import blockPad
 import numpy as np
+from Buffer import Buffer
 
-class TBuffer:
-
-    def __init__(self, context):
-        self.context = context
-        
+class TBuffer(Buffer):
+       
     def setT(self, T):
         if(len(T.shape) != 3):
             raise Exception("Illegal shape.")
@@ -25,3 +23,6 @@ class TBuffer:
         mf = cl.mem_flags
 
         self.T = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=T1)
+        
+        for kernel in self.kernels:
+            kernel.setTBuffer(self)

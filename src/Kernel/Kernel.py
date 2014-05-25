@@ -28,9 +28,17 @@ class Kernel:
         self.kernel = cl.Kernel(self.program, self.getName())
     
     def setTBuffer(self, TBuffer):
-        raise NotImplementedError()
+        TBuffer.addKernel(self)
+        self.updatedTBuffer(TBuffer)
     
     def setUBuffer(self, UBuffer):
+        UBuffer.addKernel(self)
+        self.updatedUBuffer(UBuffer)
+    
+    def updatedTBuffer(self, TBuffer):
+        raise NotImplementedError()
+    
+    def updatedUBuffer(self, UBuffer):
         raise NotImplementedError()
     
     def run(self):
