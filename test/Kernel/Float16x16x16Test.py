@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 from Kernel.Float16x16x16 import Factory
-from Buffer import GCBlocker
+from Buffer.GCBlocker import GCBlocker
 
 class Float16x16x16Test(unittest.TestCase):
 
