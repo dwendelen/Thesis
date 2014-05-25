@@ -1,12 +1,27 @@
 import pyopencl as cl
-from BlockPadder import blockPad
-import numpy as np
 
 class Buffer:
-
+    _context = None
+    _buffer = None
+    _kernels = []
+    
     def __init__(self, context):
-        self.context = context
-        self.kernels = []
-        
+        self._context = context
+
     def addKernel(self, kernel):
-        self.kernels.append(kernel)
+        self._kernels.append(kernel)
+    
+    def getBuffer(self):
+        return self._buffer
+        
+    def getNbBytes(self):
+        return self.getBuffer().size
+
+class InputBuffer(Buffer):
+    def _setBuf(self, array):
+        mf = cl.mem_flags
+        
+        self._buffer cl.Buffer(self._context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=array)
+        
+        for kernel in self._kernels:
+            kernel.setTBuffer(self)

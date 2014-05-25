@@ -42,6 +42,13 @@ class Kernel:
         raise NotImplementedError()
     
     def run(self):
+        e = cl.enqueue_nd_range_kernel(self.contextQueue.queue, self.kernel, self.getGlobalSize(), self.getLocalSize())
+        self.time = (e.profile.end - e.profile.start)/ 1000000.0
+    
+    def getGlobalSize(self):
+        raise NotImplementedError()
+    
+    def getLocalSize(self):
         raise NotImplementedError()
     
     def init(self):

@@ -18,3 +18,12 @@ class Float3DElement(Kernel):
     
     def getName(self):
         return 'Float3DElement'
+    
+    def updatedTBuffer(self, TBuffer):
+        raise NotImplementedError()
+    
+    def updatedUBuffer(self, UBuffer):
+        raise NotImplementedError()
+    
+    def init(self):
+        raise NotImplementedError()

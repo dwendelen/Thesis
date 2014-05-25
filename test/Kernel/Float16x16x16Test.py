@@ -1,7 +1,8 @@
 import numpy as np
 import unittest
-from Kernel.Float16x16x16 import Factory
+from Kernel.Float16x16x16 import Float16x16x16Factory
 from Buffer.GCBlocker import GCBlocker
+from Platform.ContextQueue import ContextQueue
 
 class Float16x16x16Test(unittest.TestCase):
 
@@ -20,8 +21,11 @@ class Float16x16x16Test(unittest.TestCase):
         U.append(np.array([[1,2],[3,4]]))
         U.append(np.array([[1,2],[3,4],[5,6]]))
         
+        cq = ContextQueue()
+        cq.init()
+        
         gcBlocker = GCBlocker()
-        f = Factory(gcBlocker)
+        f = Float16x16x16Factory(gcBlocker, cq)
         kernel = f.create(U, T)
         kernel.run()
         

@@ -1,16 +1,8 @@
-from Float16x16x16Kernel import Float16x16x16Kernel
-
-import math
-from BlockPadder import blockPad
-import numpy as np
-import pyopencl as cl
-from Platform.ContextQueue import ContextQueue
-from Buffer.TBuffer import TBuffer
-from Buffer.UBuffer import UBuffer
-from Buffer.SumBuffer import TempBuffer
 
 
-class Float16x16x16(Float16x16x16Kernel):
+from Float16x16x16Kernel import *
+
+class Float16x16x16(Float16x16x16UnmappedKernel):
     def getNbOperaties(self, I, R, n):
         return self.getNbWorkGroups(I, R, n) * (9216*R + 12287)
         
@@ -27,36 +19,10 @@ class Float16x16x16(Float16x16x16Kernel):
     def getNbWGs(self):
         return (self.I[0]*self.I[1]*self.I[2])/(16*16*16)
     
-class Factory():
-    def __init__(self, gcBlocker):
-        '''
-        @type gcBlocker: Buffer.GCBlocker.GCBlocker
-        '''
-        self.gcBlocker = gcBlocker
-        
+class Float16x16x16Factory(Float16x16x16UnmappedKernelFactory):
     def create(self, U, T):
-        cq = ContextQueue()
-        cq.init()
+        f = Float16x16x16(self.contextQueue)
         
-        f = Float16x16x16(cq)
-        f.compile()
-        f.init()
-        
-        tb = TBuffer(cq.context)
-        tb.setT(T)
-        f.setTBuffer(tb)
-        
-        ub = UBuffer(cq.context)
-        ub.setU(U)
-        f.setUBuffer(ub)
-
-        sm = TempBuffer(cq.context)
-        sm.init(f.getNbWGs())
-        f.setSumBuffer(sm)
-        
-        #Avoid garbage collection
-        self.gcBlocker.remember(tb)
-        self.gcBlocker.remember(ub)
-        self.gcBlocker.remember(sm)
+        self.initKernelAndCreateCommonBuffers(U, T, f)
         
         return f
