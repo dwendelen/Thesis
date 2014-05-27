@@ -14,11 +14,13 @@ T   The 3D-tensor to approximate. Expected shape: I0 x I1 x I2
 This kernel MUST be run with a local 4x4x4 workspace
 */
 
-__kernel void float3DElement(__global const float *T,
-    __global const float *U0, __global const float *U1, __global const float *U2,
-    __local float *l, int R, int I0, int I1, int I2,
+__kernel void float3DElement(__global const float4 *T,
+    __global const float4 *U0, __global const float4 *U1, __global const float4 *U2,
+    int R, int I0, int I1, int I2,
     __global float *sum)
 {   
+	
+    __local float l[128];
     float a;
     float f;
     float c;

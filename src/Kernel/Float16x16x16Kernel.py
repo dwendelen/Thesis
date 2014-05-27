@@ -26,22 +26,18 @@ class Float16x16x16Kernel(Kernel):
         return (4, 4, 4)
     
     def updatedUBuffer(self, UBuffer):       
-        self.kernel.set_arg(5, UBuffer.R)
+        self.kernel.set_arg(4, UBuffer.R)
         
         for i in range(3):
             self.kernel.set_arg(i + 1, UBuffer.U[i])
     
     def setIBuffer(self, IBuffer):
-        self.kernel.set_arg(6, IBuffer.IBuffer0)
-        self.kernel.set_arg(7, IBuffer.IBuffer1)
-        self.kernel.set_arg(8, IBuffer.IBuffer2)
+        self.kernel.set_arg(5, IBuffer.IBuffer0)
+        self.kernel.set_arg(6, IBuffer.IBuffer1)
+        self.kernel.set_arg(7, IBuffer.IBuffer2)
         
     def setSumBuffer(self, sumBuffer):
         self.kernel.set_arg(9, sumBuffer.buffer)
-    
-    def init(self):
-        l_buf = cl.LocalMemory(64*2)
-        self.kernel.set_arg(4, l_buf)
     
 class Float16x16x16UnmappedKernel(Float16x16x16Kernel):
     def updatedTBuffer(self, Tbuffer):

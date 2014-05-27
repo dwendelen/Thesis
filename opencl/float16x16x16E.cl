@@ -18,7 +18,7 @@ This kernel MUST be run with a local 4x4x4 workspace
 __attribute__((reqd_work_group_size(4, 4, 4)))
 __kernel void float16x16x16E(__global const float4 *T,
     __global const float4 *U0, __global const float4 *U1, __global const float4 *U2,
-    __local float4 *l, int R, int I0, int I1, int I2,
+    int R, int I0, int I1, int I2,
     __global float *sum)
 {   
     
