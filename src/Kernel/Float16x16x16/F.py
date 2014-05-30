@@ -1,8 +1,8 @@
+import math
 
+from FUnMapped import FUnMapped
 
-from Float16x16x16Kernel import *
-
-class Float16x16x16(Float16x16x16UnmappedKernel):
+class F(FUnMapped):
     def getNbOperaties(self, I, R, n):
         return self.getNbWorkGroups(I, R, n) * (9216*R + 12287)
         
@@ -19,10 +19,5 @@ class Float16x16x16(Float16x16x16UnmappedKernel):
     def getNbWGs(self):
         return (self.I[0]*self.I[1]*self.I[2])/(16*16*16)
     
-class Float16x16x16Factory(Float16x16x16UnmappedKernelFactory):
-    def create(self, U, T):
-        f = Float16x16x16(self.contextQueue)
-        
-        self.initKernelAndCreateCommonBuffers(U, T, f)
-        
-        return f
+    def initFromF(self, f):
+        FUnMapped.initFromFUnMapped(self, f)

@@ -27,19 +27,13 @@ class Kernel:
         self.program = cl.Program(self.contextQueue.context, file.read()).build()
         self.kernel = cl.Kernel(self.program, self.getName())
     
-    def setTBuffer(self, TBuffer):
-        TBuffer.addKernel(self)
-        self.updatedTBuffer(TBuffer)
+    def _createInitBuf(self, array):
+        mf = cl.mem_flags
+        return cl.Buffer(self._context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=array)
     
-    def setUBuffer(self, UBuffer):
-        UBuffer.addKernel(self)
-        self.updatedUBuffer(UBuffer)
-    
-    def updatedTBuffer(self, TBuffer):
-        raise NotImplementedError()
-    
-    def updatedUBuffer(self, UBuffer):
-        raise NotImplementedError()
+    def _createReadWriteBuf(self, nbBytes):
+        mf = cl.mem_flags
+        return cl.Buffer(self.context, mf.READ_WRITE, size=nbBytes)
     
     def run(self):
         e = cl.enqueue_nd_range_kernel(self.contextQueue.queue, self.kernel, self.getGlobalSize(), self.getLocalSize())
@@ -49,7 +43,4 @@ class Kernel:
         raise NotImplementedError()
     
     def getLocalSize(self):
-        raise NotImplementedError()
-    
-    def init(self):
         raise NotImplementedError()
