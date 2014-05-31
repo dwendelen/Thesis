@@ -62,9 +62,6 @@ class FCommon(Kernel):
         self.kernel.set_arg(2, self.U[1])
         self.kernel.set_arg(3, self.U[2])
         self.kernel.set_arg(4, self.R)
-        self.kernel.set_arg(5, self.IBuffer[0])
-        self.kernel.set_arg(6, self.IBuffer[1])
-        self.kernel.set_arg(7, self.IBuffer[2])
-        self.kernel.set_arg(8, self.Sum)
+        self.kernel.set_arg(5, self.Sum)
     
 

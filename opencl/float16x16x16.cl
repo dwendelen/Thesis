@@ -22,8 +22,7 @@ This kernel MUST be run with a local 4x4x4 workspace
 __attribute__((reqd_work_group_size(4, 4, 4)))
 __kernel void float16x16x16(__global const float4 *T,
     __global const float4 *U0, __global const float4 *U1, __global const float4 *U2,
-    int R, int I0, int I1, int I2,
-    __global float *sum)
+    int R, __global float *sum)
 {   
 	
     __local float l[128];
@@ -32,7 +31,10 @@ __kernel void float16x16x16(__global const float4 *T,
     float4 b[4];
     float4 c[16];
     float4 f;
-
+    
+    int I0 = get_global_size(0);
+    int I1 = get_global_size(1);
+    int I2 = get_global_size(2);
     
     #pragma unroll
     for(int i = 0; i < 16; i++)
