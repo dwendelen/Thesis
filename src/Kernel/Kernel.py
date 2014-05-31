@@ -32,14 +32,6 @@ class Kernel:
         self.program = cl.Program(self.contextQueue.context, file.read()).build()
         self.kernel = cl.Kernel(self.program, self.getName())
     
-    def _createInitBuf(self, array):
-        mf = cl.mem_flags
-        return cl.Buffer(self.contextQueue.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=array)
-    
-    def _createReadWriteBuf(self, nbBytes):
-        mf = cl.mem_flags
-        return cl.Buffer(self.contextQueue.context, mf.READ_WRITE, size=nbBytes)
-    
     def run(self):
         e = cl.enqueue_nd_range_kernel(self.contextQueue.queue, self.kernel, self.getGlobalSize(), self.getLocalSize())
         

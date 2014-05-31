@@ -10,6 +10,7 @@ class FCommon(Kernel):
     
     R = None
     U = (None, None, None)
+    I = (None, None, None)
     Sum = None
     
     def getNbWorkGroups(self, I, R, n):
@@ -29,31 +30,10 @@ class FCommon(Kernel):
     def getNbWgs(self):
         return (self.I[0]*self.I[1]*self.I[2])/(16*16*16)
     
-    def getI(self):
-        raise NotImplementedError()
-        
-    def init(self, U):
-        '''
-        Precondition: self.I must be set
-        '''
-        self.R = np.int32(U[0].shape[1])
-        
-        U0 = blockPad(U[0], [16, 1])
-        U1 = blockPad(U[1], [16, 1])
-        U2 = blockPad(U[2], [16, 1])
-        
-        buf0 = self._createInitBuf(U0)
-        buf1 = self._createInitBuf(U1)
-        buf2 = self._createInitBuf(U2)
-        self.U = (buf0, buf1, buf2)
-        
-        self.Sum = self._createReadWriteBuf(self.getNbWgs() * 4)
-        
-        self.__setBuffers()
-    
-    def initRUSum(self, R, U, Sum):
+    def init(self, R, U, I, Sum):
         self.R = R
         self.U = U
+        self.I = I
         self.Sum = Sum
         self.__setBuffers()    
         

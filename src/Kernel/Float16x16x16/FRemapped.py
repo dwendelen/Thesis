@@ -20,18 +20,8 @@ class Float16x16x16Remapped(FCommon, IProvider):
     def getNbWGs(self):
         return (self.I[0]*self.I[1]*self.I[2])/(16*16*16)
     
-    def init(self, TMapper, U):
-        '''
-        @type TMapper: TMapper
-        '''
-        IProvider.init(self, TMapper.I)
-        self.TMapped = TMapper.TMapped
-        FCommon.init(self, U)
-        
-        self.__setBuffers()
-    
-    def initTMapped(self, TMapped):
-        self.TMapped = TMapped
+    def init(self, TMapped, R, U, I, Sum):
+        FCommon.init(self, R, U, I, Sum)
         self.__setBuffers()
         
     def __setBuffers(self):

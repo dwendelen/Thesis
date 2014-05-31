@@ -6,15 +6,8 @@ class TInput(IProvider, Kernel):
     
     T = None
     
-    def initT(self, T):
-        self.T = T
-        self.__setBuffers()
-    
     def init(self, T):
-        T1 = blockPad(T, [16,16,16])
-        self.T = self._createInitBuf(T1)
-        
-        IProvider.init(self, T1.shape)
+        self.T = T
         self.__setBuffers()
         
     def __setBuffers(self):
