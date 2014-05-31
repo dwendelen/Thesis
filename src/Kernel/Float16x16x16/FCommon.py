@@ -51,10 +51,10 @@ class FCommon(Kernel):
         
         self.__setBuffers()
     
-    def initFromFCommon(self, kernel):
-        self.R = kernel.R
-        self.U = kernel.U
-        self.Sum = kernel.Sum
+    def initRUSum(self, R, U, Sum):
+        self.R = R
+        self.U = U
+        self.Sum = Sum
         self.__setBuffers()    
         
     def __setBuffers(self):

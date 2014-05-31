@@ -6,9 +6,8 @@ class TInput(IProvider, Kernel):
     
     T = None
     
-    def initFromTInput(self, tInput):
-        IProvider.initFromIProvider(tInput)
-        self.T = TInput.T
+    def initT(self, T):
+        self.T = T
         self.__setBuffers()
     
     def init(self, T):

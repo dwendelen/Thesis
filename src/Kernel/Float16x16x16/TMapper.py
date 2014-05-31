@@ -9,13 +9,13 @@ class TMapper(TInput):
         TInput.init(self, T)
         self.TMapped = self._createReadWriteBuf(self.T.size)
         
-        self.setBuffers()
+        self.__setBuffers()()
     
-    def initFromTMapper(self, tMapper):
-        TInput.initFromTInput(self, tMapper)
-        self.TMapped = tMapper.TMapped
+    def initTMapped(self, tMapped):
+        self.TMapped = tMapped
+        self.__setBuffers()
         
-    def setBuffers(self):
+    def __setBuffers(self):
         self.kernel.set_arg(1, self.TMapped)
         self.kernel.set_arg(2, self.I[0])
         self.kernel.set_arg(3, self.I[1])

@@ -4,10 +4,10 @@ class IProvider:
     I = (None, None, None)
     IBuffer = (None, None, None)
     
-    def initFromIProvider(self, iProvider):
-        self.I = iProvider.I
-        self.IBuffer = iProvider.IBuffer
+    def initIBufferI(self, IBuffer, I):
+        self.I = I
+        self.IBuffer = IBuffer
     
     def init(self, I):
-        self.IBuffer = np.int32(I)
+        self.IBuffer = np.int32(I/4)
         self.I = I

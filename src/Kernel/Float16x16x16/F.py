@@ -18,6 +18,3 @@ class F(FUnMapped):
 
     def getNbWGs(self):
         return (self.I[0]*self.I[1]*self.I[2])/(16*16*16)
-    
-    def initFromF(self, f):
-        FUnMapped.initFromFUnMapped(self, f)
