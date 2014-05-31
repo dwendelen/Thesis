@@ -1,6 +1,7 @@
 import numpy as np
 import unittest
 from Kernel.Float16x16x16.F import F
+from Platform.ContextQueue import ContextQueue
 
 class Float16x16x16Test(unittest.TestCase):
 
@@ -19,7 +20,7 @@ class Float16x16x16Test(unittest.TestCase):
         U.append(np.array([[1,2],[3,4]]))
         U.append(np.array([[1,2],[3,4],[5,6]]))
         
-        cq = ContextQueue()
+        cq = ContextQueue(True)
         cq.init()
         
         f = F(cq)

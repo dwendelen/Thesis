@@ -28,11 +28,12 @@ class Float16x16x16Remapped(FCommon, IProvider):
         self.TMapped = TMapper.TMapped
         FCommon.init(self, U)
         
-        self.setBuffers()
+        self.__setBuffers()
     
     def initFromFRemapped(self, fRemapped):
         FCommon.initFromFCommon(self, fRemapped)
         IProvider.initFromIProvider(self, fRemapped)
+        self.__setBuffers() 
         
-    def setBuffers(self):
+    def __setBuffers(self):
         self.kernel.set_arg(0, self.TMapped)

@@ -19,15 +19,15 @@ class FCommon(Kernel):
         return (I*I*I*R)
     
     def getGlobalSize(self):
-        return ( self.getI[0]/self.getLocalSize()[0],
-                 self.getI[1]/self.getLocalSize()[1],
-                 self.getI[2]/self.getLocalSize()[2])
+        return ( self.I[0]/self.getLocalSize()[0],
+                 self.I[1]/self.getLocalSize()[1],
+                 self.I[2]/self.getLocalSize()[2])
     
     def getLocalSize(self):
         return (4, 4, 4)
     
     def getNbWgs(self):
-        return (self.getI()[0]*self.getI()[1]*self.getI()[2])/(16*16*16)
+        return (self.I[0]*self.I[1]*self.I[2])/(16*16*16)
     
     def getI(self):
         raise NotImplementedError()
@@ -36,7 +36,7 @@ class FCommon(Kernel):
         '''
         Precondition: self.I must be set
         '''
-        self.R = np.int32(U.shape[1])
+        self.R = np.int32(U[0].shape[1])
         
         U0 = blockPad(U[0], [16, 1])
         U1 = blockPad(U[1], [16, 1])
@@ -47,25 +47,24 @@ class FCommon(Kernel):
         buf2 = self._createInitBuf(U2)
         self.U = (buf0, buf1, buf2)
         
-        self.Sum = self.getNbWorkGroups(self.getI(), self.R, 3) * 4
+        self.Sum = self._createReadWriteBuf(self.getNbWgs() * 4)
         
-        self.setBuffers()
+        self.__setBuffers()
     
     def initFromFCommon(self, kernel):
         self.R = kernel.R
         self.U = kernel.U
         self.Sum = kernel.Sum
-        self.setBuffers()    
+        self.__setBuffers()    
         
-    def setBuffers(self):
-        
+    def __setBuffers(self):
         self.kernel.set_arg(1, self.U[0])
         self.kernel.set_arg(2, self.U[1])
         self.kernel.set_arg(3, self.U[2])
         self.kernel.set_arg(4, self.R)
-        self.kernel.set_arg(5, self.getI()[0])
-        self.kernel.set_arg(6, self.getI()[1])
-        self.kernel.set_arg(7, self.getI()[2])
+        self.kernel.set_arg(5, self.IBuffer[0])
+        self.kernel.set_arg(6, self.IBuffer[1])
+        self.kernel.set_arg(7, self.IBuffer[2])
         self.kernel.set_arg(8, self.Sum)
     
 
