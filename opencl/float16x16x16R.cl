@@ -16,7 +16,7 @@ This kernel MUST be run with a local 4x4x4 workspace
 IDEE Fetchen per float2 -> geen channel conflict
 */
 __attribute__((reqd_work_group_size(4, 4, 4)))
-__kernel void float16x16x16(__global const float4 *T,
+__kernel void float16x16x16R(__global const float4 *T,
     __global const float4 *U0, __global const float4 *U1, __global const float4 *U2,
     int R, __global float *sum)
 {
@@ -80,7 +80,7 @@ __kernel void float16x16x16(__global const float4 *T,
     int gIdx1 = get_global_id(1);
     int gIdx2 = get_global_id(2);
     
-    int lIdx = get_local_id(1) + 4 * get_local_id(2)
+    int lIdx = get_local_id(1) + 4 * get_local_id(2);
     int gIdx = get_group_id(0) + get_num_groups(0) * (get_group_id(1) + get_num_groups(1) * get_group_id(2));
     
     //Calculate first index
@@ -94,7 +94,7 @@ __kernel void float16x16x16(__global const float4 *T,
     {
         //Handle the 4 floats along the 0-axis
         f = T[idx];
-        t = c[j] - f;
+        t = c[i] - f;
 		s += t*t;
 			
         idx += 16;

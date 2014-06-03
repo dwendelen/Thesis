@@ -21,6 +21,7 @@ class Float16x16x16Remapped(FCommon):
     
     def init(self, TMapped, R, U, I, Sum):
         FCommon.init(self, R, U, I, Sum)
+        self.TMapped = TMapped
         self.__setBuffers()
         
     def __setBuffers(self):

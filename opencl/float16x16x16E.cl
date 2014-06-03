@@ -16,7 +16,7 @@ T   The 3D-tensor to approximate. Expected shape: I0 x I1 x I2
 This kernel MUST be run with a local 4x4x4 workspace
 */
 __attribute__((reqd_work_group_size(4, 4, 4)))
-__kernel void float16x16x16(__global const float4 *T,
+__kernel void float16x16x16E(__global const float4 *T,
     __global const float4 *U0, __global const float4 *U1, __global const float4 *U2,
     int R, __global float *sum)
 {   
