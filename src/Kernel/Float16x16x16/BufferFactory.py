@@ -1,3 +1,8 @@
+import numpy as np
+import pyopencl as cl
+
+from BlockPadder import blockPad
+
 class BufferFactory:
     
     T = None
@@ -31,7 +36,7 @@ class BufferFactory:
         
         self.R = np.int32(U[0].shape[1])
         
-        self.Sum = self.createReadWriteBuf(4*I[0]*I[1]*I[2]/(16*16*16))
+        self.Sum = self.createReadWriteBuf(4*self.I[0]*self.I[1]*self.I[2]/(16*16*16))
         
 class MappedBufferFactory(BufferFactory):
 

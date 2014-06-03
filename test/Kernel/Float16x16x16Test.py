@@ -1,7 +1,9 @@
 import numpy as np
 import unittest
+
 from Kernel.Float16x16x16.F import F
 from Platform.ContextQueue import ContextQueue
+from Kernel.Float16x16x16.BufferFactory import BufferFactory
 
 class Float16x16x16Test(unittest.TestCase):
 
@@ -23,9 +25,12 @@ class Float16x16x16Test(unittest.TestCase):
         cq = ContextQueue(True)
         cq.init()
         
+        b = BufferFactory()
+        b.init(T, U)
+        
         f = F(cq)
         f.compile()
-        f.init(T, U)
+        f.init(b.T, b.R, b.U, b.I, b.Sum)
         f.run()
         
 if __name__ == "__main__":
