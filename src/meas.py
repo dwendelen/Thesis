@@ -1,68 +1,43 @@
 import numpy as np
-from OpenCLPlatform import OpenCLPlatform
-from OpenCLPlatform2 import OpenCLPlatform2
-from OpenCLPlatformE import OpenCLPlatformE
-from simulators import float16x16x16SlechtsEenKeerFetchen,\
-    float16x16x16ElkeKeerNieuweFetch
+
+from Kernel.Float16x16x16.F import F
+from Kernel.Float16x16x16.FRemapped import Float16x16x16Remapped
+
+from simulators import simulateKernel
+from Platform.ContextQueue import ContextQueue
+from Kernel.Float16x16x16.BufferFactory import BufferFactory
+
 R = 4
 I = 360
 
-(_, _, t0, t1) = float16x16x16SlechtsEenKeerFetchen(I, R)
-(_, _, _, t2) = float16x16x16ElkeKeerNieuweFetch(I, R)
+T = np.array(np.random.rand(I, I, I), dtype=np.float32)
+U = np.array(np.random.rand(I, R), dtype=np.float32)
+
+cq = ContextQueue(profile = True)
+
+b = BufferFactory()
+b.init(T, U)
+
+f = F(cq)
+f.compile()
+f.init(b.T, b.R, b.U, b.I, b.Sum)
+
+r = Float16x16x16Remapped(cq)
+r.compile()
+r.init(b.T, b.R, b.U, b.I, b.Sum)
+
+(t0, t1, t2) = simulateKernel(r, I, R, 3, perBasicElement = False)
 
 print str(t1*1000) + ' ~ ' + str(t2*1000) + ', ' + str(t0*1000)
 
-T = np.array(np.random.rand(I, I, I), dtype=np.float32)
+print 'Version UnRemapped'
+f.run()
+f.run()
+f.run()
+print f.time
 
-U = np.array(np.random.rand(I, R), dtype=np.float32)
-
-
-print 'Version one'
-p = OpenCLPlatform()
-p.init()
-p.setT(T)
-p.setU([U, U, U])
-p.f()
-print p.time
-
-print 'Empty'
-p = OpenCLPlatformE()
-p.init()
-p.setT(T)
-p.setU([U, U, U])
-p.f()
-print p.time
-
-print 'Empty'
-p = OpenCLPlatformE()
-p.init()
-p.setT(T)
-p.setU([U, U, U])
-p.f()
-eTime = p.time
-print eTime
-
-T = np.array(np.random.rand(I, I, I), dtype=np.float32)
-
-U = np.array(np.random.rand(I, R), dtype=np.float32)
-
-print 'Version one'
-
-p = OpenCLPlatform()
-p.init()
-p.setT(T)
-p.setU([U, U, U])
-p.f()
-print p.time
-print p.time-eTime
-
-print 'Version two'
-
-p = OpenCLPlatform2()
-p.init()
-p.setT(T)
-p.setU([U, U, U])
-p.f()
-
-print p.time
-print p.time-eTime
+print 'Version ReMapped'
+r.run()
+r.run()
+r.run()
+print r.time

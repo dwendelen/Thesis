@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from Kernel.Float3DElement import Float3DElement
-from Kernel.Float16x16x16 import Float16x16x16
+from Kernel.Float16x16x16.F import F
 
 '''
 @return: (tcalc, tmemm, tmemz)
@@ -57,5 +57,5 @@ def simAndPlotKernels(kernels, start, length, R, n):
 
 if __name__ == "__main__":
     R=40    
-    simAndPlotKernels([Float3DElement(), Float16x16x16()], 10, 20, R, 3)
+    simAndPlotKernels([Float3DElement(), F()], 10, 20, R, 3)
 
