@@ -25,7 +25,7 @@ class Float16x16x16Test(unittest.TestCase):
         cq = ContextQueue(True)
         cq.init()
         
-        b = BufferFactory()
+        b = BufferFactory(cq)
         b.init(T, U)
         
         f = F(cq)

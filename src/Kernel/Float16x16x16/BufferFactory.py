@@ -5,11 +5,15 @@ from BlockPadder import blockPad
 
 class BufferFactory:
     
+    contextQueue = None
     T = None
     R = None
     U = (None, None, None)
     I = (None, None, None)
     Sum = None
+    
+    def __init__(self, contextQueue):
+        self.contextQueue = contextQueue
     
     def _createInitBuf(self, array):
         mf = cl.mem_flags
@@ -29,14 +33,14 @@ class BufferFactory:
         U1 = blockPad(U[1], [16, 1])
         U2 = blockPad(U[2], [16, 1])
         
-        buf0 = self.createInitBuf(U0)
-        buf1 = self.createInitBuf(U1)
-        buf2 = self.createInitBuf(U2)
+        buf0 = self._createInitBuf(U0)
+        buf1 = self._createInitBuf(U1)
+        buf2 = self._createInitBuf(U2)
         self.U = (buf0, buf1, buf2)
         
         self.R = np.int32(U[0].shape[1])
         
-        self.Sum = self.createReadWriteBuf(4*self.I[0]*self.I[1]*self.I[2]/(16*16*16))
+        self.Sum = self._createReadWriteBuf(4*self.I[0]*self.I[1]*self.I[2]/(16*16*16))
         
 class MappedBufferFactory(BufferFactory):
 
@@ -44,7 +48,7 @@ class MappedBufferFactory(BufferFactory):
     
     def init(self, T, U):
         BufferFactory(self, T, U)
-        self.TMapped = self.createReadWriteBuf(self.T.size)
+        self.TMapped = self._createReadWriteBuf(self.T.size)
         
         
 
