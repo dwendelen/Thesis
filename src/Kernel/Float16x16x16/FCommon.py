@@ -35,7 +35,7 @@ class FCommon(Kernel):
         self.U = U
         self.I = I
         self.Sum = Sum
-        self.__setBuffers()    
+        self.__setBuffers()
         
     def __setBuffers(self):
         self.kernel.set_arg(1, self.U[0])

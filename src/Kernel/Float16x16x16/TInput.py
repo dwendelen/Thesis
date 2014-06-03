@@ -1,8 +1,6 @@
 from ..Kernel import Kernel
-from BlockPadder import blockPad
-from IProvider import IProvider
 
-class TInput(IProvider, Kernel):
+class TInput(Kernel):
     
     T = None
     

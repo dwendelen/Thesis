@@ -1,9 +1,8 @@
 import math
 
 from FCommon import FCommon
-from IProvider import IProvider
 
-class Float16x16x16Remapped(FCommon, IProvider):
+class Float16x16x16Remapped(FCommon):
     def getNbOperaties(self, I, R, n):
         return self.getNbWorkGroups(I, R, n) * (9216*R + 12287)
         
