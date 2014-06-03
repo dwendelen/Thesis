@@ -11,11 +11,11 @@ class BufferFactory:
     I = (None, None, None)
     Sum = None
     
-    def createInitBuf(self, array):
+    def _createInitBuf(self, array):
         mf = cl.mem_flags
         return cl.Buffer(self.contextQueue.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=array)
     
-    def createReadWriteBuf(self, nbBytes):
+    def _createReadWriteBuf(self, nbBytes):
         mf = cl.mem_flags
         return cl.Buffer(self.contextQueue.context, mf.READ_WRITE, size=nbBytes)
 
