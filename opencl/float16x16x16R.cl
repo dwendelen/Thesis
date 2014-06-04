@@ -97,7 +97,7 @@ __kernel void float16x16x16R(__global const float4 *T,
         t = c[i] - f;
 		s += t*t;
 			
-        idx += 16;
+        idx += 64;
     }
 
     bool bo = get_local_id(0) == 0 && 
