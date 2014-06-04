@@ -36,10 +36,10 @@ class Float16x16x16Test(unittest.TestCase):
         
     def testR(self):
         
-        T = np.random.rand((200, 150, 50), dtype=np.float32)
-        U0 = np.random.rand((200, 10), dtype=np.float32)
-        U1 = np.random.rand((150, 10), dtype=np.float32)
-        U2 = np.random.rand((50, 10), dtype=np.float32)
+        T = np.random.rand(200, 150, 50).astype(np.float32)
+        U0 = np.random.rand(200, 10).astype(np.float32)
+        U1 = np.random.rand(150, 10).astype(np.float32)
+        U2 = np.random.rand(50, 10).astype(np.float32)
         U = (U0, U1, U2)
         
         fac = Factory()
