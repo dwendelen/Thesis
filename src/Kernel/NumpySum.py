@@ -11,9 +11,9 @@ class NumpySum:
         self.queue = queue
         
     def init(self, Sum):
-        self.sum = Sum
-        self.array = np.zeros(Sum.size/np.float32.nbytes, dtype = np.float32)
+        self.Sum = Sum
+        self.array = np.zeros((Sum.size/np.dtype(np.float32).itemsize), dtype = np.float32)
         
-    def getSum(self):
+    def getF(self):
         cl.enqueue_copy(self.queue, self.array, self.Sum)
-        return np.sum(self.array)
+        return np.sum(self.array)/2

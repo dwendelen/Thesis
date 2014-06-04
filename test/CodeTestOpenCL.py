@@ -33,7 +33,7 @@ class CodeTest(unittest.TestCase):
         self.OpenCLPlatform.setT(self.T1)
 
     def initT1(self):
-        T = np.zeros((1,2,3));
+        T = np.zeros((1,2,3), dtype = np.float32);
         T[0, 0, 0] = 111;
         T[0, 1, 0] = 121;
         T[0, 0, 1] = 112;
@@ -46,22 +46,22 @@ class CodeTest(unittest.TestCase):
 
     def initU1(self):
         U=[]
-        U.append(np.array([[1,2]]))
-        U.append(np.array([[1,2],[3,4]]))
-        U.append(np.array([[1,2],[3,4],[5,6]]))
+        U.append(np.array([[1,2]], dtype = np.float32))
+        U.append(np.array([[1,2],[3,4]], dtype = np.float32))
+        U.append(np.array([[1,2],[3,4],[5,6]], dtype = np.float32))
         
         self.U1 = U
         self.U1r = copyListOfArray(U)
         
         U2=[]
-        U2.append(np.array([[101,102]]))
-        U2.append(np.array([[201,202],[203,204]]))
-        U2.append(np.array([[301,302],[303,304],[305,306]]))
+        U2.append(np.array([[101,102]], dtype = np.float32))
+        U2.append(np.array([[201,202],[203,204]], dtype = np.float32))
+        U2.append(np.array([[301,302],[303,304],[305,306]], dtype = np.float32))
         
         self.U2 = U2
 
     def initB2(self):
-        self.b2 = np.array([101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112])
+        self.b2 = np.array([101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112], dtype = np.float32)
 
     def test_g(self):
         e = []
@@ -95,7 +95,20 @@ class CodeTest(unittest.TestCase):
         
         nps = NumpySum(cq.queue)
         nps.init(b.Sum)
-        r = nps.getSum()
+        
+        array = np.zeros((16,2), dtype = np.float32)
+        cl.enqueue_copy(cq.queue, array, b.U[0])
+        print array
+        cl.enqueue_copy(cq.queue, array, b.U[1])
+        print array
+        cl.enqueue_copy(cq.queue, array, b.U[2])
+        print array
+        
+        array = np.zeros((16,16,16), dtype = np.float32)
+        cl.enqueue_copy(cq.queue, array, b.T)
+        print array
+        
+        r = nps.getF()
         
         self.testUUnchanged()
         self.assertEqual(exp, r, "F is not correct")

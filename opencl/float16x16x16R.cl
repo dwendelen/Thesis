@@ -114,7 +114,7 @@ __kernel void float16x16x16R(__global const float4 *T,
     {
         float sss = 0;
         #pragma unroll
-        for(int i = 0; i < 64; i+=2)
+        for(int i = 0; i < 2*64; i+=2)
         {
             sss += l[i];
         }

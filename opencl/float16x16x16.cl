@@ -1,3 +1,5 @@
+#pragma OPENCL EXTENSION cl_amd_printf : enable
+
 /*
 Mogelijk issue: Channel conflict omdat er gesprongen wordt
 met een veelvoud van 4x16=64 bytes en een veelvoud van
@@ -118,7 +120,7 @@ __kernel void float16x16x16(__global const float4 *T,
               get_local_id(1) == 0 &&
               get_local_id(2) == 0;
     
-    //By doing the index times two, every work-item uses another bank (2.411778 -> 2.343779)
+    //By doing the index times two, every work-item uses another bank (2.411778 -> 2.343779) 
     int index = 2*(get_local_id(0) + 4 * get_local_id(1) + 16 * get_local_id(2));
     l[index] = s.x + s.y + s.z + s.w;
     
@@ -128,7 +130,7 @@ __kernel void float16x16x16(__global const float4 *T,
     {
         float sss = 0;
         #pragma unroll
-        for(int i = 0; i < 64; i+=2)
+        for(int i = 0; i < 2*64; i+=2)
         {
             sss += l[i];
         }
