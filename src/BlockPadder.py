@@ -3,10 +3,10 @@ from math import ceil
 
 import numpy as np
 
-def blockPad(array, blockSizes):
-    def getNewSize(i, blockSize):
+def getNewSize(i, blockSize):
         return int(ceil(i/blockSize))*blockSize
-    
+
+def blockPad(array, blockSizes):
     slices = list()
     dim = list()
     for i in range(len(array.shape)):

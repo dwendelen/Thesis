@@ -4,6 +4,10 @@ from code import *
 import numpy.testing as npt
 import scipy.io
 from Platform.OpenCLPlatform import *
+from Platform.ContextQueue import ContextQueue
+from Kernel.Float16x16x16.F import F
+from Kernel.Float16x16x16.BufferFactory import BufferFactory
+from Kernel.NumpySum import NumpySum
 
 class CodeTest(unittest.TestCase):
 
@@ -75,10 +79,24 @@ class CodeTest(unittest.TestCase):
         self.assertListOfArraysEquals(r, e, "Gradient is wrong")
 
     
-    def test_f(self):
+    def test_f_16x16x16(self):
         exp = 23337
-        self.OpenCLPlatform.setU(self.U1)
-        r = self.OpenCLPlatform.f()
+        
+        cq = ContextQueue()
+        cq.init()
+        
+        b = BufferFactory(cq)
+        b.init(self.T1, self.U1)
+        
+        f = F(cq)
+        f.compile()
+        f.init(b.T, b.R, b.U, b.I, b.Sum)
+        f.run()
+        
+        nps = NumpySum(cq.queue)
+        nps.init(b.Sum)
+        r = nps.getSum()
+        
         self.testUUnchanged()
         self.assertEqual(exp, r, "F is not correct")
     
