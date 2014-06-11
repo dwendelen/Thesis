@@ -20,7 +20,7 @@ T   The 3D-tensor to approximate. Expected shape: I0 x I1 x I2
 This kernel MUST be run with a local 4x4x4 workspace
 */
 __attribute__((reqd_work_group_size(4, 4, 4)))
-__kernel void float16x16x16(__global const float4 *T, __global float4 *TMapped)
+__kernel void float16x16x16Mapper(__global const float4 *T, __global float4 *TMapped)
 {   
 	float4 f;
 	
@@ -28,6 +28,10 @@ __kernel void float16x16x16(__global const float4 *T, __global float4 *TMapped)
     int gIdx0 = get_global_id(0);
     int gIdx1 = get_global_id(1);
     int gIdx2 = get_global_id(2);
+    
+    int I0 = get_global_size(0);
+    int I1 = get_global_size(1);
+    int I2 = get_global_size(2);
     
     int jumpI1 = I0;
     int jumpI2 = 4*I0*I1;
@@ -37,7 +41,7 @@ __kernel void float16x16x16(__global const float4 *T, __global float4 *TMapped)
         4*gIdx1 * jumpI1 +
         4*gIdx2 * jumpI2;
 
-	int lIdx = get_local_id(1) + 4 * get_local_id(2);
+	int lIdx = get_local_id(0) + 4 * get_local_id(1) + 16 * get_local_id(2);
     int gIdx = get_group_id(0) + get_num_groups(0) * (get_group_id(1) + get_num_groups(1) * get_group_id(2));
     
     //Calculate first index

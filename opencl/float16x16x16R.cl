@@ -80,7 +80,7 @@ __kernel void float16x16x16R(__global const float4 *T,
     int gIdx1 = get_global_id(1);
     int gIdx2 = get_global_id(2);
     
-    int lIdx = get_local_id(1) + 4 * get_local_id(2);
+    int lIdx = get_local_id(0) + 4 * get_local_id(1) + 16 * get_local_id(2);
     int gIdx = get_group_id(0) + get_num_groups(0) * (get_group_id(1) + get_num_groups(1) * get_group_id(2));
     
     //Calculate first index
@@ -105,7 +105,7 @@ __kernel void float16x16x16R(__global const float4 *T,
               get_local_id(2) == 0;
     
     //By doing the index times two, every work-item uses another bank (2.411778 -> 2.343779)
-    int index = 2*(get_local_id(0) + 4 * lIdx);
+    int index = 2*lIdx;
     l[index] = s.x + s.y + s.z + s.w;
     
     barrier(CLK_LOCAL_MEM_FENCE);

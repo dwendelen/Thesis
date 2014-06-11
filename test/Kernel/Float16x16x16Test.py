@@ -9,32 +9,8 @@ from Kernel.Float16x16x16.Factory import Factory
 from Platform.Platform import NumPyPlatform
 
 class Float16x16x16Test(unittest.TestCase):
-
-    def testF(self):
-        
-        T = np.random.rand((200, 150, 50))
-        U0 = np.random.rand((200, 10))
-        U1 = np.random.rand((150, 10))
-        U2 = np.random.rand((50, 10))
-        U = (U0, U1, U2)
-        
-        fac = Factory()
-        fac.init()
-        fac.setTU(T, U)
-        f = fac.createF()
-        f.run()
-        
-        r = fac.getF()
-        
-        npp = NumPyPlatform()
-        npp.init()
-        npp.setT(T)
-        npp.setU(U)
-        r = npp.f()
-        
-        self.assertEqual(r, e)
-        
-    def testR(self):
+    
+    def testRandomStuff(self):
         
         T = np.random.rand(200, 150, 50).astype(np.float32)
         U0 = np.random.rand(200, 10).astype(np.float32)
@@ -46,21 +22,32 @@ class Float16x16x16Test(unittest.TestCase):
         fac.init()
         fac.setTU(T, U)
         
+        f = fac.createF()
         m = fac.createRemapper()
-        r = fac.createF()
+        r = fac.createR()
+        
+        f.run()
+        rf = fac.getF()
         
         m.run()
         r.run()
+        rr = fac.getF()
         
-        r = fac.getF()
+        
         
         npp = NumPyPlatform()
         npp.init()
         npp.setT(T)
         npp.setU(U)
-        r = npp.f()
+        e = npp.f()
         
-        self.assertEqual(r, e)
+        print rf
+        print rr
+        print e
+        
+        self.assertEqual(rf, rr)
+        self.assertEqual(re, e)
+    
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

@@ -28,7 +28,7 @@ class Factory:
     def createRemapper(self):
         r = TMapper(self.cq)
         r.compile()
-        r.init(self.b.T, self.b.TMapped)
+        r.init(self.b.T, self.b.TMapped, self.b.I)
         return r
     
     def createR(self):
