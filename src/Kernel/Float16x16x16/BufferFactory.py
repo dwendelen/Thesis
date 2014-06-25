@@ -10,7 +10,7 @@ class BufferFactory:
     R = None
     U = (None, None, None)
     I = (None, None, None)
-    Sum = None
+    SumArray = None
     TMapped = None
     
     def __init__(self, contextQueue):
@@ -41,7 +41,7 @@ class BufferFactory:
         
         self.R = np.int32(U[0].shape[1])
         
-        self.Sum = self._createReadWriteBuf(4*self.I[0]*self.I[1]*self.I[2]/(16*16*16))
+        self.SumArray = self._createReadWriteBuf(4*self.I[0]*self.I[1]*self.I[2]/(16*16*16))
         self.TMapped = self._createReadWriteBuf(self.T.size)
         
 

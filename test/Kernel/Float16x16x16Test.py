@@ -9,8 +9,8 @@ from Kernel.Float16x16x16.Factory import Factory
 from Platform.Platform import NumPyPlatform
 
 class Float16x16x16Test(unittest.TestCase):
-    
-    def testRandomStuff(self):
+
+    def testF(self):
         
         T = np.random.rand(200, 150, 50).astype(np.float32)
         U0 = np.random.rand(200, 10).astype(np.float32)
