@@ -1,10 +1,5 @@
 import numpy as np
-
-from Kernel.Float16x16x16.F import F
-from Kernel.Float16x16x16.E import Float16x16x16E as E
-from Kernel.Float16x16x16.FRemapped import Float16x16x16Remapped
-from Kernel.Float16x16x16.FRemapped2 import Float16x16x16Remapped2
-from Kernel.Float16x16x16.TMapper import TMapper
+import pyopencl as cl
 
 from simulators import simulateKernel
 from Platform.ContextQueue import ContextQueue
@@ -18,7 +13,9 @@ cq = ContextQueue(profile = True)
 cq.init()
 
 n = 64000001;
-a = np.array(np.random.rand(64000001), dtype=np.float32)
+a = np.array(np.random.rand(n), dtype=np.float32)
+
+print 'a created'
 
 mf = cl.mem_flags
 s = cl.Buffer(cq.context, mf.READ_WRITE, size=4)

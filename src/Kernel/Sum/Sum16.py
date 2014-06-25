@@ -1,7 +1,7 @@
 import numpy as np
 import pyopencl as cl
 
-from Kernel import Kernel
+from Kernel.Kernel import Kernel
 from BlockPadder import getNewSize
 
 class Sum16(Kernel):
@@ -33,12 +33,16 @@ class Sum16(Kernel):
         self.Sum = Sum
         self.Array = Array
         
-        self.n = Array.size/np.dtype(np.float32).itemsize
+        self.n = np.int32(Array.size/np.dtype(np.float32).itemsize)
         self.size = getNewSize(self.n, 16)
         self.localSum = np.zeros(1, dtype = np.float32)
         
+        self.kernel.set_arg(0, self.Array)
+        self.kernel.set_arg(1, self.n)
+        self.kernel.set_arg(2, self.Sum)
+        
     def getGlobalSize(self):
-        return self.size
+        return (self.size,)
     
     def getLocalSize(self):
         return (16,)

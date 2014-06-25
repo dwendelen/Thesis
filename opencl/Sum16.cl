@@ -1,3 +1,5 @@
+#pragma OPENCL EXTENSION cl_amd_printf : enable
+
 //The number of consecutive float4s served by one channel
 #define OFFSET      64
 
@@ -11,8 +13,8 @@
 Basic idea:
 To have two workitems per channel, to keep the channels busy.
 */
-__attribute__((reqd_work_group_size(16)))
-__kernel void Sum16(__global const float *array, __global const int n, __global float *sum)
+__attribute__((reqd_work_group_size(16,1,1)))
+__kernel void Sum16(__global const float *array, const int n, __global float *sum)
 {   
 	__local float l[16];
 	
@@ -20,6 +22,11 @@ __kernel void Sum16(__global const float *array, __global const int n, __global 
 	const int limit2 = (n / 4) * 4;
 	int idx = get_local_id(0) * OFFSET;
 	float4 s;
+	
+	if(get_local_id(0) == 0)
+	{
+	    printf("limit1: %i, limit2: %i", limit1, limit2);
+	}
 	
 	//Sum up a whole block
 	while(idx < limit1)
@@ -48,7 +55,7 @@ __kernel void Sum16(__global const float *array, __global const int n, __global 
 	
 	s.x += s.z;
 	s.y += s.w;
-	s.x += s.y
+	s.x += s.y;
 	
 	//Sum up the remaining floats
 	while(idx < n)
