@@ -3,10 +3,16 @@ import numpy as np
 from Kernel.Float16x16x16.F import F
 from Kernel.Float16x16x16.E import Float16x16x16E as E
 from Kernel.Float16x16x16.FRemapped import Float16x16x16Remapped
+from Kernel.Float16x16x16.FRemapped2 import Float16x16x16Remapped2
+from Kernel.Float16x16x16.TMapper import TMapper
 
 from simulators import simulateKernel
 from Platform.ContextQueue import ContextQueue
+from Platform.Platform import NumPyPlatform
 from Kernel.Float16x16x16.BufferFactory import BufferFactory
+
+import cProfile
+
 
 def run(kernel, (t0, t1, t2), name):
     print name
@@ -15,27 +21,39 @@ def run(kernel, (t0, t1, t2), name):
     kernel.run()
     
     print kernel.time
-    print str(t1*1000) + ' ~ ' + str(t2*1000) + ', ' + str(t0*1000)
-    print str(t1*1000/kernel.time) + ' ~ ' + str(t2*1000/kernel.time) + ', ' + str(t0*1000/kernel.time)
+    #print str(t1*1000) + ' ~ ' + str(t2*1000) + ', ' + str(t0*1000)
+    #print str(t1*1000/kernel.time) + ' ~ ' + str(t2*1000/kernel.time) + ', ' + str(t0*1000/kernel.time)
     
 def do(R, I):
     print 'R: ' + str(R) + ' I: ' + str(I)
     T = np.array(np.random.rand(I, I, I), dtype=np.float32)
     U = np.array(np.random.rand(I, R), dtype=np.float32)
     
+    npl.setT(T)
+    npl.setU((U, U, U))
+    
     b.init(T, (U, U, U))
     
     e.init(b.T, b.R, b.U, b.I, b.Sum)
     f.init(b.T, b.R, b.U, b.I, b.Sum)
     r.init(b.T, b.R, b.U, b.I, b.Sum)
+    r2.init(b.T, b.R, b.U, b.I, b.Sum)
+    rm.init(b.T, b.TMapped, b.I)
     
     (t0, t1, t2) = simulateKernel(r, I, R, 3, perBasicElement = False)
 
-    run(e, (t0, t1, t2), 'Version Empty')
+    
+
+    #run(e, (t0, t1, t2), 'Version Empty')
+    cProfile.run('npl.f()')
     run(f, (t0, t1, t2), 'Version UnRemapped')
     run(r, (t0, t1, t2), 'Version ReMapped')
+    run(rm, (t0, t1, t2), 'Version Remapper')
     print ''
     print ''
+
+npl = NumPyPlatform()
+npl.init()
 
 cq = ContextQueue(profile = True)
 cq.init()
@@ -50,6 +68,12 @@ f.compile()
 
 r = Float16x16x16Remapped(cq)
 r.compile()
+
+r2 = Float16x16x16Remapped2(cq)
+r2.compile()
+
+rm = TMapper(cq)
+rm.compile()
 
 do(16,100)
 do(4,100)

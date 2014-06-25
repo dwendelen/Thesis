@@ -29,6 +29,8 @@ __kernel void float16x16x16(__global const float4 *T,
 	
     __local float l[128];
     
+    /* */
+    
     float4 a;
     float4 b[4];
     float4 c[16];
@@ -116,9 +118,7 @@ __kernel void float16x16x16(__global const float4 *T,
         idx += jumpI2 - 4*jumpI1;
     }
 
-    bool bo = get_local_id(0) == 0 && 
-              get_local_id(1) == 0 &&
-              get_local_id(2) == 0;
+    
     
     //By doing the index times two, every work-item uses another bank (2.411778 -> 2.343779) 
     int index = 2*(get_local_id(0) + 4 * get_local_id(1) + 16 * get_local_id(2));
@@ -126,7 +126,11 @@ __kernel void float16x16x16(__global const float4 *T,
     
     barrier(CLK_LOCAL_MEM_FENCE);
     
-    if(bo)
+    bool isFirstWorkItem = get_local_id(0) == 0 &&
+              get_local_id(1) == 0 &&
+              get_local_id(2) == 0;
+    
+    if(isFirstWorkItem)
     {
         float sss = 0;
         #pragma unroll

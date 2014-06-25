@@ -3,6 +3,7 @@ from Kernel.Float16x16x16.BufferFactory import BufferFactory
 from Kernel.Float16x16x16.F import F
 from Kernel.NumpySum import NumpySum
 from Kernel.Float16x16x16.FRemapped import Float16x16x16Remapped
+from Kernel.Float16x16x16.FRemapped2 import Float16x16x16Remapped2
 from Kernel.Float16x16x16.TMapper import TMapper
 
 class Factory:
@@ -33,6 +34,12 @@ class Factory:
     
     def createR(self):
         r = Float16x16x16Remapped(self.cq)
+        r.compile()
+        r.init(self.b.TMapped, self.b.R, self.b.U, self.b.I, self.b.Sum)
+        return r
+        
+    def createR2(self):
+        r = Float16x16x16Remapped2(self.cq)
         r.compile()
         r.init(self.b.TMapped, self.b.R, self.b.U, self.b.I, self.b.Sum)
         return r
