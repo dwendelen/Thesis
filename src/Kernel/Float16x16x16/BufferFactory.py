@@ -12,6 +12,7 @@ class BufferFactory:
     I = (None, None, None)
     SumArray = None
     TMapped = None
+    Sum = None
     
     def __init__(self, contextQueue):
         self.contextQueue = contextQueue
@@ -23,7 +24,7 @@ class BufferFactory:
     def _createReadWriteBuf(self, nbBytes):
         mf = cl.mem_flags
         return cl.Buffer(self.contextQueue.context, mf.READ_WRITE, size=nbBytes)
-
+    
     def init(self, T, U):
         T1 = blockPad(T, [16,16,16])
         self.T = self._createInitBuf(T1)
@@ -43,5 +44,6 @@ class BufferFactory:
         
         self.SumArray = self._createReadWriteBuf(4*self.I[0]*self.I[1]*self.I[2]/(16*16*16))
         self.TMapped = self._createReadWriteBuf(self.T.size)
+        self.Sum = self._createReadWriteBuf(4)
         
 

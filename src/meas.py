@@ -12,6 +12,7 @@ from Platform.Platform import NumPyPlatform
 from Kernel.Float16x16x16.BufferFactory import BufferFactory
 
 import cProfile
+from Kernel.Sum.Sum16 import Sum16
 
 
 def run(kernel, (t0, t1, t2), name):
