@@ -34,18 +34,17 @@ class Sum16(Kernel):
         self.Array = Array
         
         self.n = np.int32(Array.size/np.dtype(np.float32).itemsize)
-        self.size = getNewSize(self.n, 16)
-        self.localSum = np.zeros(16, dtype = np.float32)
+        self.localSum = np.zeros(1024, dtype = np.float32)
         
         self.kernel.set_arg(0, self.Array)
         self.kernel.set_arg(1, self.n)
         self.kernel.set_arg(2, self.Sum)
         
     def getGlobalSize(self):
-        return (16,)
+        return (1024*16,)
     
     def getLocalSize(self):
-        return (1,)
+        return (16,)
     
     def getSum(self):
         cl.enqueue_copy(self.contextQueue.queue, self.localSum, self.Sum)
