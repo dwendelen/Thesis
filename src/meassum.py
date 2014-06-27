@@ -16,7 +16,7 @@ n = 64000005;
 a = np.array(np.random.rand(n), dtype=np.float32)
 
 mf = cl.mem_flags
-s = cl.Buffer(cq.context, mf.READ_WRITE, size=4*16)
+s = cl.Buffer(cq.context, mf.READ_WRITE, size=4*32768)
 sa = cl.Buffer(cq.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=a)
 
 k = Sum16(cq)

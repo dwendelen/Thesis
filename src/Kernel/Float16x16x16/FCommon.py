@@ -2,11 +2,11 @@
 import math
 import numpy as np
 
-from ..Kernel import Kernel
 from BlockPadder import blockPad
+from Kernel.BlockKernel import Block3DKernel
 
 
-class FCommon(Kernel):
+class FCommon(Block3DKernel):
     
     R = None
     U = (None, None, None)
@@ -19,10 +19,7 @@ class FCommon(Kernel):
     def getBasicElements(self, I, R, n):
         return (I*I*I*R)
     
-    def getGlobalSize(self):
-        return ( self.I[0]/self.getLocalSize()[0],
-                 self.I[1]/self.getLocalSize()[1],
-                 self.I[2]/self.getLocalSize()[2])
+    
     
     def getLocalSize(self):
         return (4, 4, 4)
@@ -35,9 +32,9 @@ class FCommon(Kernel):
         self.U = U
         self.I = I
         self.Sum = Sum
-        self.__setBuffers()
+        self._setBuffers()
         
-    def __setBuffers(self):
+    def _setBuffers(self):
         self.kernel.set_arg(1, self.U[0])
         self.kernel.set_arg(2, self.U[1])
         self.kernel.set_arg(3, self.U[2])

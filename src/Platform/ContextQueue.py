@@ -10,7 +10,7 @@ class ContextQueue:
         self.profile = profile
 
     def init(self):
-        devices = cl.get_platforms()[0].get_devices(cl.device_type.GPU)
+        devices = cl.get_platforms()[0].get_devices(cl.device_type.CPU)
         self.context = cl.Context([devices[0]])
         if(self.profile):
             self.queue = cl.CommandQueue(self.context, properties=cl.command_queue_properties.PROFILING_ENABLE)
