@@ -23,7 +23,8 @@ def kr(U):
 
     (J, K) = U[-1].shape
     
-    X = U[-1].copy().reshape((J, 1, K), order = 'F')
+    #X = U[-1].copy().reshape((J, 1, K), order = 'F')
+    X = U[-1].reshape((J, 1, K), order = 'F')
 
     for n in range(len(U)-2, -1, -1):
         I = U[n].shape[0]
