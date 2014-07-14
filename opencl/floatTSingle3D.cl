@@ -1,5 +1,5 @@
 __attribute__((reqd_work_group_size(4, 4, 4)))
-__kernel void float16x16x16(__global const float *T,
+__kernel void floatTSingle3D(__global const float *T,
     __global const float *U0, __global const float *U1, __global const float *U2,
     int R, __global float *sum, const int I0, const int I1, const int I2)
 {

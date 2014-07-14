@@ -14,6 +14,7 @@ from Kernel.Float16x16x16.BufferFactory import BufferFactory
 #import cProfile
 from Kernel.Sum.Sum16 import Sum16
 from Kernel.Float4x4x4.FRemapped import FRemapped
+from Kernel.FloatSingle3D import FloatSingle3D
 
 
 def run(kernel, (t0, t1, t2), name):
@@ -40,7 +41,8 @@ def do(R, I):
     f.init(b.T, b.R, b.U, b.I, b.Sum)
     r.init(b.T, b.R, b.U, b.I, b.Sum)
     r2.init(b.T, b.R, b.U, b.I, b.Sum)
-    r4.init(b.T, b.R, b.U, b.I, b.Sum)    
+    r4.init(b.T, b.R, b.U, b.I, b.Sum)
+    rst.init(b.T, b.R, b.U, b.I, b.Sum)    
     rm.init(b.T, b.TMapped, b.I)
     
     #(t0, t1, t2) = simulateKernel(r, I, R, 3, perBasicElement = False)
@@ -51,6 +53,7 @@ def do(R, I):
     #cProfile.run('npl.f()')
     run(f, (t0, t1, t2), 'Version UnRemapped')
     run(r, (t0, t1, t2), 'Version ReMapped')
+    run(rst, (t0, t1, t2), 'Version Single T')
     run(r4, (t0, t1, t2), 'Version 4x4x4')
     run(rm, (t0, t1, t2), 'Version Remapper')
     print ''
@@ -81,6 +84,9 @@ rm.compile()
 
 r4 = FRemapped(cq)
 r4.compile()
+
+rst = FloatSingle3D(cq)
+rst.compile()
 
 do(4,1)
 do(6000,1)
