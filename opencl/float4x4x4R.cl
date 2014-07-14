@@ -16,14 +16,14 @@ This kernel MUST be run with a local 4x4x4 workspace
 IDEE Fetchen per float2 -> geen channel conflict
 */
 __attribute__((reqd_work_group_size(4, 4, 4)))
-__kernel void float16x16x16R(__global const float *T,
+__kernel void float4x4x4R(__global const float *T,
     __global const float *U0, __global const float *U1, __global const float *U2,
     int R, __global float *sum)
 {
     __local float l[128];
     
     float reg;
-    float sum = 0;
+    float localSum = 0;
 
     int I0 = get_global_size(0);
     int I1 = get_global_size(1);
@@ -48,7 +48,7 @@ __kernel void float16x16x16R(__global const float *T,
         //Fetch laatste 4 met n=2
         reg = reg * U2[gId2];
         
-        sum += reg;
+        localSum += reg;
         
         gId0 += I0;
         gId1 += I1;
@@ -65,8 +65,8 @@ __kernel void float16x16x16R(__global const float *T,
     //Calculate first index
     int idx =  lIdx + 64 * gIdx;   
 
-    reg = sum - T[idx];
-	sum = reg * reg;
+    reg = localSum - T[idx];
+	localSum = reg * reg;
 
     bool bo = get_local_id(0) == 0 && 
               get_local_id(1) == 0 &&
@@ -74,7 +74,7 @@ __kernel void float16x16x16R(__global const float *T,
     
     //By doing the index times two, every work-item uses another bank (2.411778 -> 2.343779)
     int index = 2*lIdx;
-    l[index] = sum;
+    l[index] = localSum;
     
     barrier(CLK_LOCAL_MEM_FENCE);
     
@@ -83,9 +83,9 @@ __kernel void float16x16x16R(__global const float *T,
         #pragma unroll
         for(int i = 2; i < 2*64; i+=2)
         {
-            sum += l[i];
+            localSum += l[i];
         }
         
-        sum[gIdx] = sum;
+        sum[gIdx] = localSum;
     }
 }

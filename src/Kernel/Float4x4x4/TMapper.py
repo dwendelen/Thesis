@@ -11,9 +11,9 @@ class TMapper(Kernel):
         return (4,4,4)
     
     def getGlobalSize(self):
-        return ( self.I[0]/4,
-                 self.I[1]/4,
-                 self.I[2]/4)
+        return ( self.I[0],
+                 self.I[1],
+                 self.I[2])
     
     def init(self, T, tMapped, I):
         self.T = T
@@ -26,5 +26,5 @@ class TMapper(Kernel):
         self.kernel.set_arg(1, self.TMapped)
         
     def getName(self):
-        return 'float16x16x16Mapper'
+        return 'float4x4x4Mapper'
 

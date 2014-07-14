@@ -13,13 +13,14 @@ from Kernel.Float16x16x16.BufferFactory import BufferFactory
 
 import cProfile
 from Kernel.Sum.Sum16 import Sum16
+from Kernel.Float4x4x4.FRemapped import FRemapped
 
 
 def run(kernel, (t0, t1, t2), name):
     print name
-    #kernel.run()
-    #kernel.run()
-    #kernel.run()
+    kernel.run()
+    kernel.run()
+    kernel.run()
     
     print kernel.time
     #print str(t1*1000) + ' ~ ' + str(t2*1000) + ', ' + str(t0*1000)
@@ -33,48 +34,53 @@ def do(R, I):
     npl.setT(T)
     npl.setU((U, U, U))
     
-    #b.init(T, (U, U, U))
+    b.init(T, (U, U, U))
     
-    #e.init(b.T, b.R, b.U, b.I, b.Sum)
-    #f.init(b.T, b.R, b.U, b.I, b.Sum)
-    #r.init(b.T, b.R, b.U, b.I, b.Sum)
-    #r2.init(b.T, b.R, b.U, b.I, b.Sum)
-    #rm.init(b.T, b.TMapped, b.I)
+    e.init(b.T, b.R, b.U, b.I, b.Sum)
+    f.init(b.T, b.R, b.U, b.I, b.Sum)
+    r.init(b.T, b.R, b.U, b.I, b.Sum)
+    r2.init(b.T, b.R, b.U, b.I, b.Sum)
+    rm.init(b.T, b.TMapped, b.I)
+    r4.init(b.T, b.TMapped, b.I)
     
     #(t0, t1, t2) = simulateKernel(r, I, R, 3, perBasicElement = False)
 
-    
+    (t0, t1, t2) = (0,0,0)
 
-    #run(e, (t0, t1, t2), 'Version Empty')
-    cProfile.run('npl.f()')
-    #run(f, (t0, t1, t2), 'Version UnRemapped')
-    #run(r, (t0, t1, t2), 'Version ReMapped')
-    #run(rm, (t0, t1, t2), 'Version Remapper')
+    run(e, (t0, t1, t2), 'Version Empty')
+    #cProfile.run('npl.f()')
+    run(f, (t0, t1, t2), 'Version UnRemapped')
+    run(r, (t0, t1, t2), 'Version ReMapped')
+    run(rm, (t0, t1, t2), 'Version Remapper')
+    run(r4, (t0, t1, t2), 'Version 4x4x4')
     print ''
     print ''
 
 npl = NumPyPlatform()
 npl.init()
 
-#cq = ContextQueue(profile = True)
-#cq.init()
+cq = ContextQueue(profile = True)
+cq.init()
 
-#b = BufferFactory(cq)
+b = BufferFactory(cq)
 
-#e = E(cq)
-#e.compile()
+e = E(cq)
+e.compile()
 
-#f = F(cq)
-#f.compile()
+f = F(cq)
+f.compile()
 
-#r = Float16x16x16Remapped(cq)
-#r.compile()
+r = Float16x16x16Remapped(cq)
+r.compile()
 
-#r2 = Float16x16x16Remapped2(cq)
-#r2.compile()
+r2 = Float16x16x16Remapped2(cq)
+r2.compile()
 
-#rm = TMapper(cq)
-#rm.compile()
+rm = TMapper(cq)
+rm.compile()
+
+r4 = FRemapped(cq)
+r4.compile()
 
 do(16,100)
 do(4,100)

@@ -4,10 +4,14 @@ from code import *
 import numpy.testing as npt
 import scipy.io
 from Platform import *
+from Platform.Platform import *
 #from OpenCLPlatform import *
 
-class CodeTest(unittest.TestCase):
+import cProfile
 
+class CodeTest(unittest.TestCase):
+    #def __init__(self):
+        #self.setUp()
     def setUp(self):
         unittest.TestCase.setUp(self)
         self.initU1()
@@ -155,7 +159,6 @@ class CodeTest(unittest.TestCase):
         for i in range(len(a)):
             npt.assert_array_equal(a[i], b[i], msg + ": The elements do not match")
 
-
     def testFull(self):
         
         '''
@@ -192,4 +195,7 @@ class CodeTest(unittest.TestCase):
     
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
+    #cProfile.run('CodeTest().testFull()');
     unittest.main()
+    
+    

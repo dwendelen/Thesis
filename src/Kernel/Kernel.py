@@ -9,21 +9,6 @@ class Kernel:
     def __init__(self, contextQueue):
         self.contextQueue = contextQueue
     
-    def getNbOperaties(self, I, R, n):
-        raise NotImplementedError()
-    
-    def getNbWorkGroups(self, I, R, n):
-        raise NotImplementedError()
-        
-    def getDataTransferZonderCache(self, I, R, n):
-        raise NotImplementedError()
-        
-    def getDataTransferMetCache(self, I, R, n):
-        raise NotImplementedError()
-    
-    def getBasicElements(self, I, R, n):
-        raise NotImplementedError()
-    
     def getName(self):
         raise NotImplementedError()
     

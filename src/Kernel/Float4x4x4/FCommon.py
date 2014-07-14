@@ -17,9 +17,9 @@ class FCommon(Kernel):
         return (4, 4, 4)
     
     def getGlobalSize(self):
-        return ( self.I[0]/4,
-                 self.I[1]/4,
-                 self.I[2]/4)
+        return ( self.I[0],
+                 self.I[1],
+                 self.I[2])
     
     def init(self, T, R, U, I, Sum):
         self.T = T
