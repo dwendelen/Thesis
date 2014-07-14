@@ -17,7 +17,7 @@ class Kernel:
         self.program = cl.Program(self.contextQueue.context, file.read()).build()
         self.kernel = cl.Kernel(self.program, self.getName())
     
-    def run(self):
+    def run(self):        
         e = cl.enqueue_nd_range_kernel(self.contextQueue.queue, self.kernel, self.getGlobalSize(), self.getLocalSize())
         
         if(self.contextQueue.profile):

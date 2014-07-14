@@ -16,15 +16,16 @@ class FloatSingle3D(Kernel):
         return (64, 1, 1)
     
     def getGlobalSize(self):
-        return ( self.I[0],
-                 self.I[1],
-                 self.I[2])
+        return ( self.I,1,1)
     
-    def init(self, T, R, U, I, Sum):
+    def init(self, T, R, U, I, Sum, I0, I1, I2):
         self.T = T
         self.R = R
         self.U = U
         self.I = I
+        self.I0 = I0
+        self.I1 = I1
+        self.I2 = I2
         self.Sum = Sum
         self._setBuffers()
         
@@ -35,6 +36,9 @@ class FloatSingle3D(Kernel):
         self.kernel.set_arg(3, self.U[2])
         self.kernel.set_arg(4, self.R)
         self.kernel.set_arg(5, self.Sum)
+        self.kernel.set_arg(6, self.I0)
+        self.kernel.set_arg(7, self.I1)
+        self.kernel.set_arg(8, self.I2)
     
     def getName(self):
         return 'floatTSingle3D'
