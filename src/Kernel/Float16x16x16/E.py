@@ -1,7 +1,7 @@
 
-from FUnMapped import FUnMapped
+from FCommon import FCommon
 
-class Float16x16x16E(FUnMapped):
+class Float16x16x16E(FCommon):
 
     
     def getName(self):

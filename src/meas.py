@@ -11,7 +11,7 @@ from Platform.ContextQueue import ContextQueue
 from Platform.Platform import NumPyPlatform
 from Kernel.Float16x16x16.BufferFactory import BufferFactory
 
-import cProfile
+#import cProfile
 from Kernel.Sum.Sum16 import Sum16
 from Kernel.Float4x4x4.FRemapped import FRemapped
 
@@ -40,8 +40,8 @@ def do(R, I):
     f.init(b.T, b.R, b.U, b.I, b.Sum)
     r.init(b.T, b.R, b.U, b.I, b.Sum)
     r2.init(b.T, b.R, b.U, b.I, b.Sum)
+    r4.init(b.T, b.R, b.U, b.I, b.Sum)    
     rm.init(b.T, b.TMapped, b.I)
-    r4.init(b.T, b.TMapped, b.I)
     
     #(t0, t1, t2) = simulateKernel(r, I, R, 3, perBasicElement = False)
 
@@ -51,8 +51,8 @@ def do(R, I):
     #cProfile.run('npl.f()')
     run(f, (t0, t1, t2), 'Version UnRemapped')
     run(r, (t0, t1, t2), 'Version ReMapped')
-    run(rm, (t0, t1, t2), 'Version Remapper')
     run(r4, (t0, t1, t2), 'Version 4x4x4')
+    run(rm, (t0, t1, t2), 'Version Remapper')
     print ''
     print ''
 
@@ -81,6 +81,11 @@ rm.compile()
 
 r4 = FRemapped(cq)
 r4.compile()
+
+do(4,1)
+do(6000,1)
+do(4,10)
+do(600,10)
 
 do(16,100)
 do(4,100)

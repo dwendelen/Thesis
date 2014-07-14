@@ -71,17 +71,15 @@ __kernel void float4x4x4R(__global const float *T,
     bool bo = get_local_id(0) == 0 && 
               get_local_id(1) == 0 &&
               get_local_id(2) == 0;
-    
-    //By doing the index times two, every work-item uses another bank (2.411778 -> 2.343779)
-    int index = 2*lIdx;
-    l[index] = localSum;
+
+    l[lIdx] = localSum;
     
     barrier(CLK_LOCAL_MEM_FENCE);
     
     if(bo)
     {        
         #pragma unroll
-        for(int i = 2; i < 2*64; i+=2)
+        for(int i = 1; i < 64; i++)
         {
             localSum += l[i];
         }
