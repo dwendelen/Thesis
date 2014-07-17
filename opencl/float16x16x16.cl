@@ -96,6 +96,8 @@ __kernel void float16x16x16(__global const float4 *T,
         4*gIdx1 * jumpI1 +
         4*gIdx2 * jumpI2;
 
+	jumpI2 -= 4*I0;
+
 	float4 s = (float4)(0.0f,0.0f,0.0f,0.0f);
 	float4 t;
 
@@ -115,7 +117,7 @@ __kernel void float16x16x16(__global const float4 *T,
         }
         //Jump to next group along the 2-axis,
         //and undo jumps along the 1-axis
-        idx += jumpI2 - 4*jumpI1;
+        idx += jumpI2;
     }
 
     

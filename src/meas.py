@@ -11,11 +11,13 @@ from Platform.ContextQueue import ContextQueue
 from Platform.Platform import NumPyPlatform
 from Kernel.Float16x16x16.BufferFactory import BufferFactory
 from Kernel.Float4x4x4.BufferFactory import BufferFactory as BufferFactory4
+from Kernel.Float8x8x8.BufferFactory import BufferFactory as BufferFactory8
 from Kernel.BufferFactory import BufferFactory as BufferFactory1
 
 #import cProfile
 from Kernel.Sum.Sum16 import Sum16
 from Kernel.Float4x4x4.FRemapped import FRemapped
+from Kernel.Float8x8x8.FRemapped import FRemapped as FRemapped8
 from Kernel.FloatSingle3D import FloatSingle3D
 
 
@@ -39,6 +41,7 @@ def do(R, I):
     
     b.init(T, (U, U, U))
     b4.init(T, (U, U, U))
+    b8.init(T, (U, U, U))
     b1.init(T, (U, U, U))
     
     e.init(b.T, b.R, b.U, b.I, b.Sum)
@@ -46,6 +49,7 @@ def do(R, I):
     r.init(b.T, b.R, b.U, b.I, b.Sum)
     r2.init(b.T, b.R, b.U, b.I, b.Sum)
     r4.init(b4.T, b4.R, b4.U, b4.I, b4.Sum)
+    r8.init(b8.T, b8.R, b8.U, b8.I, b8.Sum)
     rst.init(b1.T, b1.R, b1.U, b1.I, b1.Sum, b1.I0, b1.I1, b1.I2)    
     rm.init(b.T, b.TMapped, b.I)
     
@@ -59,6 +63,7 @@ def do(R, I):
     run(r, (t0, t1, t2), 'Version ReMapped')
     run(rst, (t0, t1, t2), 'Version Single T')
     run(r4, (t0, t1, t2), 'Version 4x4x4')
+    run(r8, (t0, t1, t2), 'Version 8x8x8')
     run(rm, (t0, t1, t2), 'Version Remapper')
     print ''
     print ''
@@ -72,6 +77,7 @@ cq.init()
 b = BufferFactory(cq)
 b4 = BufferFactory4(cq)
 b1 = BufferFactory1(cq)
+b8 = BufferFactory8(cq)
 
 e = E(cq)
 e.compile()
@@ -90,6 +96,9 @@ rm.compile()
 
 r4 = FRemapped(cq)
 r4.compile()
+
+r8 = FRemapped8(cq)
+r8.compile()
 
 rst = FloatSingle3D(cq)
 rst.compile()

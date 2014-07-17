@@ -2,8 +2,8 @@ import numpy as np
 import unittest
 
 from Platform.ContextQueue import ContextQueue
-from Kernel.Float4x4x4.BufferFactory import BufferFactory
-from Kernel.Float4x4x4.Factory import Factory
+from Kernel.Float8x8x8.BufferFactory import BufferFactory
+from Kernel.Float8x8x8.Factory import Factory
 
 from Platform.Platform import NumPyPlatform
 
