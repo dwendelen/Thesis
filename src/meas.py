@@ -25,7 +25,7 @@ def run(kernel, (t0, t1, t2), name):
     print name
     kernel.run()
     kernel.run()
-    kernel.run()
+    #kernel.run()
     
     print kernel.time
     #print str(t1*1000) + ' ~ ' + str(t2*1000) + ', ' + str(t0*1000)
