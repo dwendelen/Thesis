@@ -67,6 +67,11 @@ def do(R, I):
     run(rm, (t0, t1, t2), 'Version Remapper')
     print ''
     print ''
+    
+    b.release()
+    b1.release()
+    b4.release()
+    b8.release()
 
 npl = NumPyPlatform()
 npl.init()
@@ -116,6 +121,11 @@ do(4,360)
 do(6000,16)
 do(6000,100)
 do(6000,360)
+
+do(1024,360)
+do(100,360)
+do(128,360)
+do(1,360)
 
 do(1,1)
 do(1,4)

@@ -25,7 +25,35 @@ class BufferFactory:
         mf = cl.mem_flags
         return cl.Buffer(self.contextQueue.context, mf.READ_WRITE, size=nbBytes)
     
+    def release(self):
+        if(self.T != None):
+            self.T.release()
+        
+        if(self.TMapped != None):
+            self.TMapped.release()
+        
+        if(self.U[0] != None):
+            self.U[0].release()
+            
+        if(self.U[1] != None):
+            self.U[1].release()
+            
+        if(self.U[2] != None):
+            self.U[2].release()
+            
+        if(self.SumArray != None):
+            self.SumArray.release()
+    
+        self.T = None
+        self.R = None
+        self.U = (None, None, None)
+        self.I = (None, None, None)
+        self.SumArray = None
+        self.TMapped = None
+        self.Sum = None
+    
     def init(self, T, U):
+        self.release()
         T1 = blockPad(T, [4,4,4])
         self.T = self._createInitBuf(T1)
         
