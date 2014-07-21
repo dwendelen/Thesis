@@ -44,6 +44,9 @@ class BufferFactory:
         if(self.SumArray != None):
             self.SumArray.release()
     
+        if(self.Sum != None):
+            self.Sum.release()
+    
         self.T = None
         self.R = None
         self.U = (None, None, None)
