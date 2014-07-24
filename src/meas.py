@@ -42,15 +42,13 @@ def do(R, I):
     b.init(T, (U, U, U))
     b4.init(T, (U, U, U))
     b8.init(T, (U, U, U))
-    b1.init(T, (U, U, U))
     
     e.init(b.T, b.R, b.U, b.I, b.Sum)
     f.init(b.T, b.R, b.U, b.I, b.Sum)
     r.init(b.T, b.R, b.U, b.I, b.Sum)
     r2.init(b.T, b.R, b.U, b.I, b.Sum)
     r4.init(b4.T, b4.R, b4.U, b4.I, b4.Sum)
-    r8.init(b8.T, b8.R, b8.U, b8.I, b8.Sum)
-    rst.init(b1.T, b1.R, b1.U, b1.I, b1.Sum, b1.I0, b1.I1, b1.I2)    
+    r8.init(b8.T, b8.R, b8.U, b8.I, b8.Sum)  
     rm.init(b.T, b.TMapped, b.I)
     
     #(t0, t1, t2) = simulateKernel(r, I, R, 3, perBasicElement = False)
@@ -69,7 +67,6 @@ def do(R, I):
     print ''
     
     b.release()
-    b1.release()
     b4.release()
     b8.release()
 
@@ -104,9 +101,6 @@ r4.compile()
 
 r8 = FRemapped8(cq)
 r8.compile()
-
-rst = FloatSingle3D(cq)
-rst.compile()
 
 do(4,1)
 do(6000,1)
