@@ -33,9 +33,9 @@ __kernel void float16x16x16I(__global const float4 *T,
     int gId1 = get_global_id(1);
     int gId2 = get_global_id(2);
 
-	gId0 = (gId0/64) * 512 + channel * 64 + gId0 % 64;
-	gId1 = (gId1/64) * 512 + channel * 64 + gId1 % 64;
-	gId2 = (gId2/64) * 512 + channel * 64 + gId2 % 64;
+	gId0 = (gId0/18) * 128 + channel * 16 + gId0 % 16;
+	gId1 = (gId1/18) * 128 + channel * 16 + gId1 % 16;
+	gId2 = (gId2/18) * 128 + channel * 16 + gId2 % 16;
 
     for(int r = 0; r < R; r++)
     {   
@@ -78,7 +78,7 @@ __kernel void float16x16x16I(__global const float4 *T,
     int lIdx = get_local_id(0) + 4 * get_local_id(1) + 16 * get_local_id(2);
     
     //Calculate first index
-    int idx =  lIdx + 8*1024 * (gIdx/8) + 64*channel;   
+    int idx =  8*1024 * (gIdx/8) + 16*channel + 128*lIdx;   
 
 	float4 s = (float4)(0.0f,0.0f,0.0f,0.0f);
 	float4 t;
@@ -91,7 +91,7 @@ __kernel void float16x16x16I(__global const float4 *T,
         t = c[i] - f;
 		s += t*t;
 			
-        idx += 8*64;
+        idx++;
     }
 
     l[lIdx] = s.x + s.y + s.z + s.w;
