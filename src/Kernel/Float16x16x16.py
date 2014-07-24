@@ -23,6 +23,10 @@ class Float16x16x16Remapped(FCommon):
     def getName(self):
         return 'float16x16x16R'
 
+class FIsolated(FCommon):
+    def getName(self):
+        return 'float16x16x16I'
+
 class Float16x16x16Remapped2(FCommon):
     def getName(self):
         return 'float16x16x16R2'

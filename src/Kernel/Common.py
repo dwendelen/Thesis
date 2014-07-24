@@ -8,6 +8,7 @@ class AbstractBufferFactory:
     T = None
     R = None
     U = (None, None, None)
+    U8 = (None, None, None)
     I = (None, None, None)
     SumArray = None
     TMapped = None
@@ -42,6 +43,15 @@ class AbstractBufferFactory:
             
         if(self.U[2] != None):
             self.U[2].release()
+        
+        if(self.U8[0] != None):
+            self.U8[0].release()
+            
+        if(self.U8[1] != None):
+            self.U8[1].release()
+            
+        if(self.U8[2] != None):
+            self.U8[2].release()
             
         if(self.SumArray != None):
             self.SumArray.release()
@@ -52,6 +62,7 @@ class AbstractBufferFactory:
         self.T = None
         self.R = None
         self.U = (None, None, None)
+        self.U8 = (None, None, None)
         self.I = (None, None, None)
         self.SumArray = None
         self.TMapped = None
@@ -78,6 +89,9 @@ class AbstractBufferFactory:
         
         self.SumArray = self._createReadWriteBuf(4*self.I[0]*self.I[1]*self.I[2]/(self.blockSize()*self.blockSize()*self.blockSize()))
         self.TMapped = self._createReadWriteBuf(self.T.size)
+        self.U8[0] = self._createReadWriteBuf(8*self.U[0].size)
+        self.U8[1] = self._createReadWriteBuf(8*self.U[1].size)
+        self.U8[2] = self._createReadWriteBuf(8*self.U[2].size)
         self.Sum = self._createReadWriteBuf(4)
 
 class Kernel:

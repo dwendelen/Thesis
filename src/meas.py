@@ -1,24 +1,23 @@
 import numpy as np
 
-from Kernel.Float16x16x16.F import F
-from Kernel.Float16x16x16.E import Float16x16x16E as E
-from Kernel.Float16x16x16.FRemapped import Float16x16x16Remapped
-from Kernel.Float16x16x16.FRemapped2 import Float16x16x16Remapped2
-from Kernel.Float16x16x16.TMapper import TMapper
+from Kernel.Float16x16x16 import F
+from Kernel.Float16x16x16 import Float16x16x16E as E
+from Kernel.Float16x16x16 import Float16x16x16Remapped
+from Kernel.Float16x16x16 import FIsolated
+from Kernel.Float16x16x16 import Float16x16x16Remapped2
+from Kernel.Float16x16x16 import TMapper
 
 from simulators import simulateKernel
 from Platform.ContextQueue import ContextQueue
 from Platform.Platform import NumPyPlatform
-from Kernel.Float16x16x16.BufferFactory import BufferFactory
-from Kernel.Float4x4x4.BufferFactory import BufferFactory as BufferFactory4
-from Kernel.Float8x8x8.BufferFactory import BufferFactory as BufferFactory8
-from Kernel.BufferFactory import BufferFactory as BufferFactory1
+from Kernel.Float16x16x16 import BufferFactory
+from Kernel.Float4x4x4 import BufferFactory as BufferFactory4
+from Kernel.Float8x8x8 import BufferFactory as BufferFactory8
 
 #import cProfile
 from Kernel.Sum.Sum16 import Sum16
-from Kernel.Float4x4x4.FRemapped import FRemapped
-from Kernel.Float8x8x8.FRemapped import FRemapped as FRemapped8
-from Kernel.FloatSingle3D import FloatSingle3D
+from Kernel.Float4x4x4 import FRemapped
+from Kernel.Float8x8x8 import FRemapped as FRemapped8
 
 
 def run(kernel, (t0, t1, t2), name):
@@ -45,6 +44,7 @@ def do(R, I):
     
     e.init(b.T, b.R, b.U, b.I, b.Sum)
     f.init(b.T, b.R, b.U, b.I, b.Sum)
+    i.init(b.T, b.R, b.U8, b.I, b.Sum)
     r.init(b.T, b.R, b.U, b.I, b.Sum)
     r2.init(b.T, b.R, b.U, b.I, b.Sum)
     r4.init(b4.T, b4.R, b4.U, b4.I, b4.Sum)
@@ -59,6 +59,7 @@ def do(R, I):
     run(rm, (t0, t1, t2), 'Version Remapper')
     #cProfile.run('npl.f()')
     run(f, (t0, t1, t2), 'Version UnRemapped')
+    run(i, (t0, t1, t2), 'Version Isolated')
     run(r, (t0, t1, t2), 'Version ReMapped')
     b.release()
     run(r8, (t0, t1, t2), 'Version 8x8x8')
@@ -83,6 +84,9 @@ e.compile()
 
 f = F(cq)
 f.compile()
+
+i = FIsolated(cq)
+i.compile()
 
 r = Float16x16x16Remapped(cq)
 r.compile()
