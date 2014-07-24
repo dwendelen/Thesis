@@ -1,12 +1,40 @@
+from Common import BlockKernel, AbstractBufferFactory, AbstractTMapper
 from Platform.ContextQueue import ContextQueue
-from Kernel.Float16x16x16.BufferFactory import BufferFactory
-from Kernel.Float16x16x16.F import F
 from Kernel.NumpySum import NumpySum
-from Kernel.Float16x16x16.FRemapped import Float16x16x16Remapped
-from Kernel.Float16x16x16.FRemapped2 import Float16x16x16Remapped2
-from Kernel.Float16x16x16.TMapper import TMapper
 from Kernel.Sum.Sum16 import Sum16
 
+class BufferFactory(AbstractBufferFactory):
+    def blockSize(self):
+        return 16
+        
+class FCommon(BlockKernel):
+    def getNbFloatsPerWorkitem(self):
+        return 4
+
+class Float16x16x16E(FCommon):
+    def getName(self):
+        return 'float16x16x16E'
+
+class F(FCommon):
+    def getName(self):
+        return 'float16x16x16'
+
+class Float16x16x16Remapped(FCommon):
+    def getName(self):
+        return 'float16x16x16R'
+
+class Float16x16x16Remapped2(FCommon):
+    def getName(self):
+        return 'float16x16x16R2'
+
+class TMapper(AbstractTMapper):
+    
+    def getNbFloatsPerWorkitem(self):
+            return 4
+        
+    def getName(self):
+        return 'float16x16x16Mapper'
+        
 class Factory:
     def init(self):
         self.cq = ContextQueue()
@@ -53,3 +81,4 @@ class Factory:
         
     def getF(self):
         return self.summer.getF()
+

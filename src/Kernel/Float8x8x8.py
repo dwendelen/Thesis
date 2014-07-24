@@ -1,10 +1,29 @@
+from Common import BlockKernel, AbstractBufferFactory, AbstractTMapper
 from Platform.ContextQueue import ContextQueue
-from Kernel.Float8x8x8.BufferFactory import BufferFactory
 from Kernel.NumpySum import NumpySum
-from Kernel.Float8x8x8.FRemapped import FRemapped
-from Kernel.Float8x8x8.TMapper import TMapper
 from Kernel.Sum.Sum16 import Sum16
 
+class BufferFactory(AbstractBufferFactory):
+    def blockSize(self):
+        return 8
+        
+class FCommon(BlockKernel):
+    def getNbFloatsPerWorkitem(self):
+        return 2
+
+class FRemapped(FCommon):
+    def getName(self):
+        return 'float8x8x8R'
+
+
+class TMapper(AbstractTMapper):
+    
+    def getNbFloatsPerWorkitem(self):
+            return 2
+        
+    def getName(self):
+        return 'float8x8x8Mapper'
+        
 class Factory:
     def init(self):
         self.cq = ContextQueue()

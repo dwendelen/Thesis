@@ -1,7 +1,7 @@
 import numpy as np
 import pyopencl as cl
 
-from Kernel.Kernel import Kernel
+from Kernel.Common import Kernel
 from BlockPadder import getNewSize
 
 class Sum16(Kernel):

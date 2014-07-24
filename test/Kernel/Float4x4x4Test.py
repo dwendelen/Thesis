@@ -2,8 +2,7 @@ import numpy as np
 import unittest
 
 from Platform.ContextQueue import ContextQueue
-from Kernel.Float4x4x4.BufferFactory import BufferFactory
-from Kernel.Float4x4x4.Factory import Factory
+from Kernel.Float4x4x4 import *
 
 from Platform.Platform import NumPyPlatform
 
@@ -25,13 +24,9 @@ class Float4x4x4Test(unittest.TestCase):
         fac = Factory()
         fac.init()
         fac.setTU(T, U)
-        
-        #f = fac.createF()
+
         m = fac.createRemapper()
         r = fac.createR()
-        
-        #f.run()
-        #rf = fac.getF()
         
         m.run()
         r.run()
@@ -43,10 +38,6 @@ class Float4x4x4Test(unittest.TestCase):
         npp.setU(U)
         e = npp.f()
         
-        print rr
-        print e
-        
-        #self.assertEqual(rf, rr)
         self.assertAlmostEqual(rr, e, delta = delta)
     
 if __name__ == "__main__":
