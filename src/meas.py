@@ -48,7 +48,7 @@ def do(R, I):
     r.init(b.T, b.R, b.U, b.I, b.Sum)
     r2.init(b.T, b.R, b.U, b.I, b.Sum)
     r4.init(b4.T, b4.R, b4.U, b4.I, b4.Sum)
-    r8.init(b8.T, b8.R, b8.U, b8.I, b8.Sum)  
+    r8.init(b8.T, b8.R, b8.U, b8.I, b8.Sum)
     rm.init(b.T, b.TMapped, b.I)
     
     #(t0, t1, t2) = simulateKernel(r, I, R, 3, perBasicElement = False)
@@ -56,19 +56,17 @@ def do(R, I):
     (t0, t1, t2) = (0,0,0)
 
     run(e, (t0, t1, t2), 'Version Empty')
+    run(rm, (t0, t1, t2), 'Version Remapper')
     #cProfile.run('npl.f()')
     run(f, (t0, t1, t2), 'Version UnRemapped')
     run(r, (t0, t1, t2), 'Version ReMapped')
-    run(rst, (t0, t1, t2), 'Version Single T')
-    run(r4, (t0, t1, t2), 'Version 4x4x4')
-    run(r8, (t0, t1, t2), 'Version 8x8x8')
-    run(rm, (t0, t1, t2), 'Version Remapper')
-    print ''
-    print ''
-    
     b.release()
-    b4.release()
+    run(r8, (t0, t1, t2), 'Version 8x8x8')
     b8.release()
+    run(r4, (t0, t1, t2), 'Version 4x4x4')
+    b4.release()
+    print ''
+    print ''
 
 npl = NumPyPlatform()
 npl.init()
@@ -78,7 +76,6 @@ cq.init()
 
 b = BufferFactory(cq)
 b4 = BufferFactory4(cq)
-b1 = BufferFactory1(cq)
 b8 = BufferFactory8(cq)
 
 e = E(cq)
