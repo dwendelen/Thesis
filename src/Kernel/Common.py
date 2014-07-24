@@ -85,13 +85,15 @@ class AbstractBufferFactory:
         buf2 = self._createInitBuf(U2)
         self.U = (buf0, buf1, buf2)
         
+        buf0 = self._createReadWriteBuf(8*self.U[0].size)
+        buf1 = self._createReadWriteBuf(8*self.U[1].size)
+        buf2 = self._createReadWriteBuf(8*self.U[2].size)
+        self.U8 = (buf0, buf1, buf2)
+        
         self.R = np.int32(U[0].shape[1])
         
         self.SumArray = self._createReadWriteBuf(4*self.I[0]*self.I[1]*self.I[2]/(self.blockSize()*self.blockSize()*self.blockSize()))
         self.TMapped = self._createReadWriteBuf(self.T.size)
-        self.U8[0] = self._createReadWriteBuf(8*self.U[0].size)
-        self.U8[1] = self._createReadWriteBuf(8*self.U[1].size)
-        self.U8[2] = self._createReadWriteBuf(8*self.U[2].size)
         self.Sum = self._createReadWriteBuf(4)
 
 class Kernel:

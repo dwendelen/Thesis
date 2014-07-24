@@ -7,7 +7,6 @@ from Kernel.Float16x16x16 import FIsolated
 from Kernel.Float16x16x16 import Float16x16x16Remapped2
 from Kernel.Float16x16x16 import TMapper
 
-from simulators import simulateKernel
 from Platform.ContextQueue import ContextQueue
 from Platform.Platform import NumPyPlatform
 from Kernel.Float16x16x16 import BufferFactory

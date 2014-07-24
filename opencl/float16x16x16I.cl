@@ -33,9 +33,9 @@ __kernel void float16x16x16I(__global const float4 *T,
     int gId1 = get_global_id(1);
     int gId2 = get_global_id(2);
 
-	int gId0 = (gId0/64) * 512 + channel * 64 + gId0 % 64;
-	int gId1 = (gId1/64) * 512 + channel * 64 + gId1 % 64;
-	int gId2 = (gId2/64) * 512 + channel * 64 + gId2 % 64;
+	gId0 = (gId0/64) * 512 + channel * 64 + gId0 % 64;
+	gId1 = (gId1/64) * 512 + channel * 64 + gId1 % 64;
+	gId2 = (gId2/64) * 512 + channel * 64 + gId2 % 64;
 
     for(int r = 0; r < R; r++)
     {   
