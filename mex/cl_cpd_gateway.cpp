@@ -2,6 +2,7 @@
 #include <new>
 #include <map>
 #include <string>
+#include "command.hpp"
 
 //scalar, throwing new and it matching delete
 void* operator new (std::size_t n) throw(std::bad_alloc)
@@ -34,5 +35,14 @@ void operator delete (void* p, const std::nothrow_t&) throw()
 void mexFunction(int nlhs, mxArray *plhs[],
     int nrhs, const mxArray *prhs[])
     {
+		cl_cpd::UConverter cs;
+        if(cs.validate(prhs[0]))
+            mexPrintf("T");
+        else
+        {
+            mexPrintf("F");
+            return;
+        }
 
+        cl_cpd::U* u = cs.convert(prhs[0]);
     }

@@ -16,7 +16,10 @@ namespace cl_cpd
 	class NoDeviceFoundException: public ClCpdException {};
 	class InvalidSizeOfIException: public ClCpdException {};
 	class InvalidSizeOfUException: public ClCpdException {};
-
+	class SizesTandUDontMatchException: public ClCpdException {};
+	class SizesUDontMatchException: public ClCpdException {};
+	class KernelFileNotFoundException: public ClCpdException {};
+	class InvalidKernelNameException: public ClCpdException {};
 }
 
 #endif /* CL_CPD_EXCEPTIONS_HPP_ */

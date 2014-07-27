@@ -10,6 +10,8 @@
 
 #include <string>
 #include <exception>
+#include <fstream>
+#include <iostream>
 
 #include "cl.hpp"
 #include "exceptions.hpp"
@@ -19,14 +21,25 @@ namespace cl_cpd
 	struct T
 	{
 		std::vector<size_t> I;
-		double* T;
+		double* Ts;
 	};
 
 	struct U
 	{
 		size_t R;
 		std::vector<size_t> I;
-		std::vector<double*> U;
+		std::vector<double*> Us;
+
+		size_t size(size_t dim)
+		{
+			return sizeof(double) * R * I[dim];
+		}
+	};
+
+	struct Sum
+	{
+		size_t nbElements;
+		double* sum;
 	};
 
 	class ContextQueue
@@ -51,14 +64,15 @@ namespace cl_cpd
 	class Kernel
 	{
 	public:
-		Kernel(ContextQueue* cq);
+		Kernel(ContextQueue* cq): cq(cq), kernel(NULL), nanoTime(0) {}
 		void compile();
 		void run();
 		uint64_t getExecutionTimeLastRun();
 		virtual ~Kernel();
 
 	protected:
-		virtual std::string getCode() = 0;
+		std::string getCode();
+		virtual std::string getFile() = 0;
 
 	protected:
 		virtual cl::NDRange getLocalSize() = 0;
@@ -76,41 +90,68 @@ namespace cl_cpd
 	class BlockKernel: public Kernel
 	{
 	public:
-		void setT(cl::Buffer T);
-		void setI(std::vector<size_t> I);
-		bool isValidSizedI(std::vector<size_t> I);
+		BlockKernel(ContextQueue* cq): Kernel(cq), I(NULL) {}
+		void setT(cl::Buffer* T);
+		void setI(std::vector<size_t>* I);
+		bool isValidSizedI(std::vector<size_t>* I);
 	protected:
 		virtual u_int getnbDoublesPerWorkitem() = 0;
 		cl::NDRange getLocalSize();
 		cl::NDRange getGlobalSize();
 
 	private:
-		std::vector<size_t> I;
+		std::vector<size_t>* I;
 	};
 
 	class AbstractFKernel: public BlockKernel
 	{
 	public:
+		AbstractFKernel(ContextQueue* cq): BlockKernel(cq) {}
 		void setR(cl_int R);
-		void setU(std::vector<cl::Buffer> U);
-		bool hasUValidNbOfDims(std::vector<cl::Buffer> U);
-		void setSum(cl::Buffer sum);
+		void setU(std::vector<cl::Buffer*>* U);
+		bool hasUValidNbOfDims(std::vector<cl::Buffer*>* U);
+		void setSum(cl::Buffer* sum);
 
 	};
 
 	class AbstractTMapper: public BlockKernel
 	{
 	public:
-		void setTMapped(cl::Buffer TMapped);
+		void setTMapped(cl::Buffer* TMapped);
 	};
 
 	class AbstractBufferFactory
 	{
 	public:
-		AbstractBufferFactory(ContextQueue cq) : cq(cq){}
+		AbstractBufferFactory(ContextQueue* cq):
+			cq(cq), t(NULL), r(0), u(NULL), i(NULL), sum(NULL), sumArray(NULL){}
 
+		void init(T t, U u);
+		void updateU(U u);
+		void readSum();
+
+		cl::Buffer* getT(){return t;}
+		cl_int getR(){return r;}
+		std::vector<cl::Buffer*>* getU(){return u;}
+		std::vector<size_t>* getI(){return i;}
+		cl::Buffer* getSum(){return sum;}
+		Sum* getSumArray(){return sumArray;}
+
+		virtual ~AbstractBufferFactory();
+	protected:
+		cl::Buffer* createInitBuf(size_t nbBytes, void* p);
+		cl::Buffer* createReadWriteBuf(size_t nbBytes);
+		virtual u_int getnbDoublesPerWorkitem() = 0;
 	private:
-		ContextQueue cq;
+		ContextQueue* cq;
+		cl::Buffer* t;
+		cl_int r;
+		std::vector<cl::Buffer*>* u;
+		std::vector<size_t>* i;
+		cl::Buffer* sum;
+		Sum* sumArray;
+
+		void cleanUp();
 	};
 
 }

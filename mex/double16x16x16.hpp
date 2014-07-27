@@ -12,18 +12,36 @@
 
 namespace cl_cpd {
 
-class double16x16x16UnMapped: public AbstractFKernel
-{
-	u_int getnbDoublesPerWorkitem()
+	class Double16x16x16UnMapped: public AbstractFKernel
 	{
-		return 4;
-	}
+	public:
+		Double16x16x16UnMapped(ContextQueue* cq) : AbstractFKernel(cq) {}
 
-	std::string getCode()
+	protected:
+		u_int getnbDoublesPerWorkitem()
+		{
+			return 4;
+		}
+
+		std::string getFile()
+		{
+			return "double16x16x16";
+		}
+	};
+
+
+	class Double16x16x16BufferFactory: public AbstractBufferFactory
 	{
-		return "";
-	}
-};
+	public:
+		Double16x16x16BufferFactory(ContextQueue* cq):AbstractBufferFactory(cq){}
+	protected:
+		u_int getnbDoublesPerWorkitem()
+		{
+			return 4;
+		}
+	};
+
+
 
 }
 
