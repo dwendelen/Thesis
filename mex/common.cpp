@@ -36,6 +36,7 @@ void ContextQueue::init(bool profile)
 		ps[0].getDevices(CL_DEVICE_TYPE_GPU, &ds);
 	}
 	catch (cl::Error& e) {
+		cout << e.err();
 		if(e.err() != CL_DEVICE_NOT_FOUND)
 			throw e;
 	}
@@ -44,6 +45,7 @@ void ContextQueue::init(bool profile)
 		try {
 			ps[0].getDevices(CL_DEVICE_TYPE_CPU, &ds);
 		} catch (cl::Error& e) {
+			cout << e.err();
 			if(e.err() != CL_DEVICE_NOT_FOUND)
 				throw e;
 		}
@@ -166,7 +168,7 @@ void AbstractBufferFactory::readSum()
 
 void AbstractBufferFactory::cleanUp()
 {
-	delNull(r);
+	r = 0;
 	delNull((*u)[0]);
 	delNull((*u)[1]);
 	delNull((*u)[2]);

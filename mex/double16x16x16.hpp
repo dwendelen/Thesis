@@ -15,7 +15,7 @@ namespace cl_cpd {
 	class Double16x16x16UnMapped: public AbstractFKernel
 	{
 	public:
-		Double16x16x16UnMapped(ContextQueue* cq) : AbstractFKernel(cq) {}
+		Double16x16x16UnMapped(ContextQueue* cq): AbstractFKernel(cq) {}
 
 	protected:
 		u_int getnbDoublesPerWorkitem()

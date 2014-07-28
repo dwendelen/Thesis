@@ -12,112 +12,133 @@
 
 #include "mex.h"
 #include "common.hpp"
+#include "double16x16x16.hpp"
 
 namespace cl_cpd
 {
-	class Command
-	{
-	public:
-		virtual std::string getString() = 0;
-		virtual void handle(int nlhs, mxArray *plhs[],
-				int nrhs, const mxArray *prhs[]) = 0;
-		virtual ~Command() {}
-	};
-
-	template <typename TypeToConvertTo>
 	class Converter
 	{
 	public:
+		Converter(){}
 		virtual bool validate(const mxArray* input) = 0;
-		virtual TypeToConvertTo convert(const mxArray* input) = 0;
+		virtual ~Converter() {};
 	};
 
-	class CStringConverter: public Converter<char*>
+	class BoolConverter: public Converter
 	{
 	public:
-		bool validate(const mxArray* input)
-		{
-			if(!mxIsChar(input))
-				return false;
-
-			if(mxGetM(input) != 1)
-				return false;
-
-			return true;
-		}
-		char* convert(const mxArray* input)
-		{
-			return mxArrayToString(input);
-		}
+		BoolConverter() : Converter(){}
+		bool validate(const mxArray* input);
+		bool convert(const mxArray* input);
+		~BoolConverter(){}
 	};
 
-	class TConverter: public Converter<T*>
+	class CStringConverter: public Converter
 	{
 	public:
-
-		bool validate(const mxArray* input)
-		{
-			return mxIsDouble(input);
-		}
-		T* convert(const mxArray* input)
-		{
-			T* t = new T;
-			mwSize dims = mxGetNumberOfDimensions(input);
-			t->I = std::vector<size_t>(dims);
-			for(size_t i = 0; i < dims; i++)
-			{
-				t->I[i] = mxGetDimensions(input)[i];
-			}
-
-			t->Ts = mxGetPr(input);
-
-			return t;
-		}
+		bool validate(const mxArray* input);
+		char* convert(const mxArray* input);
+		~CStringConverter(){}
 	};
 
-	class UConverter: public Converter<U*>
+	class TConverter: public Converter
 	{
 	public:
+		bool validate(const mxArray* input);
+		T* convert(const mxArray* input);
+		~TConverter(){}
+	};
 
-		bool validate(const mxArray* input)
+	class UConverter: public Converter
+	{
+	public:
+		bool validate(const mxArray* input);
+		U* convert(const mxArray* input);
+		~UConverter(){}
+	};
+
+	class SumConverter
+	{
+	public:
+		mxArray* convert(const Sum* input);
+	};
+
+	class Command
+	{
+	public:
+		virtual std::string getString() = 0;//{return "ktoeuoeu";};
+		std::vector<Converter*> getConverters() {return converters;}
+		virtual std::vector<mxArray*> handle(std::vector<const mxArray*>) = 0;
+		virtual ~Command() {};
+	protected:
+		std::vector<Converter*> converters;
+	};
+
+	class InitCommand: public Command
+	{
+	public:
+		InitCommand()
 		{
-			if(!mxIsCell(input))
-				return false;
-
-			mwSize dims = mxGetNumberOfElements(input);
-            
-			if(dims < 1)
-				return false;
-
-			size_t R = mxGetN(mxGetCell(input, 0));
-
-			for(size_t i = 1; i < dims; i++)
-			{
-				if(mxGetN(mxGetCell(input, i)) != R)
-					return false;
-
-				if(!mxIsDouble(mxGetCell(input, i)))
-					return false;
-			}
-
-			return mxIsDouble(mxGetCell(input, 0));
+			converters = std::vector<Converter*>(1);
+			converters[0] = new BoolConverter();
 		}
-		U* convert(const mxArray* input)
-		{
-			U* u = new U;
-			mwSize dims = mxGetNumberOfElements(input);
-			u->I = std::vector<size_t>(dims);
-			u->Us = std::vector<double*>(dims);
-			for(size_t i = 0; i < dims; i++)
-			{
-				u->I[i] = mxGetM(mxGetCell(input, i));
-				u->Us[i] = mxGetPr(mxGetCell(input, i));
-			}
-			u->R = mxGetN(mxGetCell(input, 0));
 
-			return u;
+		std::string getString()
+		{
+			return "init";
+		}
+
+		std::vector<mxArray*> handle(std::vector<const mxArray*>);
+		~InitCommand()
+		{
+			delete converters[0];
 		}
 	};
+
+	class SetTCommand: public Command
+	{
+	public:
+		SetTCommand()
+		{
+			converters = std::vector<Converter*>(2);
+			converters[0] = new TConverter();
+			converters[1] = new UConverter();
+		}
+
+		std::string getString()
+		{
+			return "setT";
+		}
+
+		std::vector<mxArray*> handle(std::vector<const mxArray*>);
+
+		~SetTCommand()
+		{
+			delete converters[0];
+			delete converters[1];
+		}
+	};
+
+	class RunCommand: public Command
+	{
+	public:
+		RunCommand()
+		{
+			converters = std::vector<Converter *>(0);
+		}
+
+		std::string getString()
+		{
+			return "run";
+		}
+
+		std::vector<mxArray*> handle(std::vector<const mxArray*>);
+
+		~RunCommand() {}
+	};
+
+
 }
+
 
 #endif /* CL_CPD_COMMAND_HPP_ */

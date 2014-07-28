@@ -43,23 +43,24 @@ namespace cl_cpd
 	};
 
 	class ContextQueue
-	{
-	public:
-		ContextQueue();
-		void init();
-		void init(bool profile);
-		cl::Context* getContext();
-		cl::CommandQueue* getQueue();
-		std::vector<cl::Device>* getDevice();
-		bool isProfile();
-		~ContextQueue();
+		{
+		public:
+			ContextQueue();
+			void init();
+			void init(bool profile);
+			cl::Context* getContext();
+			cl::CommandQueue* getQueue();
+			std::vector<cl::Device>* getDevice();
+			bool isProfile();
+			~ContextQueue();
 
-	private:
-		bool profile;
-		cl::Context* context;
-		cl::CommandQueue* queue;
-		std::vector<cl::Device>* device;
-	};
+		private:
+			bool profile;
+			cl::Context* context;
+			cl::CommandQueue* queue;
+			std::vector<cl::Device>* device;
+		};
+
 
 	class Kernel
 	{
