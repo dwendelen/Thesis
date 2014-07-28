@@ -13,6 +13,7 @@ using namespace cl_cpd;
 
 int main()
 {
+	try{
 	T t;
 	t.Ts = new double[32*16*64];
 	t.I = std::vector<size_t>();
@@ -48,6 +49,15 @@ int main()
 	f.setSum(b.getSum());
 
 	f.run();
+
+
+	}
+	catch (cl::Error &e)
+	{
+		std::cout << "Exception OpenCL: " << e.what() << " code: " << e.err();
+	}
+
+	std::cout << "OK";
 }
 
 

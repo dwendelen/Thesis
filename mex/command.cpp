@@ -10,22 +10,29 @@
 
 namespace cl_cpd
 {
-	ContextQueue cq;
-	Double16x16x16UnMapped f(&cq);
-	Double16x16x16BufferFactory b(&cq);
+
+	ContextQueue *cq = NULL;
+	Double16x16x16UnMapped *f = NULL;
+	Double16x16x16BufferFactory *b = NULL;
 
 	std::vector<mxArray*> InitCommand::handle(std::vector<const mxArray*> input)
 	{
-		std::cout << "enter init";
 		bool profile = BoolConverter().convert(input[0]);
         
-        cq = ContextQueue();
-		cq.init(profile);
-        
-        f = Double16x16x16UnMapped(&cq);
-		f.compile();
+		std::cout << profile;
 
-		std::cout << "exit init";
+		delete cq;
+		delete f;
+
+        cq = new ContextQueue();
+		cq->init(profile);
+        
+        f = new Double16x16x16UnMapped(cq);
+		f->compile();
+
+        delete b;
+        b = new Double16x16x16BufferFactory(cq);
+        
 		return std::vector<mxArray*>(0);
 	}
 
@@ -34,14 +41,13 @@ namespace cl_cpd
 		T* t = TConverter().convert(input[0]);
 		U* u = UConverter().convert(input[1]);
         
-        b = Double16x16x16BufferFactory(&cq);
-		b.init(*t, *u);
+		b->init(*t, *u);
 
-		f.setT(b.getT());
-		f.setR(b.getR());
-		f.setU(b.getU());
-		f.setI(b.getI());
-		f.setSum(b.getSum());
+		f->setT(b->getT());
+		f->setR(b->getR());
+		f->setU(b->getU());
+		f->setI(b->getI());
+		f->setSum(b->getSum());
 
 		delete t;
 		delete u;
@@ -51,10 +57,10 @@ namespace cl_cpd
 
 	std::vector<mxArray*> RunCommand::handle(std::vector<const mxArray*> input)
 	{
-		f.run();
+		f->run();
 
-		b.readSum();
-		mxArray* s = SumConverter().convert(b.getSumArray());
+		b->readSum();
+		mxArray* s = SumConverter().convert(b->getSumArray());
 
 		std::vector<mxArray*> r = std::vector<mxArray*>(1);
 		r[0] = s;

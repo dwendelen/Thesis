@@ -11,11 +11,15 @@
 #include <iostream>
 
 #include "mex.h"
-#include "common.hpp"
-#include "double16x16x16.hpp"
+#include "../cpp/common.hpp"
+#include "../cpp/double16x16x16.hpp"
 
 namespace cl_cpd
 {
+	extern ContextQueue *cq;
+	extern Double16x16x16UnMapped *f;
+	extern Double16x16x16BufferFactory *b;
+
 	class Converter
 	{
 	public:
@@ -66,7 +70,7 @@ namespace cl_cpd
 	class Command
 	{
 	public:
-		virtual std::string getString() = 0;//{return "ktoeuoeu";};
+		virtual std::string getString() = 0;
 		std::vector<Converter*> getConverters() {return converters;}
 		virtual std::vector<mxArray*> handle(std::vector<const mxArray*>) = 0;
 		virtual ~Command() {};

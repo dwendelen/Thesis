@@ -1,1 +1,1 @@
-mex cl_cpd_gateway.cpp command.cpp common.cpp -lOpenCL -g
+mex -L/opt/intel/opencl/lib64 -lOpenCL cl_cpd_gateway.cpp command.cpp ../cpp/common.cpp

@@ -7,6 +7,7 @@ void* operator new (std::size_t n) throw(std::bad_alloc)
 {
     //mexPrintf("New");
     void* p = mxMalloc(n);
+    mexMakeMemoryPersistent(p);
     if(p == NULL)
         throw std::bad_alloc();
 
@@ -20,14 +21,40 @@ void operator delete (void* p) throw()
 //scalar, nothrow new and it matching delete
 void* operator new (std::size_t n,const std::nothrow_t&) throw()
 {
-    //mexPrintf("New");
-    return mxMalloc(n);
+    void* p = mxMalloc(n);
+    mexMakeMemoryPersistent(p);
+    return p;
 } 
 void operator delete (void* p, const std::nothrow_t&) throw()
 {
     //mexPrintf("Del");
     mxFree(p);
 }
+
+//array throwing new and matching delete[]
+void* operator new[](std::size_t size) throw(std::bad_alloc)
+{
+	mexPrintf("new[]");
+	return operator new(size);
+}
+void operator delete[](void* ptr) throw()
+{
+	mexPrintf("delete[]");
+	operator delete(ptr);
+}
+
+//array, nothrow new and matching delete[]
+void* operator new [](std::size_t size, const std::nothrow_t&) throw()
+{
+	mexPrintf("delete[]");
+	return operator new(size, std::nothrow_t());
+}
+void operator delete[](void* ptr, const std::nothrow_t&) throw()
+{
+	mexPrintf("delete[]");
+	operator delete[](ptr, std::nothrow_t());
+}
+
 
 void CommandRegister::add(Command* c)
 {
@@ -51,9 +78,17 @@ Command* CommandRegister::get(std::string command)
 	return m[command];
 }
 
+void clean()
+{
+	delete f;
+	delete b;
+	delete cq;
+}
+
 void mexFunction(int nlhs, mxArray *plhs[],
     int nrhs, const mxArray *prhs[])
     {
+		mexAtExit(clean);
 		try{
 			CommandRegister* cr = buildCommandRegister();
 			Command* command = getCommand(cr, nrhs, prhs);

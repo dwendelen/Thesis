@@ -36,7 +36,6 @@ void ContextQueue::init(bool profile)
 		ps[0].getDevices(CL_DEVICE_TYPE_GPU, &ds);
 	}
 	catch (cl::Error& e) {
-		cout << e.err();
 		if(e.err() != CL_DEVICE_NOT_FOUND)
 			throw e;
 	}
@@ -45,7 +44,6 @@ void ContextQueue::init(bool profile)
 		try {
 			ps[0].getDevices(CL_DEVICE_TYPE_CPU, &ds);
 		} catch (cl::Error& e) {
-			cout << e.err();
 			if(e.err() != CL_DEVICE_NOT_FOUND)
 				throw e;
 		}
@@ -169,14 +167,21 @@ void AbstractBufferFactory::readSum()
 void AbstractBufferFactory::cleanUp()
 {
 	r = 0;
-	delNull((*u)[0]);
-	delNull((*u)[1]);
-	delNull((*u)[2]);
-	delNull(u);
+	if(u != NULL)
+	{
+		delNull((*u)[0]);
+		delNull((*u)[1]);
+		delNull((*u)[2]);
+		delNull(u);
+	}
 	delNull(i);
 	delNull(sum);
-	delNull(sumArray->sum);
-	delNull(sumArray);
+
+	if(sumArray != NULL)
+	{
+		delNull(sumArray->sum);
+		delNull(sumArray);
+	}
 }
 
 AbstractBufferFactory::~AbstractBufferFactory()
@@ -222,7 +227,6 @@ void Kernel::run()
 
 	if(cq->isProfile())
 	{
-		cout << "Prof";
 		e.wait();
 		nanoTime = e.getProfilingInfo<CL_PROFILING_COMMAND_END>()
 				- e.getProfilingInfo<CL_PROFILING_COMMAND_START>();
