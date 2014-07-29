@@ -1,16 +1,16 @@
 #pragma OPENCL EXTENSION cl_amd_printf : enable
 
 __attribute__((reqd_work_group_size(4, 4, 4)))
-__kernel void Kernel(__global const double4 *T,
-    __global const double4 *U0, __global const double4 *U1, __global const double4 *U2,
+__kernel void Kernel(__global const double2 *T,
+    __global const double2 *U0, __global const double2 *U1, __global const double2 *U2,
     int R, __global double *sum)
 {   
     __local double l[128];
     
-    double4 a;
-    double4 b[4];
-    double4 c[16];
-    double4 f;
+    double2 a;
+    double2 b[4];
+    double2 c[16];
+    double2 f;
     
     int gIdx = get_group_id(0) + get_num_groups(0) * (get_group_id(1) + get_num_groups(1) * get_group_id(2));
     int channel = gIdx % 8;
@@ -80,8 +80,8 @@ __kernel void Kernel(__global const double4 *T,
     //Calculate first index
     int idx =  8*1024 * (gIdx/8) + 16*channel + 128*lIdx;   
 
-	double4 s = 0;
-	double4 t;
+	double2 s = 0;
+	double2 t;
 
     #pragma unroll
     for(int i = 0; i < 16; i++)

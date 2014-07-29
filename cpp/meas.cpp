@@ -11,6 +11,7 @@
 #include "double16x16x16R.hpp"
 #include "double16x16x16I.hpp"
 #include "double8x8x8R.hpp"
+#include "double8x8x8I.hpp"
 
 using namespace cl_cpd;
 using namespace std;
@@ -24,6 +25,7 @@ Double16x16x16Isolated* i = NULL;
 Double16x16x16BufferFactory* b = NULL;
 
 Double8x8x8ReMapped* r8 = NULL;
+Double8x8x8Isolated* i8 = NULL;
 Double8x8x8BufferFactory* b8 = NULL;
 
 void run(Kernel* kernel, string name, double ops){
@@ -102,7 +104,14 @@ void doo(int R, int I)
 	r8->setI(b->getI());
 	r8->setSum(b->getSum());
 
+	i8->setT(b->getT());
+	i8->setR(b->getR());
+	i8->setU(b->getU());
+	i8->setI(b->getI());
+	i8->setSum(b->getSum());
+
 	run(r8, "8x8x8 Remapped", ops);
+	run(i8, "8x8x8 Isolated", ops);
 }
 
 void dooo()
@@ -121,6 +130,8 @@ void dooo()
 	i->compile();
 	r8 = new Double8x8x8ReMapped(cq);
 	r8->compile();
+	i8 = new Double8x8x8Isolated(cq);
+	i8->compile();
 
 	doo(4,1);
 	doo(6000,1);
@@ -155,6 +166,7 @@ void dooo()
 	delete i;
 	delete b8;
 	delete r8;
+	delete i8;
 }
 int main()
 {
