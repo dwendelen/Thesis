@@ -12,23 +12,25 @@
 using namespace cl_cpd;
 using namespace std;
 
-double bigT[500*500*500];
-double bigU[500*10000];
+double bigT[320*320*320];
+double bigU[320*10000];
 
 Double16x16x16UnMapped* f = NULL;
 Double16x16x16BufferFactory* b = NULL;
 
-void run(Kernel* kernel, string name){
+void run(Kernel* kernel, string name, double ops){
 	cout << name << "\n";
 
 	kernel->run();
 	kernel->run();
 
 	cout << (kernel->getExecutionTimeLastRun() / 1000000) << "\n";
+	cout << (ops/kernel->getExecutionTimeLastRun()) << "\n";
 }
 
 void doo(int R, int I)
 {
+    double ops = ((double)R + 2) * (double)I*(double)I*(double)I;
 	cout << "\nR: " << R << " I: " << I << "\n";
 
 	if(I % 16 != 0)
@@ -56,7 +58,7 @@ void doo(int R, int I)
 	f->setI(b->getI());
 	f->setSum(b->getSum());
 
-	run(f, "16x16x16 Unmapped");
+	run(f, "16x16x16 Unmapped", ops);
 }
 
 void dooo()
@@ -77,24 +79,24 @@ void dooo()
 
 	doo(16,100);
 	doo(4,100);
-	doo(16,360);
-	doo(4,360);
+	doo(16,320);
+	doo(4,320);
 
 	doo(6000,16);
 	doo(6000,100);
-	doo(6000,360);
+	doo(6000,320);
 
-	doo(1024,360);
-	doo(100,360);
-	doo(128,360);
-	doo(1,360);
+	doo(1024,320);
+	doo(100,320);
+	doo(128,320);
+	doo(1,320);
 
 	doo(1,1);
 	doo(1,4);
 	doo(1,16);
 	doo(1,64);
 	doo(1,256);
-	doo(1,400);
+	doo(1,320);
 
 	delete cq;
 	delete b;
