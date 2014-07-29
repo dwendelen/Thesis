@@ -121,8 +121,5 @@ int main()
 	{
 		cerr << "Exception OpenCL: " << e.what() << " code: " << e.err();
 	}
-
-	delete b;
-	delete f;
 }
 
