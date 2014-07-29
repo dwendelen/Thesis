@@ -8,8 +8,8 @@ __kernel void Kernel(__global const double2 *T,
     __local double l[128];
     
     double2 a;
-    double2 b[4];
-    double2 c[16];
+    double2 b[2];
+    double2 c[4];
     double2 f;
     
     int gIdx = get_group_id(0) + get_num_groups(0) * (get_group_id(1) + get_num_groups(1) * get_group_id(2));
@@ -24,7 +24,7 @@ __kernel void Kernel(__global const double2 *T,
     int jump2 = 8 * I2;
     
     #pragma unroll
-    for(int i = 0; i < 16; i++)
+    for(int i = 0; i < 4; i++)
     {
         c[i] = 0;
     }
@@ -49,22 +49,16 @@ __kernel void Kernel(__global const double2 *T,
         
         b[0] = a * f.x;
         b[1] = a * f.y;
-        b[2] = a * f.z;
-        b[3] = a * f.w;
 
         //barrier(CLK_LOCAL_MEM_FENCE);
         
         //Fetch laatste 16 met n=2
         f = U2[gId2];
         
-        #pragma unroll
-        for(int i = 0; i < 4; i++)
-        {
-            c[i +  0] += b[i] * f.x;
-            c[i +  4] += b[i] * f.y;
-            c[i +  8] += b[i] * f.z;
-            c[i + 12] += b[i] * f.w;
-        }
+        c[0] += b[0] * f.x;
+        c[1] += b[1] * f.x;
+        c[2] += b[0] * f.y;
+        c[3] += b[1] * f.y;
         
         gId0 += jump0;
         gId1 += jump1;
@@ -94,7 +88,7 @@ __kernel void Kernel(__global const double2 *T,
         idx++;
     }
 
-    l[lIdx] = s.x + s.y + s.z + s.w;
+    l[lIdx] = s.x + s.y;
     
     barrier(CLK_LOCAL_MEM_FENCE);
     
