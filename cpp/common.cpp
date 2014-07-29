@@ -232,7 +232,7 @@ void Kernel::run()
 	}
 
 }
-uint64_t Kernel::getExecutionTimeLastRun()
+double Kernel::getExecutionTimeLastRun()
 {
 	return nanoTime;
 }

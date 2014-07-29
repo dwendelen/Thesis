@@ -68,7 +68,7 @@ namespace cl_cpd
 		Kernel(ContextQueue* cq): cq(cq), kernel(NULL), nanoTime(0) {}
 		void compile();
 		void run();
-		uint64_t getExecutionTimeLastRun();
+		double getExecutionTimeLastRun();
 		virtual ~Kernel();
 
 	protected:
@@ -83,7 +83,7 @@ namespace cl_cpd
 	private:
 		ContextQueue* cq;
 		cl::Kernel* kernel;
-		uint64_t nanoTime;
+		double nanoTime;
 	};
 
 
