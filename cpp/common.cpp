@@ -295,7 +295,7 @@ cl::NDRange BlockKernel::getLocalSize()
 
 cl::NDRange BlockKernel::getGlobalSize()
 {
-	return cl::NDRange((*I)[0]/4,(*I)[1]/4,(*I)[2]/4);
+	return cl::NDRange((*I)[0]/getnbDoublesPerWorkitem(),(*I)[1]/getnbDoublesPerWorkitem,(*I)[2]/getnbDoublesPerWorkitem);
 }
 
 void AbstractFKernel::setR(cl_int R)
