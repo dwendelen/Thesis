@@ -203,7 +203,7 @@ void Kernel::compile()
 	cl::Program p(*cq->getContext(), s);
 	try{
 	p.build(*cq->getDevice());
-	}catch (cl::Error e) {
+	}catch (cl::Error &e) {
 		cout << p.getBuildInfo<CL_PROGRAM_BUILD_LOG>((*cq->getDevice())[0]);
 	}
 	cout << p.getBuildInfo<CL_PROGRAM_BUILD_LOG>((*cq->getDevice())[0]);
