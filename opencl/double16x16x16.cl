@@ -123,8 +123,8 @@ __kernel void Kernel(__global const double4 *T,
     
     
     //By doing the index times two, every work-item uses another bank (2.411778 -> 2.343779) 
-    int index = 2*(get_local_id(0) + 4 * get_local_id(1) + 16 * get_local_id(2));
-    l[index] = s.x + s.y + s.z + s.w;
+    int lIdx = get_local_id(0) + 4 * get_local_id(1) + 16 * get_local_id(2);
+    l[lIdx] = s.x + s.y + s.z + s.w;
     
     barrier(CLK_LOCAL_MEM_FENCE);
     
@@ -136,12 +136,12 @@ __kernel void Kernel(__global const double4 *T,
     {
         double sss = 0;
         #pragma unroll
-        for(int i = 0; i < 2*64; i+=2)
+        for(int i = 0; i < 64; i++)
         {
             sss += l[i];
         }
         
-        index = get_group_id(0) + get_num_groups(0) * (get_group_id(1) + get_num_groups(1) * get_group_id(2));
-        sum[index] = sss;
+        int gIdx = get_group_id(0) + get_num_groups(0) * (get_group_id(1) + get_num_groups(1) * get_group_id(2));
+        sum[gIdx] = sss;
     }
 }

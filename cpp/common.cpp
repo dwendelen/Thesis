@@ -201,7 +201,13 @@ void Kernel::compile()
 	cl::Program::Sources s;
 	s.push_back(make_pair(c.c_str(), c.length()));
 	cl::Program p(*cq->getContext(), s);
+	try{
 	p.build(*cq->getDevice());
+	}catch (cl::Error e) {
+		cout << p.getBuildInfo<CL_PROGRAM_BUILD_LOG>((*cq->getDevice())[0]);
+	}
+	cout << p.getBuildInfo<CL_PROGRAM_BUILD_LOG>((*cq->getDevice())[0]);
+
 	try {
 		this->kernel = new cl::Kernel(p, "Kernel");
 	} catch (cl::Error &e) {

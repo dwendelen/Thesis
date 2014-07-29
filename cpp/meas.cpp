@@ -9,6 +9,7 @@
 
 #include "double16x16x16.hpp"
 #include "double16x16x16R.hpp"
+#include "double8x8x8R.hpp"
 
 using namespace cl_cpd;
 using namespace std;
@@ -19,6 +20,9 @@ double bigU[320*10000];
 Double16x16x16UnMapped* f = NULL;
 Double16x16x16ReMapped* r = NULL;
 Double16x16x16BufferFactory* b = NULL;
+
+Double8x8x8ReMapped* r8 = NULL;
+Double8x8x8BufferFactory* b8 = NULL;
 
 void run(Kernel* kernel, string name, double ops){
 	cout << name << "\n";
@@ -35,15 +39,16 @@ void doo(int R, int I)
     double ops = ((double)R + 2) * (double)I*(double)I*(double)I;
 	cout << "\nR: " << R << " I: " << I << "\n";
 
+	int I16 = I;
 	if(I % 16 != 0)
-		I = (I/16)*16 + 16;
+		I16 = (I/16)*16 + 16;
 
 	T t;
 	t.Ts = bigT;
 	t.I = vector<size_t>();
-	t.I.push_back(I);
-	t.I.push_back(I);
-	t.I.push_back(I);
+	t.I.push_back(I16);
+	t.I.push_back(I16);
+	t.I.push_back(I16);
 
 	U u;
 	u.Us = vector<double*>();
@@ -68,6 +73,25 @@ void doo(int R, int I)
 
 	run(f, "16x16x16 Unmapped", ops);
 	run(r, "16x16x16 Remapped", ops);
+
+	int I8 = I;
+	if(I % 8 != 0)
+		I8 = (I/8)*8 + 8;
+
+	t.I = vector<size_t>();
+	t.I.push_back(I8);
+	t.I.push_back(I8);
+	t.I.push_back(I8);
+	u.I = t.I;
+
+	b8->init(t, u);
+	r8->setT(b->getT());
+	r8->setR(b->getR());
+	r8->setU(b->getU());
+	r8->setI(b->getI());
+	r8->setSum(b->getSum());
+
+	run(r8, "8x8x8 Remapped", ops);
 }
 
 void dooo()
@@ -76,11 +100,14 @@ void dooo()
 	cq->init(true);
 
 	b = new Double16x16x16BufferFactory(cq);
+	b8 = new Double8x8x8BufferFactory(cq);
 
 	f = new Double16x16x16UnMapped(cq);
 	f->compile();
 	r = new Double16x16x16ReMapped(cq);
 	r->compile();
+	r8 = new Double8x8x8ReMapped(cq);
+	r8->compile();
 
 	doo(4,1);
 	doo(6000,1);
@@ -111,6 +138,9 @@ void dooo()
 	delete cq;
 	delete b;
 	delete f;
+	delete r;
+	delete b8;
+	delete r8;
 }
 int main()
 {
