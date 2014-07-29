@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "double16x16x16.hpp"
+#include "double16x16x16R.hpp"
 
 using namespace cl_cpd;
 using namespace std;
@@ -16,6 +17,7 @@ double bigT[500*500*500];
 double bigU[500*10000];
 
 Double16x16x16UnMapped* f = NULL;
+Double16x16x16ReMapped* r = NULL;
 Double16x16x16BufferFactory* b = NULL;
 
 void run(Kernel* kernel, string name){
@@ -56,6 +58,12 @@ void doo(int R, int I)
 	f->setI(b->getI());
 	f->setSum(b->getSum());
 
+	r->setT(b->getT());
+	r->setR(b->getR());
+	r->setU(b->getU());
+	r->setI(b->getI());
+	r->setSum(b->getSum());
+
 	run(f, "16x16x16 Unmapped");
 }
 
@@ -68,7 +76,8 @@ void dooo()
 
 	f = new Double16x16x16UnMapped(cq);
 	f->compile();
-
+	r = new Double16x16x16ReMapped(cq);
+	r->compile();
 
 	doo(4,1);
 	doo(6000,1);

@@ -171,6 +171,7 @@ void AbstractBufferFactory::readSum(Sum sumArray)
 
 void AbstractBufferFactory::cleanUp()
 {
+	delNull(t);
 	r = 0;
 	if(u != NULL)
 	{
