@@ -125,18 +125,18 @@ namespace cl_cpd
 	{
 	public:
 		AbstractBufferFactory(ContextQueue* cq):
-			cq(cq), t(NULL), r(0), u(NULL), i(NULL), sum(NULL), sumArray(NULL){}
+			cq(cq), t(NULL), r(0), u(NULL), i(NULL), sum(NULL){}
 
 		void init(T t, U u);
 		void updateU(U u);
-		void readSum();
+		void readSum(Sum sumArray);
 
 		cl::Buffer* getT(){return t;}
 		cl_int getR(){return r;}
 		std::vector<cl::Buffer*>* getU(){return u;}
 		std::vector<size_t>* getI(){return i;}
 		cl::Buffer* getSum(){return sum;}
-		Sum* getSumArray(){return sumArray;}
+		size_t getNbElementsInSum(){return nbElementsInSum;}
 
 		virtual ~AbstractBufferFactory();
 	protected:
@@ -150,7 +150,7 @@ namespace cl_cpd
 		std::vector<cl::Buffer*>* u;
 		std::vector<size_t>* i;
 		cl::Buffer* sum;
-		Sum* sumArray;
+		size_t nbElementsInSum;
 
 		void cleanUp();
 	};

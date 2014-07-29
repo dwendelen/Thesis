@@ -35,15 +35,15 @@ private:
 	std::map<std::string, cl_cpd::Command*> m;
 };
 
-void mexFunction(int nlhs, mxArray *plhs[],
-    int nrhs, const mxArray *prhs[]);
+void mexFunction(int nbOutput, mxArray *outputArray[],
+    int nbInput, const mxArray *inputArray[]);
 CommandRegister* buildCommandRegister();
 
 
-cl_cpd::Command* getCommand(CommandRegister* cr, int nrhs, const mxArray *prhs[]);
+cl_cpd::Command* getCommand(CommandRegister* cr, int nbInput, const mxArray *inputArray[]);
 
-std::vector<const mxArray *> validateAndVectoriseParameters
-	(cl_cpd::Command * command, int nrhs, const mxArray * prhs[]);
+void validateAndFillInput
+	(cl_cpd::Command * command, int nbInput, const mxArray * inputArray[]);
 
-
+void fillOutputArray(int nbOutput, mxArray *outputArray[], std::vector<mxArray *> output);
 #endif /* CL_CPD_GATEWAY_HPP_ */

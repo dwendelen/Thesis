@@ -118,13 +118,13 @@ void AbstractBufferFactory::init(T t, U u)
 		throw SizesUDontMatchException();
 
 	if(t.I[0] % (getnbDoublesPerWorkitem() * 4) != 0)
-			throw InvalidSizeOfIException();
+			throw InvalidSizeOfIException(getnbDoublesPerWorkitem() * 4);
 
 	if(t.I[1] % (getnbDoublesPerWorkitem() * 4) != 0)
-			throw InvalidSizeOfIException();
+			throw InvalidSizeOfIException(getnbDoublesPerWorkitem() * 4);
 
 	if(t.I[2] % (getnbDoublesPerWorkitem() * 4) != 0)
-			throw InvalidSizeOfIException();
+			throw InvalidSizeOfIException(getnbDoublesPerWorkitem() * 4);
 
 	cleanUp();
 
@@ -144,22 +144,27 @@ void AbstractBufferFactory::init(T t, U u)
 	s = (t.I[0]*t.I[1]*t.I[2])/(4*getnbDoublesPerWorkitem()*4*getnbDoublesPerWorkitem()*4*getnbDoublesPerWorkitem());
 	this->sum = createReadWriteBuf(sizeof(double) * s);
 
-	sumArray = new Sum();
-	sumArray->nbElements = s;
-	sumArray->sum = new double[s];
+	nbElementsInSum = s;
 }
+
+
 
 void AbstractBufferFactory::updateU(U u)
 {
+	cout << 0;
 	cq->getQueue()->enqueueWriteBuffer(*(*this->u)[0],CL_FALSE, 0, u.size(0), u.Us[0]);
+	cout << 4;
 	cq->getQueue()->enqueueWriteBuffer(*(*this->u)[1],CL_FALSE, 0, u.size(1), u.Us[1]);
+	cout << 5;
 	cq->getQueue()->enqueueWriteBuffer(*(*this->u)[2],CL_FALSE, 0, u.size(2), u.Us[2]);
 }
 
-void AbstractBufferFactory::readSum()
+void AbstractBufferFactory::readSum(Sum sumArray)
 {
+	std::cout << "  readsum   ";
 	cq->getQueue()->enqueueReadBuffer(*sum, CL_TRUE, 0,
-			sumArray->nbElements*sizeof(double), sumArray->sum);
+			sumArray.nbElements*sizeof(double), sumArray.sum);
+	std::cout << "  readsum eone  ";
 }
 
 #define delNull(x) {delete x; x = NULL;}
@@ -176,12 +181,6 @@ void AbstractBufferFactory::cleanUp()
 	}
 	delNull(i);
 	delNull(sum);
-
-	if(sumArray != NULL)
-	{
-		delNull(sumArray->sum);
-		delNull(sumArray);
-	}
 }
 
 AbstractBufferFactory::~AbstractBufferFactory()
@@ -200,18 +199,18 @@ void Kernel::compile()
 		this->kernel = new cl::Kernel(p, "Kernel");
 	} catch (cl::Error &e) {
 		if(e.err() == CL_INVALID_KERNEL_NAME)
-			throw InvalidKernelNameException();
+			throw InvalidKernelNameException("Kernel");
 		else
 			throw e;
 	}
 }
 string Kernel::getCode()
 {
-	string f = "opencl/" + getFile() + ".cl";
+	string f = "../opencl/" + getFile() + ".cl";
 	ifstream ifs (f.c_str());
 
 	if(!ifs.good())
-		throw KernelFileNotFoundException();
+		throw KernelFileNotFoundException(f.c_str());
 
 	string content( (std::istreambuf_iterator<char>(ifs) ),
 	                       (std::istreambuf_iterator<char>()) );
@@ -254,7 +253,7 @@ void BlockKernel::setT(cl::Buffer* T)
 void BlockKernel::setI(vector<size_t>* I)
 {
 	if(!isValidSizedI(I))
-		throw InvalidSizeOfIException();
+		throw InvalidSizeOfIException(getnbDoublesPerWorkitem() * 4);
 
 	this->I = I;
 }

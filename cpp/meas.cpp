@@ -41,6 +41,9 @@ int main()
 	Double16x16x16UnMapped f (&cq);
 	f.compile();
 
+	Sum s;
+	s.nbElements = 8;
+	s.sum = new double[100];
 
 	f.setT(b.getT());
 	f.setR(b.getR());
@@ -49,7 +52,19 @@ int main()
 	f.setSum(b.getSum());
 
 	f.run();
+	b.readSum(s);
 
+	std::cout << "\n" << s.sum[0] << "\n";
+
+	u.Us[0][0] = 1.0;
+	u.Us[1][0] = 1.0;
+	u.Us[2][0] = 1.0;
+
+	b.updateU(u);
+	f.run();
+	b.readSum(s);
+
+	std::cout << "\n" << s.sum[0] << "\n";
 
 	}
 	catch (cl::Error &e)

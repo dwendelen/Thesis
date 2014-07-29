@@ -20,45 +20,51 @@ namespace cl_cpd
 	extern Double16x16x16UnMapped *f;
 	extern Double16x16x16BufferFactory *b;
 
-	class Converter
+	class Parameter
 	{
 	public:
-		Converter(){}
 		virtual bool validate(const mxArray* input) = 0;
-		virtual ~Converter() {};
+		virtual void setVal(const mxArray* input) = 0;
 	};
 
-	class BoolConverter: public Converter
+	template<typename T>
+	class XParameter: Parameter
 	{
 	public:
-		BoolConverter() : Converter(){}
+		void setVal(const mxArray* input)
+		{
+			val = convert(input);
+		}
+		virtual T convert(const mxArray* input) = 0;
+		T val;
+	};
+
+	class BoolParameter: public XParameter<bool>
+	{
+	public:
 		bool validate(const mxArray* input);
 		bool convert(const mxArray* input);
-		~BoolConverter(){}
 	};
 
-	class CStringConverter: public Converter
+	class StringParameter: public XParameter<std::string>
 	{
 	public:
 		bool validate(const mxArray* input);
-		char* convert(const mxArray* input);
-		~CStringConverter(){}
+		std::string convert(const mxArray* input);
 	};
 
-	class TConverter: public Converter
+	class TParameter: public XParameter<T>
 	{
 	public:
 		bool validate(const mxArray* input);
-		T* convert(const mxArray* input);
-		~TConverter(){}
+		T convert(const mxArray* input);
 	};
 
-	class UConverter: public Converter
+	class UParameter: public XParameter<U>
 	{
 	public:
 		bool validate(const mxArray* input);
-		U* convert(const mxArray* input);
-		~UConverter(){}
+		U convert(const mxArray* input);
 	};
 
 	class SumConverter
@@ -71,76 +77,102 @@ namespace cl_cpd
 	{
 	public:
 		virtual std::string getString() = 0;
-		std::vector<Converter*> getConverters() {return converters;}
-		virtual std::vector<mxArray*> handle(std::vector<const mxArray*>) = 0;
+		virtual std::vector<Parameter*> getParameters() = 0;
+		virtual std::vector<mxArray*> handle() = 0;
 		virtual ~Command() {};
-	protected:
-		std::vector<Converter*> converters;
 	};
 
 	class InitCommand: public Command
 	{
+		BoolParameter profile;
 	public:
-		InitCommand()
-		{
-			converters = std::vector<Converter*>(1);
-			converters[0] = new BoolConverter();
-		}
-
 		std::string getString()
 		{
 			return "init";
 		}
 
-		std::vector<mxArray*> handle(std::vector<const mxArray*>);
-		~InitCommand()
+		std::vector<Parameter*> getParameters()
 		{
-			delete converters[0];
+			std::vector<Parameter*> r(1);
+			r[0] = (Parameter*)&profile;
+			return r;
 		}
+
+		std::vector<mxArray*> handle();
+
+		~InitCommand()
+		{}
 	};
 
 	class SetTCommand: public Command
 	{
+		TParameter t;
+		UParameter u;
 	public:
-		SetTCommand()
-		{
-			converters = std::vector<Converter*>(2);
-			converters[0] = new TConverter();
-			converters[1] = new UConverter();
-		}
-
 		std::string getString()
 		{
-			return "setT";
+			return "setTAndU";
 		}
 
-		std::vector<mxArray*> handle(std::vector<const mxArray*>);
-
-		~SetTCommand()
+		std::vector<Parameter*> getParameters()
 		{
-			delete converters[0];
-			delete converters[1];
+			std::vector<Parameter*> r(2);
+			r[0] = (Parameter*)&t;
+			r[1] = (Parameter*)&u;
+			return r;
 		}
+
+		std::vector<mxArray*> handle();
+	};
+
+	class SetUCommand: public Command
+	{
+		UParameter u;
+	public:
+		std::string getString()
+		{
+			return "setU";
+		}
+
+		std::vector<Parameter*> getParameters()
+		{
+			std::vector<Parameter*> r(1);
+			r[0] = (Parameter*)&u;
+			return r;
+		}
+
+		std::vector<mxArray*> handle();
 	};
 
 	class RunCommand: public Command
 	{
 	public:
-		RunCommand()
-		{
-			converters = std::vector<Converter *>(0);
-		}
-
 		std::string getString()
 		{
 			return "run";
 		}
+		std::vector<Parameter*> getParameters()
+		{
+			return std::vector<Parameter*>(0);
+		}
 
-		std::vector<mxArray*> handle(std::vector<const mxArray*>);
-
-		~RunCommand() {}
+		std::vector<mxArray*> handle();
 	};
 
+	class TimeCommand: public Command
+	{
+	public:
+		std::string getString()
+		{
+			return "time";
+		}
+		std::vector<Parameter*> getParameters()
+		{
+			return std::vector<Parameter*>(0);
+		}
+
+		std::vector<mxArray*> handle();
+	};
 
 }
 

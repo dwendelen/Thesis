@@ -15,33 +15,29 @@ namespace cl_cpd
 	Double16x16x16UnMapped *f = NULL;
 	Double16x16x16BufferFactory *b = NULL;
 
-	std::vector<mxArray*> InitCommand::handle(std::vector<const mxArray*> input)
+	std::vector<mxArray*> InitCommand::handle()
 	{
-		bool profile = BoolConverter().convert(input[0]);
-        
-		std::cout << profile;
-
 		delete cq;
 		delete f;
 
         cq = new ContextQueue();
-		cq->init(profile);
-        
+		cq->init(profile.val);
+
         f = new Double16x16x16UnMapped(cq);
 		f->compile();
 
         delete b;
         b = new Double16x16x16BufferFactory(cq);
-        
+
 		return std::vector<mxArray*>(0);
 	}
 
-	std::vector<mxArray*> SetTCommand::handle(std::vector<const mxArray*> input)
+	std::vector<mxArray*> SetTCommand::handle()
 	{
-		T* t = TConverter().convert(input[0]);
-		U* u = UConverter().convert(input[1]);
-        
-		b->init(*t, *u);
+		if(f == NULL || b == NULL)
+			mexErrMsgTxt("cl_cpd is not initialised.");
+
+		b->init(t.val, u.val);
 
 		f->setT(b->getT());
 		f->setR(b->getR());
@@ -49,34 +45,58 @@ namespace cl_cpd
 		f->setI(b->getI());
 		f->setSum(b->getSum());
 
-		delete t;
-		delete u;
 
 		return std::vector<mxArray*>(0);
 	}
 
-	std::vector<mxArray*> RunCommand::handle(std::vector<const mxArray*> input)
+	std::vector<mxArray*> SetUCommand::handle()
 	{
-		f->run();
+		std::cout << "    mroeu    " ;
+		if(f == NULL || b == NULL)
+			mexErrMsgTxt("cl_cpd is not initialised.");
 
-		b->readSum();
-		mxArray* s = SumConverter().convert(b->getSumArray());
+		b->updateU(u.val);
+
+		return std::vector<mxArray*>(0);
+	}
+
+	std::vector<mxArray*> RunCommand::handle()
+	{
+		if(f == NULL || b == NULL)
+			mexErrMsgTxt("cl_cpd is not initialised.");
+
+		f->run();
+		std::cout << "\n\n" << b->getNbElementsInSum() << "\n\n";
+		mxArray* m = mxCreateDoubleMatrix(b->getNbElementsInSum(), 1, mxREAL);
+
+		Sum s;
+		s.nbElements = mxGetNumberOfElements(m);
+		s.sum = mxGetPr(m);
+
+		b->readSum(s);
 
 		std::vector<mxArray*> r = std::vector<mxArray*>(1);
-		r[0] = s;
+		r[0] = m;
 		return r;
 	}
 
-	bool BoolConverter::validate(const mxArray* input)
+	std::vector<mxArray*> TimeCommand::handle()
+	{
+		std::vector<mxArray*> r (1);
+		r[0] = mxCreateDoubleScalar((double)f->getExecutionTimeLastRun());
+		return r;
+	}
+
+	bool BoolParameter::validate(const mxArray* input)
 	{
 		return mxIsLogicalScalar(input);
 	}
-	bool BoolConverter::convert(const mxArray* input)
+	bool BoolParameter::convert(const mxArray* input)
 	{
 		return mxGetLogicals(input)[0];
 	}
 
-	bool CStringConverter::validate(const mxArray* input)
+	bool StringParameter::validate(const mxArray* input)
 	{
 		if(!mxIsChar(input))
 			return false;
@@ -86,75 +106,88 @@ namespace cl_cpd
 
 		return true;
 	}
-	char* CStringConverter::convert(const mxArray* input)
+	std::string StringParameter::convert(const mxArray* input)
 	{
-		return mxArrayToString(input);
+		return std::string(mxArrayToString(input));
 	}
 
-	bool TConverter::validate(const mxArray* input)
+	bool TParameter::validate(const mxArray* input)
 	{
 		return mxIsDouble(input);
 	}
-	T* TConverter::convert(const mxArray* input)
+	T TParameter::convert(const mxArray* input)
 	{
-		T* t = new T;
+		T t;
 		mwSize dims = mxGetNumberOfDimensions(input);
-		t->I = std::vector<size_t>(dims);
+		t.I = std::vector<size_t>(dims);
 		for(size_t i = 0; i < dims; i++)
 		{
-			t->I[i] = mxGetDimensions(input)[i];
+			t.I[i] = mxGetDimensions(input)[i];
 		}
 
-		t->Ts = mxGetPr(input);
+		t.Ts = mxGetPr(input);
 
 		return t;
 	}
 
-	bool UConverter::validate(const mxArray* input)
+	bool UParameter::validate(const mxArray* input)
 	{
 		if(!mxIsCell(input))
 			return false;
 
-		mwSize dims = mxGetNumberOfElements(input);
+		mwSize nbElements = mxGetNumberOfElements(input);
 
-		if(dims < 1)
+		if(nbElements < 1)
+			return false;
+
+		if(mxIsEmpty(mxGetCell(input, 0)))
+			return false;
+
+		if(!mxIsDouble(mxGetCell(input, 0)))
 			return false;
 
 		size_t R = mxGetN(mxGetCell(input, 0));
 
-		for(size_t i = 1; i < dims; i++)
+		for(size_t i = 1; i < nbElements; i++)
 		{
-			if(mxGetN(mxGetCell(input, i)) != R)
+			if(mxIsEmpty(mxGetCell(input, i)))
 				return false;
 
 			if(!mxIsDouble(mxGetCell(input, i)))
+				return false;
+
+			if(mxGetN(mxGetCell(input, i)) != R)
 				return false;
 		}
 
 		return mxIsDouble(mxGetCell(input, 0));
 	}
-	U* UConverter::convert(const mxArray* input)
+	U UParameter::convert(const mxArray* input)
 	{
-		U* u = new U;
+		U u;
 		mwSize dims = mxGetNumberOfElements(input);
-		u->I = std::vector<size_t>(dims);
-		u->Us = std::vector<double*>(dims);
+		u.I = std::vector<size_t>(dims);
+		u.Us = std::vector<double*>(dims);
+
 		for(size_t i = 0; i < dims; i++)
 		{
-			u->I[i] = mxGetM(mxGetCell(input, i));
-			u->Us[i] = mxGetPr(mxGetCell(input, i));
+			u.I[i] = mxGetM(mxGetCell(input, i));
+			u.Us[i] = mxGetPr(mxGetCell(input, i));
 		}
-		u->R = mxGetN(mxGetCell(input, 0));
+		u.R = mxGetN(mxGetCell(input, 0));
 
 		return u;
 	}
 
-	mxArray* SumConverter::convert(const Sum* input)
+	/*Sum SumConverter::convert(const mxArray* input)
 	{
+		Sum r;
+		r.nbElements = mxGetNumberOfElements(input);
+		r.sum =
 		mxArray* m = mxCreateDoubleMatrix(input->nbElements, 1, mxREAL);
 		mxSetPr(m, input->sum);
 		return m;
-	}
+	}*/
 
 }
 

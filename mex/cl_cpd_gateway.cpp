@@ -2,7 +2,6 @@
 
 using namespace cl_cpd;
 
-//scalar, throwing new and it matching delete
 void* operator new (std::size_t n) throw(std::bad_alloc)
 {
     //mexPrintf("New");
@@ -18,7 +17,6 @@ void operator delete (void* p) throw()
     //mexPrintf("Del");
     mxFree(p);
 }
-//scalar, nothrow new and it matching delete
 void* operator new (std::size_t n,const std::nothrow_t&) throw()
 {
     void* p = mxMalloc(n);
@@ -30,8 +28,6 @@ void operator delete (void* p, const std::nothrow_t&) throw()
     //mexPrintf("Del");
     mxFree(p);
 }
-
-//array throwing new and matching delete[]
 void* operator new[](std::size_t size) throw(std::bad_alloc)
 {
 	mexPrintf("new[]");
@@ -42,8 +38,6 @@ void operator delete[](void* ptr) throw()
 	mexPrintf("delete[]");
 	operator delete(ptr);
 }
-
-//array, nothrow new and matching delete[]
 void* operator new [](std::size_t size, const std::nothrow_t&) throw()
 {
 	mexPrintf("delete[]");
@@ -85,21 +79,29 @@ void clean()
 	delete cq;
 }
 
-void mexFunction(int nlhs, mxArray *plhs[],
-    int nrhs, const mxArray *prhs[])
+void mexFunction(int nbOutput, mxArray *outputArray[],
+    int nbInput, const mxArray *inputArray[])
     {
 		mexAtExit(clean);
 		try{
 			CommandRegister* cr = buildCommandRegister();
-			Command* command = getCommand(cr, nrhs, prhs);
-			std::vector<const mxArray *> input = validateAndVectoriseParameters(command, nrhs, prhs);
-			std::vector<mxArray *> output = command->handle(input);
+			Command* command = getCommand(cr, nbInput, inputArray);
+			std::cout << "validateAndFillInput";
+			validateAndFillInput(command, nbInput, inputArray);
+			std::cout << "handle";
+			std::vector<mxArray *> output = command->handle();
+			std::cout << "output";
+			fillOutputArray(nbOutput, outputArray, output);
 		}
 		catch (cl::Error &e)
 		{
 			std::stringstream ss;
 			ss << "Exception OpenCL: " << e.what() << " code: " << e.err();
 			mexErrMsgTxt(ss.str().c_str());
+		}
+		catch (ClCpdException &e)
+		{
+			mexErrMsgTxt(e.what());
 		}
     }
 
@@ -108,58 +110,63 @@ CommandRegister* buildCommandRegister()
 	CommandRegister* cr = new CommandRegister();
 	cr->add(new InitCommand);
 	cr->add(new SetTCommand);
+	cr->add(new SetUCommand);
 	cr->add(new RunCommand);
+	cr->add(new TimeCommand);
 
 	return cr;
 }
 
-Command* getCommand(CommandRegister* cr, int nrhs, const mxArray *prhs[])
+Command* getCommand(CommandRegister* cr, int nbInput, const mxArray *inputArray[])
 {
-	if(nrhs < 1)
+	if(nbInput < 1)
 		mexErrMsgTxt("No command supplied.");
 
-	char* commandStr = CStringConverter().convert(prhs[0]);
-	Command* c = cr->get(commandStr);
+	StringParameter p;
+	p.setVal(inputArray[0]);
+	Command* c = cr->get(p.val);
 
 	if(c == NULL)
 	{
 		std::stringstream ss;
-		ss << "Command " << commandStr << " is unknown.";
+		ss << "Command " << p.val << " is unknown.";
 		mexErrMsgTxt(ss.str().c_str());
 	}
 
 	return c;
 }
 
-std::vector<const mxArray *> validateAndVectoriseParameters(Command* command, int nrhs, const mxArray * prhs[])
+void validateAndFillInput(Command* command, int nbInput, const mxArray * inputArray[])
 {
 	std::cout << 0;
-	if(((size_t)nrhs) < command->getConverters().size() + 1)
+	if(((size_t)nbInput) < command->getParameters().size() + 1)
 	{
 		std::cout << 0.5;
 		std::stringstream ss;
 		ss << command->getString() << " requires ";
-		ss << command->getConverters().size() << " parameters, not ";
-		ss << (nrhs - 1) << ".";
+		ss << command->getParameters().size() << " parameters, not ";
+		ss << (nbInput - 1) << ".";
 		mexErrMsgTxt(ss.str().c_str());
 	}
 
-	std::cout << 1;
-
-	std::vector<const mxArray *> input;
-
-	for(mwIndex i = 0; i < command->getConverters().size(); i++)
+	for(mwIndex i = 0; i < command->getParameters().size(); i++)
 	{
 		std::cout << 2;
-		if(!command->getConverters()[i]->validate(prhs[i + 1]))
+		if(!command->getParameters()[i]->validate(inputArray[i + 1]))
 		{
 			std::stringstream ss;
 			ss << "Parameter " << i << " is invalid.";
 			mexErrMsgTxt(ss.str().c_str());
 		}
 		std::cout << 3;
-		input.push_back(prhs[i + 1]);
+		command->getParameters()[i]->setVal(inputArray[i + 1]);
 	}
+}
 
-	return input;
+void fillOutputArray(int nbOutput, mxArray *outputArray[], std::vector<mxArray *> output)
+{
+	for(size_t i = 0; i < output.size() && i < (size_t)nbOutput; i++)
+	{
+		outputArray[i] = output[i];
+	}
 }
