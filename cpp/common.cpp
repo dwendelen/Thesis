@@ -186,7 +186,13 @@ void AbstractBufferFactory::cleanUp()
 
 AbstractBufferFactory::~AbstractBufferFactory()
 {
-	cleanUp();
+	delete t;
+	delete (*u)[0];
+	delete (*u)[1];
+	delete (*u)[2];
+	delete u;
+	delete i;
+	delete sum;
 }
 
 void Kernel::compile()
