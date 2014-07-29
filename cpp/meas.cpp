@@ -9,6 +9,7 @@
 
 #include "double16x16x16.hpp"
 #include "double16x16x16R.hpp"
+#include "double16x16x16I.hpp"
 #include "double8x8x8R.hpp"
 
 using namespace cl_cpd;
@@ -19,6 +20,7 @@ double bigU[320*10000];
 
 Double16x16x16UnMapped* f = NULL;
 Double16x16x16ReMapped* r = NULL;
+Double16x16x16Isolated* i = NULL;
 Double16x16x16BufferFactory* b = NULL;
 
 Double8x8x8ReMapped* r8 = NULL;
@@ -36,7 +38,9 @@ void run(Kernel* kernel, string name, double ops){
 
 void doo(int R, int I)
 {
-    double ops = ((double)R + 2) * (double)I*(double)I*(double)I;
+    double ops = (3*(double)R + (2*(double)R/(double)I) + 3)
+    		* (double)I*(double)I*(double)I;
+
 	cout << "\nR: " << R << " I: " << I << "\n";
 
 	int I16 = I;
@@ -71,8 +75,15 @@ void doo(int R, int I)
 	r->setI(b->getI());
 	r->setSum(b->getSum());
 
+	i->setT(b->getT());
+	i->setR(b->getR());
+	i->setU(b->getU());
+	i->setI(b->getI());
+	i->setSum(b->getSum());
+
 	run(f, "16x16x16 Unmapped", ops);
 	run(r, "16x16x16 Remapped", ops);
+	run(i, "16x16x16 Isolated", ops);
 
 	int I8 = I;
 	if(I % 8 != 0)
@@ -106,6 +117,8 @@ void dooo()
 	f->compile();
 	r = new Double16x16x16ReMapped(cq);
 	r->compile();
+	i = new Double16x16x16Isolated(cq);
+	i->compile();
 	r8 = new Double8x8x8ReMapped(cq);
 	r8->compile();
 
@@ -139,6 +152,7 @@ void dooo()
 	delete b;
 	delete f;
 	delete r;
+	delete i;
 	delete b8;
 	delete r8;
 }
