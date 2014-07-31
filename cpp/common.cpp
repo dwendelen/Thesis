@@ -284,7 +284,10 @@ void Kernel::run()
 	std::vector<cl::Event> es;
 	cl::Event e;
 
-	std::vector<cl::NDRange>::iterator it2 = getGlobalSize().begin();
+	std::vector<cl::NDRange>* gSize = new std::vector<cl::NDRange>;
+	*gSize = getGlobalSize();
+
+	std::vector<cl::NDRange>::iterator it2 = (*gSize).begin();
 	//First enqueue
 	for(std::vector<cl::Kernel*>::iterator it = kernels.begin();
 			it < kernels.end(); ++it, ++it2)
@@ -293,6 +296,9 @@ void Kernel::run()
 			NULL, &e);
 		es.push_back(e);
 	}
+
+	delete gSize;
+
 	//Then start waiting
 	if(cq->isProfile())
 	{

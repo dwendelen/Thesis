@@ -177,8 +177,10 @@ namespace cl_cpd
 		void setSum(cl::Buffer* sum);
 		virtual void setBuffers(AbstractBufferFactory* b)
 		{
+			setT(b->getT());
 			setRank(b->getRank());
 			setU(b->getU());
+			setI(b->getI());
 			setSum(b->getSum());
 		}
 	};

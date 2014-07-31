@@ -65,27 +65,13 @@ void doo(int R, int I)
 	u.rank = R;
 
 	b->init(t, u);
-	f->setT(b->getT());
-	f->setRank(b->getRank());
-	f->setU(b->getU());
-	f->setI(b->getI());
-	f->setSum(b->getSum());
-
-	r->setT(b->getT());
-	r->setRank(b->getRank());
-	r->setU(b->getU());
-	r->setI(b->getI());
-	r->setSum(b->getSum());
-
-	i->setT(b->getT());
-	i->setRank(b->getRank());
-	i->setU(b->getU());
-	i->setI(b->getI());
-	i->setSum(b->getSum());
+	f->setBuffers(b);
+	r->setBuffers(b);
+	i->setBuffers(b);
 
 	run(f, "16x16x16 Unmapped", ops);
 	run(r, "16x16x16 Remapped", ops);
-	run(i, "16x16x16 Isolated", ops);
+	//run(i, "16x16x16 Isolated", ops); I needs extra memory
 
 	int I8 = I;
 	if(I % 8 != 0)
@@ -98,20 +84,11 @@ void doo(int R, int I)
 	u.I = t.I;
 
 	b8->init(t, u);
-	r8->setT(b->getT());
-	r8->setRank(b->getRank());
-	r8->setU(b->getU());
-	r8->setI(b->getI());
-	r8->setSum(b->getSum());
-
-	i8->setT(b->getT());
-	i8->setRank(b->getRank());
-	i8->setU(b->getU());
-	i8->setI(b->getI());
-	i8->setSum(b->getSum());
+	r8->setBuffers(b8);
+	i8->setBuffers(b8);
 
 	run(r8, "8x8x8 Remapped", ops);
-	run(i8, "8x8x8 Isolated", ops);
+	//run(i8, "8x8x8 Isolated", ops); I needs extra memory
 }
 
 void dooo()

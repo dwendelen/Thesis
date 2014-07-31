@@ -19,9 +19,9 @@ __kernel void float16x16x16I(__global const float4 *T,
     int I1 = get_global_size(1);
     int I2 = get_global_size(2);
     
-    int jump0 = 8 * I0;
-    int jump1 = 8 * I1;
-    int jump2 = 8 * I2;
+    int jump0 = /*8 * */I0;
+    int jump1 = /*8 * */I1;
+    int jump2 = /*8 * */I2;
     
     #pragma unroll
     for(int i = 0; i < 16; i++)
@@ -33,10 +33,10 @@ __kernel void float16x16x16I(__global const float4 *T,
     int gId1 = get_global_id(1);
     int gId2 = get_global_id(2);
 
-	gId0 = (gId0/18) * 128 + channel * 16 + gId0 % 16;
-	gId1 = (gId1/18) * 128 + channel * 16 + gId1 % 16;
-	gId2 = (gId2/18) * 128 + channel * 16 + gId2 % 16;
-
+	/*gId0 = (gId0/16) * 128 + channel * 16 + gId0 % 16;
+	gId1 = (gId1/16) * 128 + channel * 16 + gId1 % 16;
+	gId2 = (gId2/16) * 128 + channel * 16 + gId2 % 16;
+	*/
     for(int r = 0; r < R; r++)
     {   
         //Fetch eerste 16 met n=0
