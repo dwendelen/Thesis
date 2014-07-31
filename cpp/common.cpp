@@ -151,11 +151,8 @@ void AbstractBufferFactory::init(T t, U u)
 
 void AbstractBufferFactory::updateU(U u)
 {
-	cout << 0;
 	cq->getQueue()->enqueueWriteBuffer(*(*this->u)[0],CL_FALSE, 0, u.size(0), u.Us[0]);
-	cout << 4;
 	cq->getQueue()->enqueueWriteBuffer(*(*this->u)[1],CL_FALSE, 0, u.size(1), u.Us[1]);
-	cout << 5;
 	cq->getQueue()->enqueueWriteBuffer(*(*this->u)[2],CL_FALSE, 0, u.size(2), u.Us[2]);
 }
 
@@ -195,7 +192,7 @@ AbstractBufferFactory::~AbstractBufferFactory()
 
 void AbstractFGBufferFactory::init(T t, U u)
 {
-    AbstractFGBufferFactory::init(t, u);
+    AbstractBufferFactory::init(t, u);
     
     size_t s = sizeof(double) * t.I[0] * t.I[1] * t.I[2];
     
@@ -203,8 +200,8 @@ void AbstractFGBufferFactory::init(T t, U u)
 
     g = new std::vector<cl::Buffer *>(3);
     (*g)[0] = createReadWriteBuf(u.size(0));
-    (*g)[1] = createReadWriteBuf(u.size(2));
-    (*g)[1] = createReadWriteBuf(u.size(2));
+    (*g)[1] = createReadWriteBuf(u.size(1));
+    (*g)[2] = createReadWriteBuf(u.size(2));
 }
 
 void AbstractFGBufferFactory::readG(U g)
@@ -234,9 +231,12 @@ void AbstractFGBufferFactory::cleanUp()
 AbstractFGBufferFactory::~AbstractFGBufferFactory()
 {
 	delete r;
-	delete (*g)[0];
-	delete (*g)[1];
-	delete (*g)[2];
+	if(g != NULL)
+	{
+		delete (*g)[0];
+		delete (*g)[1];
+		delete (*g)[2];
+	}
 	delete g;
 }
 
@@ -247,7 +247,7 @@ void Kernel::compile()
 	s.push_back(make_pair(c.c_str(), c.length()));
 	cl::Program p(*cq->getContext(), s);
 	try{
-	p.build(*cq->getDevice());
+	p.build(*cq->getDevice(), "-cl-opt-disable -g -s \"../opencl/double16x16x16G.cl\"");
 	}catch (cl::Error &e) {
 		cout << p.getBuildInfo<CL_PROGRAM_BUILD_LOG>((*cq->getDevice())[0]);
 	}
@@ -415,20 +415,20 @@ void AbstractFKernel::setSum(cl::Buffer* sum)
 
 cl::NDRange AbstractGKernel::getLocalSize()
 {
-	return cl::NDRange(16,16,0);
+	return cl::NDRange(8,8);
 }
 std::vector<cl::NDRange> AbstractGKernel::getGlobalSize()
 {
-	std::vector<cl::NDRange> v (3);
-	v.push_back(cl::NDRange(rank, (*I)[0]/2));
-	v.push_back(cl::NDRange(rank, (*I)[1]/2));
-	v.push_back(cl::NDRange(rank, (*I)[2]/2));
+	std::vector<cl::NDRange> v;
+	v.push_back(cl::NDRange((size_t)rank, (size_t)(*I)[0]/2));
+	v.push_back(cl::NDRange((size_t)rank, (size_t)(*I)[1]/2));
+	v.push_back(cl::NDRange((size_t)rank, (size_t)(*I)[2]/2));
 	return v;
 }
 
 void AbstractGKernel::setR(cl::Buffer* R)
 {
-	setArg(0, R);
+	setArg(0, *R);
 }
 void AbstractGKernel::setU(std::vector<cl::Buffer*>* U)
 {
@@ -451,14 +451,14 @@ void AbstractGKernel::setI(std::vector<size_t>* I)
 
 	this->I = I;
 
-	getKernels()[0]->setArg(4, (*I)[1]/2);
-	getKernels()[0]->setArg(5, (*I)[2]/2);
+	getKernels()[0]->setArg(4, (cl_int)(*I)[1]/2);
+	getKernels()[0]->setArg(5, (cl_int)(*I)[2]/2);
 
-	getKernels()[1]->setArg(4, (*I)[0]/2);
-	getKernels()[1]->setArg(5, (*I)[2]/2);
+	getKernels()[1]->setArg(4, (cl_int)(*I)[0]/2);
+	getKernels()[1]->setArg(5, (cl_int)(*I)[2]/2);
 
-	getKernels()[2]->setArg(4, (*I)[0]/2);
-	getKernels()[2]->setArg(5, (*I)[1]/2);
+	getKernels()[2]->setArg(4, (cl_int)(*I)[0]/2);
+	getKernels()[2]->setArg(5, (cl_int)(*I)[1]/2);
 }
 
 bool AbstractGKernel::isValidSizedI(vector<size_t>* I)

@@ -23,10 +23,13 @@ Double16x16x16UnMapped* f = NULL;
 Double16x16x16ReMapped* r = NULL;
 Double16x16x16Isolated* i = NULL;
 Double16x16x16BufferFactory* b = NULL;
+Double16x16x16FGBufferFactory* bg = NULL;
 
 Double8x8x8ReMapped* r8 = NULL;
 Double8x8x8Isolated* i8 = NULL;
 Double8x8x8BufferFactory* b8 = NULL;
+
+Double16x16x16G* g = NULL;
 
 void run(Kernel* kernel, string name, double ops){
 	cout << name << "\n";
@@ -73,6 +76,17 @@ void doo(int R, int I)
 	run(r, "16x16x16 Remapped", ops);
 	//run(i, "16x16x16 Isolated", ops); I needs extra memory
 
+	int R16 = R;
+	if(R % 16 != 0)
+		R16 = (R/16)*16 + 16;
+
+	U u2 = u;
+	u2.rank = R16;
+
+	bg->init(t, u2);
+	g->setBuffers(bg);
+	run(g, "16x16x16 Gradient", ops);
+
 	int I8 = I;
 	if(I % 8 != 0)
 		I8 = (I/8)*8 + 8;
@@ -98,6 +112,7 @@ void dooo()
 
 	b = new Double16x16x16BufferFactory(cq);
 	b8 = new Double8x8x8BufferFactory(cq);
+	bg = new Double16x16x16FGBufferFactory(cq);
 
 	f = new Double16x16x16UnMapped(cq);
 	f->compile();
@@ -109,6 +124,9 @@ void dooo()
 	r8->compile();
 	i8 = new Double8x8x8Isolated(cq);
 	i8->compile();
+
+	g = new Double16x16x16G(cq);
+	g->compile();
 
 	doo(4,1);
 	doo(6000,1);

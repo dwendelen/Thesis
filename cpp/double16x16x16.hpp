@@ -22,10 +22,23 @@ namespace cl_cpd {
 	class Double16x16x16BufferFactory: public AbstractBufferFactory
 	{
 	public:
-		Double16x16x16BufferFactory(ContextQueue* cq):AbstractBufferFactory(cq, 4){}
+		Double16x16x16BufferFactory(ContextQueue* cq):
+			AbstractBufferFactory(cq, 4){}
 	};
 
+	class Double16x16x16G: public AbstractGKernel
+	{
+	public:
+		Double16x16x16G(ContextQueue* cq):
+			AbstractGKernel(cq, "double16x16x16G"){}
+	};
 
+	class Double16x16x16FGBufferFactory: public AbstractFGBufferFactory
+	{
+	public:
+		Double16x16x16FGBufferFactory(ContextQueue* cq):
+			AbstractFGBufferFactory(cq, 4){}
+	};
 
 }
 
