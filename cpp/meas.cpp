@@ -62,23 +62,23 @@ void doo(int R, int I)
 	u.Us.push_back(bigU);
 	u.Us.push_back(bigU);
 	u.I = t.I;
-	u.R = R;
+	u.rank = R;
 
 	b->init(t, u);
 	f->setT(b->getT());
-	f->setR(b->getR());
+	f->setRank(b->getRank());
 	f->setU(b->getU());
 	f->setI(b->getI());
 	f->setSum(b->getSum());
 
 	r->setT(b->getT());
-	r->setR(b->getR());
+	r->setRank(b->getRank());
 	r->setU(b->getU());
 	r->setI(b->getI());
 	r->setSum(b->getSum());
 
 	i->setT(b->getT());
-	i->setR(b->getR());
+	i->setRank(b->getRank());
 	i->setU(b->getU());
 	i->setI(b->getI());
 	i->setSum(b->getSum());
@@ -99,13 +99,13 @@ void doo(int R, int I)
 
 	b8->init(t, u);
 	r8->setT(b->getT());
-	r8->setR(b->getR());
+	r8->setRank(b->getRank());
 	r8->setU(b->getU());
 	r8->setI(b->getI());
 	r8->setSum(b->getSum());
 
 	i8->setT(b->getT());
-	i8->setR(b->getR());
+	i8->setRank(b->getRank());
 	i8->setU(b->getU());
 	i8->setI(b->getI());
 	i8->setSum(b->getSum());

@@ -92,15 +92,16 @@ namespace cl_cpd
 	};
 	class InvalidKernelNameException: public ClCpdException
 	{
-		const char* name;
+		std::string name;
 	public:
-		InvalidKernelNameException(const char* name):name(name){}
+		InvalidKernelNameException(std::string name):name(name){}
 		void setMsg(std::stringstream& ss) const
 		{
 			ss << "No kernel with name ";
 			ss << name;
 			ss << " found.";
 		}
+		~InvalidKernelNameException() throw(){}
 	};
 }
 

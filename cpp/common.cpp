@@ -131,7 +131,7 @@ void AbstractBufferFactory::init(T t, U u)
 	size_t s = sizeof(double) * t.I[0] * t.I[1] * t.I[2];
 	this->t = createInitBuf(s, t.Ts);
 
-	this->r = (cl_int) u.R;
+	this->rank = (cl_int) u.rank;
 
 	this->u = new std::vector<cl::Buffer *>(3);
 
@@ -170,7 +170,7 @@ void AbstractBufferFactory::readSum(Sum sumArray)
 void AbstractBufferFactory::cleanUp()
 {
 	delNull(t);
-	r = 0;
+	rank = 0;
 	if(u != NULL)
 	{
 		delNull((*u)[0]);
@@ -253,13 +253,17 @@ void Kernel::compile()
 	}
 	cout << p.getBuildInfo<CL_PROGRAM_BUILD_LOG>((*cq->getDevice())[0]);
 
-	try {
-		this->kernel = new cl::Kernel(p, "Kernel");
-	} catch (cl::Error &e) {
-		if(e.err() == CL_INVALID_KERNEL_NAME)
-			throw InvalidKernelNameException("Kernel");
-		else
-			throw e;
+	for(std::vector<std::string>::iterator it = kernelNames.begin();
+			it < kernelNames.end(); ++it)
+	{
+		try {
+			this->kernels.push_back(new cl::Kernel(p, (*it).c_str()));
+		} catch (cl::Error &e) {
+			if(e.err() == CL_INVALID_KERNEL_NAME)
+				throw InvalidKernelNameException(*it);
+			else
+				throw e;
+		}
 	}
 }
 string Kernel::getCode()
@@ -277,35 +281,68 @@ string Kernel::getCode()
 }
 void Kernel::run()
 {
+	std::vector<cl::Event> es;
 	cl::Event e;
 
-	cq->getQueue()->enqueueNDRangeKernel(*kernel, cl::NDRange(0, 0, 0), getGlobalSize(), getLocalSize(),
+	std::vector<cl::NDRange>::iterator it2 = getGlobalSize().begin();
+	//First enqueue
+	for(std::vector<cl::Kernel*>::iterator it = kernels.begin();
+			it < kernels.end(); ++it, ++it2)
+	{
+		cq->getQueue()->enqueueNDRangeKernel(**it, cl::NDRange(0, 0, 0), *it2, getLocalSize(),
 			NULL, &e);
-
+		es.push_back(e);
+	}
+	//Then start waiting
 	if(cq->isProfile())
 	{
-		e.wait();
-		nanoTime = e.getProfilingInfo<CL_PROFILING_COMMAND_END>()
-				- e.getProfilingInfo<CL_PROFILING_COMMAND_START>();
+		nanoTimes.clear();
+		for(std::vector<cl::Event>::iterator it = es.begin();
+						it < es.end(); ++it)
+		{
+		(*it).wait();
+		nanoTimes.push_back(e.getProfilingInfo<CL_PROFILING_COMMAND_END>()
+				- e.getProfilingInfo<CL_PROFILING_COMMAND_START>());
+		}
 	}
 
 }
+std::vector<double> Kernel::getExecutionTimesLastRun()
+{
+	return nanoTimes;
+}
+
 double Kernel::getExecutionTimeLastRun()
 {
-	return nanoTime;
+	double sum = 0;
+	for(std::vector<double>::iterator it = nanoTimes.begin(); it < nanoTimes.end(); ++it)
+		sum += *it;
+
+	return sum;
 }
+
+template <typename T>
+void Kernel::setArg(cl_uint index, T value)
+{
+	for(std::vector<cl::Kernel*>::iterator it = kernels.begin();
+						it < kernels.end(); ++it)
+		(*it)->setArg(index, value);
+}
+
 Kernel::~Kernel()
 {
-	delete kernel;
+	for(std::vector<cl::Kernel*>::iterator it = kernels.begin();
+					it < kernels.end(); ++it)
+		delete *it;
 }
-cl::Kernel* Kernel::getKernel()
+/*cl::Kernel* Kernel::getKernel()
 {
 	return kernel;
-}
+}*/
 
 void BlockKernel::setT(cl::Buffer* T)
 {
-	getKernel()->setArg(0, *T);
+	setArg(0, *T);
 }
 
 void BlockKernel::setI(vector<size_t>* I)
@@ -338,14 +375,16 @@ cl::NDRange BlockKernel::getLocalSize()
 	return cl::NDRange(4, 4, 4);
 }
 
-cl::NDRange BlockKernel::getGlobalSize()
+std::vector<cl::NDRange> BlockKernel::getGlobalSize()
 {
-	return cl::NDRange((*I)[0]/nbDoublesPerWorkitem,(*I)[1]/nbDoublesPerWorkitem,(*I)[2]/nbDoublesPerWorkitem);
+	std::vector<cl::NDRange> v;
+	v.push_back(cl::NDRange((*I)[0]/nbDoublesPerWorkitem,(*I)[1]/nbDoublesPerWorkitem,(*I)[2]/nbDoublesPerWorkitem));
+	return v;
 }
 
-void AbstractFKernel::setR(cl_int R)
+void AbstractFKernel::setRank(cl_int rank)
 {
-	getKernel()->setArg(4, R);
+	setArg(4, rank);
 }
 
 void AbstractFKernel::setU(vector<cl::Buffer*>* U)
@@ -353,9 +392,9 @@ void AbstractFKernel::setU(vector<cl::Buffer*>* U)
 	if(!hasUValidNbOfDims(U))
 		throw InvalidSizeOfUException();
 
-	getKernel()->setArg(1, *(*U)[0]);
-	getKernel()->setArg(2, *(*U)[1]);
-	getKernel()->setArg(3, *(*U)[2]);
+	setArg(1, *(*U)[0]);
+	setArg(2, *(*U)[1]);
+	setArg(3, *(*U)[2]);
 }
 
 bool AbstractFKernel::hasUValidNbOfDims(std::vector<cl::Buffer*>* U)
@@ -365,12 +404,95 @@ bool AbstractFKernel::hasUValidNbOfDims(std::vector<cl::Buffer*>* U)
 
 void AbstractFKernel::setSum(cl::Buffer* sum)
 {
-	getKernel()->setArg(5, *sum);
+	setArg(5, *sum);
+}
+
+cl::NDRange AbstractGKernel::getLocalSize()
+{
+	return cl::NDRange(16,16,0);
+}
+std::vector<cl::NDRange> AbstractGKernel::getGlobalSize()
+{
+	std::vector<cl::NDRange> v (3);
+	v.push_back(cl::NDRange(rank, (*I)[0]/2));
+	v.push_back(cl::NDRange(rank, (*I)[1]/2));
+	v.push_back(cl::NDRange(rank, (*I)[2]/2));
+	return v;
+}
+
+void AbstractGKernel::setR(cl::Buffer* R)
+{
+	setArg(0, R);
+}
+void AbstractGKernel::setU(std::vector<cl::Buffer*>* U)
+{
+	if(!hasUOrGValidNbOfDims(U))
+		throw InvalidSizeOfUException();
+
+	getKernels()[0]->setArg(2, *(*U)[1]);
+	getKernels()[0]->setArg(3, *(*U)[2]);
+
+	getKernels()[1]->setArg(1, *(*U)[0]);
+	getKernels()[1]->setArg(3, *(*U)[2]);
+
+	getKernels()[2]->setArg(1, *(*U)[0]);
+	getKernels()[2]->setArg(2, *(*U)[1]);
+}
+void AbstractGKernel::setI(std::vector<size_t>* I)
+{
+	if(!isValidSizedI(I))
+		throw InvalidSizeOfIException(16);
+
+	this->I = I;
+
+	getKernels()[0]->setArg(4, (*I)[1]/2);
+	getKernels()[0]->setArg(5, (*I)[2]/2);
+
+	getKernels()[1]->setArg(4, (*I)[0]/2);
+	getKernels()[1]->setArg(5, (*I)[2]/2);
+
+	getKernels()[2]->setArg(4, (*I)[0]/2);
+	getKernels()[2]->setArg(5, (*I)[1]/2);
+}
+
+bool AbstractGKernel::isValidSizedI(vector<size_t>* I)
+{
+	if(I->size() != 3)
+		return false;
+
+	if((*I)[0] % 16 != 0)
+		return false;
+
+	if((*I)[1] % 16 != 0)
+			return false;
+
+	if((*I)[2] % 16 != 0)
+			return false;
+
+	return true;
+}
+bool AbstractGKernel::hasUOrGValidNbOfDims(std::vector<cl::Buffer*>* UorG)
+{
+	return UorG->size() == 3;
+}
+
+void AbstractGKernel::setG(std::vector<cl::Buffer*>* G)
+{
+	if(!hasUOrGValidNbOfDims(G))
+		throw InvalidSizeOfUException();
+
+	getKernels()[0]->setArg(1, *(*G)[0]);
+	getKernels()[1]->setArg(2, *(*G)[1]);
+	getKernels()[2]->setArg(3, *(*G)[2]);
+}
+void AbstractGKernel::setRank(cl_int rank)
+{
+	this->rank = rank;
 }
 
 void AbstractTMapper::setTMapped(cl::Buffer* TMapped)
 {
-	getKernel()->setArg(1, TMapped);
+	setArg(1, TMapped);
 }
 
 

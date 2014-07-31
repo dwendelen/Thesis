@@ -174,7 +174,7 @@ namespace cl_cpd
 			u.I[i] = mxGetM(mxGetCell(input, i));
 			u.Us[i] = mxGetPr(mxGetCell(input, i));
 		}
-		u.R = mxGetN(mxGetCell(input, 0));
+		u.rank = mxGetN(mxGetCell(input, 0));
 
 		return u;
 	}
