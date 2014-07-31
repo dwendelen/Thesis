@@ -3,3 +3,6 @@
 *~
 /Debug
 /Release
+/cl_cpd_gateway.mexa64
+/.cproject
+/.pydevproject

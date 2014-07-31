@@ -15,29 +15,15 @@ namespace cl_cpd {
 	class Double8x8x8ReMapped: public AbstractFKernel
 	{
 	public:
-		Double8x8x8ReMapped(ContextQueue* cq): AbstractFKernel(cq) {}
-
-	protected:
-		u_int getnbDoublesPerWorkitem()
-		{
-			return 2;
-		}
-
-		std::string getFile()
-		{
-			return "double8x8x8R";
-		}
+		Double8x8x8ReMapped(ContextQueue* cq):
+			AbstractFKernel(cq, "double8x8x8R", 2) {}
 	};
 
 	class Double8x8x8BufferFactory: public AbstractBufferFactory
 	{
 	public:
-		Double8x8x8BufferFactory(ContextQueue* cq):AbstractBufferFactory(cq){}
-	protected:
-		u_int getnbDoublesPerWorkitem()
-		{
-			return 2;
-		}
+		Double8x8x8BufferFactory(ContextQueue* cq):
+			AbstractBufferFactory(cq, 2){}
 	};
 }
 

@@ -15,18 +15,8 @@ namespace cl_cpd {
 	class Double16x16x16ReMapped: public AbstractFKernel
 	{
 	public:
-		Double16x16x16ReMapped(ContextQueue* cq): AbstractFKernel(cq) {}
-
-	protected:
-		u_int getnbDoublesPerWorkitem()
-		{
-			return 4;
-		}
-
-		std::string getFile()
-		{
-			return "double16x16x16R";
-		}
+		Double16x16x16ReMapped(ContextQueue* cq):
+			AbstractFKernel(cq, "double16x16x16R", 4) {}
 	};
 
 }

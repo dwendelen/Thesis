@@ -65,7 +65,8 @@ namespace cl_cpd
 	class Kernel
 	{
 	public:
-		Kernel(ContextQueue* cq): cq(cq), kernel(NULL), nanoTime(0) {}
+		Kernel(ContextQueue* cq, std::string file):
+			cq(cq), kernel(NULL), nanoTime(0), file(file) {}
 		void compile();
 		void run();
 		double getExecutionTimeLastRun();
@@ -73,7 +74,6 @@ namespace cl_cpd
 
 	protected:
 		std::string getCode();
-		virtual std::string getFile() = 0;
 
 	protected:
 		virtual cl::NDRange getLocalSize() = 0;
@@ -84,6 +84,7 @@ namespace cl_cpd
 		ContextQueue* cq;
 		cl::Kernel* kernel;
 		double nanoTime;
+		std::string file;
 	};
 
 
@@ -91,23 +92,25 @@ namespace cl_cpd
 	class BlockKernel: public Kernel
 	{
 	public:
-		BlockKernel(ContextQueue* cq): Kernel(cq), I(NULL) {}
+		BlockKernel(ContextQueue* cq, std::string file, u_int nbDoublesPerWorkitem):
+			Kernel(cq, file), I(NULL), nbDoublesPerWorkitem(nbDoublesPerWorkitem) {}
 		void setT(cl::Buffer* T);
 		void setI(std::vector<size_t>* I);
 		bool isValidSizedI(std::vector<size_t>* I);
 	protected:
-		virtual u_int getnbDoublesPerWorkitem() = 0;
 		cl::NDRange getLocalSize();
 		cl::NDRange getGlobalSize();
 
 	private:
 		std::vector<size_t>* I;
+		u_int nbDoublesPerWorkitem;
 	};
 
 	class AbstractFKernel: public BlockKernel
 	{
 	public:
-		AbstractFKernel(ContextQueue* cq): BlockKernel(cq) {}
+		AbstractFKernel(ContextQueue* cq, std::string file, u_int nbDoublesPerWorkitem):
+			BlockKernel(cq, file, nbDoublesPerWorkitem) {}
 		void setR(cl_int R);
 		void setU(std::vector<cl::Buffer*>* U);
 		bool hasUValidNbOfDims(std::vector<cl::Buffer*>* U);
@@ -124,10 +127,11 @@ namespace cl_cpd
 	class AbstractBufferFactory
 	{
 	public:
-		AbstractBufferFactory(ContextQueue* cq):
-			cq(cq), t(NULL), r(0), u(NULL), i(NULL), sum(NULL){}
+		AbstractBufferFactory(ContextQueue* cq, u_int nbDoublesPerWorkitem):
+			cq(cq), t(NULL), r(0), u(NULL), i(NULL), sum(NULL),
+			nbElementsInSum(0), nbDoublesPerWorkitem(nbDoublesPerWorkitem){}
 
-		void init(T t, U u);
+		virtual void init(T t, U u);
 		void updateU(U u);
 		void readSum(Sum sumArray);
 
@@ -142,20 +146,36 @@ namespace cl_cpd
 	protected:
 		cl::Buffer* createInitBuf(size_t nbBytes, void* p);
 		cl::Buffer* createReadWriteBuf(size_t nbBytes);
-		virtual u_int getnbDoublesPerWorkitem() = 0;
-	private:
+		virtual void cleanUp();
 		ContextQueue* cq;
+	private:
 		cl::Buffer* t;
 		cl_int r;
 		std::vector<cl::Buffer*>* u;
 		std::vector<size_t>* i;
 		cl::Buffer* sum;
 		size_t nbElementsInSum;
+		u_int nbDoublesPerWorkitem;
 
 		void cleanUp();
 	};
 
-}
+	class AbstractFGBufferFactory:
+			public AbstractBufferFactory
+	{
+	public:
+		AbstractFGBufferFactory(ContextQueue* cq, u_int nbDoublesPerWorkitem):
+					AbstractBufferFactory(cq, nbDoublesPerWorkitem),
+					r(NULL), g(NULL){}
+		void init(T t, U u);
+		virtual ~AbstractFGBufferFactory();
+		void readG(U g);
+	protected:
+		virtual void cleanUp();
+	private:
+		cl::Buffer* r;
+		std::vector<cl::Buffer*>* g;
+	};
 
 #endif /* CL_CPD_COMMON_HPP_ */
 

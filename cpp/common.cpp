@@ -117,14 +117,14 @@ void AbstractBufferFactory::init(T t, U u)
 	if(u.I.size() != u.Us.size())
 		throw SizesUDontMatchException();
 
-	if(t.I[0] % (getnbDoublesPerWorkitem() * 4) != 0)
-			throw InvalidSizeOfIException(getnbDoublesPerWorkitem() * 4);
+	if(t.I[0] % (nbDoublesPerWorkitem * 4) != 0)
+			throw InvalidSizeOfIException(nbDoublesPerWorkitem * 4);
 
-	if(t.I[1] % (getnbDoublesPerWorkitem() * 4) != 0)
-			throw InvalidSizeOfIException(getnbDoublesPerWorkitem() * 4);
+	if(t.I[1] % (nbDoublesPerWorkitem * 4) != 0)
+			throw InvalidSizeOfIException(nbDoublesPerWorkitem * 4);
 
-	if(t.I[2] % (getnbDoublesPerWorkitem() * 4) != 0)
-			throw InvalidSizeOfIException(getnbDoublesPerWorkitem() * 4);
+	if(t.I[2] % (nbDoublesPerWorkitem * 4) != 0)
+			throw InvalidSizeOfIException(nbDoublesPerWorkitem * 4);
 
 	cleanUp();
 
@@ -141,7 +141,7 @@ void AbstractBufferFactory::init(T t, U u)
 
 	this->i = new std::vector<size_t>(t.I);
 
-	s = (t.I[0]*t.I[1]*t.I[2])/(4*getnbDoublesPerWorkitem()*4*getnbDoublesPerWorkitem()*4*getnbDoublesPerWorkitem());
+	s = (t.I[0]*t.I[1]*t.I[2])/(4*nbDoublesPerWorkitem*4*nbDoublesPerWorkitem*4*nbDoublesPerWorkitem);
 	this->sum = createReadWriteBuf(sizeof(double) * s);
 
 	nbElementsInSum = s;
@@ -161,10 +161,8 @@ void AbstractBufferFactory::updateU(U u)
 
 void AbstractBufferFactory::readSum(Sum sumArray)
 {
-	std::cout << "  readsum   ";
 	cq->getQueue()->enqueueReadBuffer(*sum, CL_TRUE, 0,
 			sumArray.nbElements*sizeof(double), sumArray.sum);
-	std::cout << "  readsum eone  ";
 }
 
 #define delNull(x) {delete x; x = NULL;}
@@ -195,6 +193,53 @@ AbstractBufferFactory::~AbstractBufferFactory()
 	delete sum;
 }
 
+void AbstractFGBufferFactory::init(T t, U u)
+{
+    AbstractFGBufferFactory::init(t, u);
+    
+    size_t s = sizeof(double) * t.I[0] * t.I[1] * t.I[2];
+    
+    r = createReadWriteBuf(s);
+
+    g = new std::vector<cl::Buffer *>(3);
+    (*g)[0] = createReadWriteBuf(u.size(0));
+    (*g)[1] = createReadWriteBuf(u.size(2));
+    (*g)[1] = createReadWriteBuf(u.size(2));
+}
+
+void AbstractFGBufferFactory::readG(U g)
+{
+	cq->getQueue()->enqueueReadBuffer(*(*this->g)[0], CL_TRUE, 0,
+			g.size(0), g.Us[0]);
+	cq->getQueue()->enqueueReadBuffer(*(*this->g)[1], CL_TRUE, 0,
+				g.size(1), g.Us[1]);
+	cq->getQueue()->enqueueReadBuffer(*(*this->g)[2], CL_TRUE, 0,
+				g.size(2), g.Us[2]);
+}
+
+void AbstractFGBufferFactory::cleanUp()
+{
+	AbstractBufferFactory::cleanUp();
+
+	delNull(r);
+	if(g != NULL)
+	{
+		delNull((*g)[0]);
+		delNull((*g)[1]);
+		delNull((*g)[2]);
+		delNull(g);
+	}
+}
+
+AbstractFGBufferFactory::~AbstractFGBufferFactory()
+{
+	delete r;
+	delete (*g)[0];
+	delete (*g)[1];
+	delete (*g)[2];
+	delete g;
+}
+
 void Kernel::compile()
 {
 	string c = this->getCode();
@@ -219,7 +264,7 @@ void Kernel::compile()
 }
 string Kernel::getCode()
 {
-	string f = "../opencl/" + getFile() + ".cl";
+	string f = "../opencl/" + file + ".cl";
 	ifstream ifs (f.c_str());
 
 	if(!ifs.good())
@@ -266,7 +311,7 @@ void BlockKernel::setT(cl::Buffer* T)
 void BlockKernel::setI(vector<size_t>* I)
 {
 	if(!isValidSizedI(I))
-		throw InvalidSizeOfIException(getnbDoublesPerWorkitem() * 4);
+		throw InvalidSizeOfIException(nbDoublesPerWorkitem * 4);
 
 	this->I = I;
 }
@@ -276,13 +321,13 @@ bool BlockKernel::isValidSizedI(vector<size_t>* I)
 	if(I->size() != 3)
 		return false;
 
-	if((*I)[0] % (getnbDoublesPerWorkitem() * 4) != 0)
+	if((*I)[0] % (nbDoublesPerWorkitem * 4) != 0)
 		return false;
 
-	if((*I)[1] % (getnbDoublesPerWorkitem() * 4) != 0)
+	if((*I)[1] % (nbDoublesPerWorkitem * 4) != 0)
 			return false;
 
-	if((*I)[2] % (getnbDoublesPerWorkitem() * 4) != 0)
+	if((*I)[2] % (nbDoublesPerWorkitem * 4) != 0)
 			return false;
 
 	return true;
@@ -295,7 +340,7 @@ cl::NDRange BlockKernel::getLocalSize()
 
 cl::NDRange BlockKernel::getGlobalSize()
 {
-	return cl::NDRange((*I)[0]/getnbDoublesPerWorkitem(),(*I)[1]/getnbDoublesPerWorkitem(),(*I)[2]/getnbDoublesPerWorkitem());
+	return cl::NDRange((*I)[0]/nbDoublesPerWorkitem,(*I)[1]/nbDoublesPerWorkitem,(*I)[2]/nbDoublesPerWorkitem);
 }
 
 void AbstractFKernel::setR(cl_int R)

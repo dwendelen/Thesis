@@ -15,20 +15,9 @@ namespace cl_cpd {
 	class Double8x8x8Isolated: public AbstractFKernel
 	{
 	public:
-		Double8x8x8Isolated(ContextQueue* cq): AbstractFKernel(cq) {}
-
-	protected:
-		u_int getnbDoublesPerWorkitem()
-		{
-			return 2;
-		}
-
-		std::string getFile()
-		{
-			return "double8x8x8I";
-		}
+		Double8x8x8Isolated(ContextQueue* cq):
+			AbstractFKernel(cq, "double8x8x8I", 2) {}
 	};
-
 }
 
 #endif /* DOUBLE8X8X8I_HPP_ */
