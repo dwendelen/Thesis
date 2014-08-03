@@ -22,6 +22,8 @@ double bigU[320*10000];
 Double16x16x16UnMapped* f = NULL;
 Double16x16x16ReMapped* r = NULL;
 Double16x16x16Isolated* i = NULL;
+AbstractFKernel* p = NULL;
+
 Double16x16x16BufferFactory* b = NULL;
 Double16x16x16FGBufferFactory* bg = NULL;
 
@@ -71,10 +73,12 @@ void doo(int R, int I)
 	f->setBuffers(b);
 	r->setBuffers(b);
 	i->setBuffers(b);
+	p->setBuffers(b);
 
 	run(f, "16x16x16 Unmapped", ops);
+	run(r, "16x16x16 Pointer", ops);
 	run(r, "16x16x16 Remapped", ops);
-	//run(i, "16x16x16 Isolated", ops); I needs extra memory
+	run(i, "16x16x16 Isolated", ops);
 
 	int R16 = R;
 	if(R % 16 != 0)
@@ -124,6 +128,9 @@ void dooo()
 	r8->compile();
 	i8 = new Double8x8x8Isolated(cq);
 	i8->compile();
+
+	p = new AbstractFKernel(cq, "double16x16x16P", 4);
+	p->compile();
 
 	g = new Double16x16x16G(cq);
 	g->compile();
