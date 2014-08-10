@@ -99,8 +99,8 @@ namespace cl_cpd
 		b4->init(t, u);
 
 		testF(new AbstractFKernel<float>(cqq, "float16x16x16", 4), b, f, delta, bb);
-		testF(new AbstractFKernel<float>(cqq, "float8x8x8", 2), b, f, delta, bb);
-		testF(new AbstractFKernel<float>(cqq, "float4x4x4", 1), b, f, delta, bb);
+		testF(new AbstractFKernel<float>(cqq, "float8x8x8", 2), b8, f, delta, bb);
+		testF(new AbstractFKernel<float>(cqq, "float4x4x4", 1), b4, f, delta, bb);
 
 		delete b;
 		delete b8;
