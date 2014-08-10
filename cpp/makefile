@@ -7,7 +7,7 @@ all: meas
 
 # Tool invocations
 meas: 
-	g++ meas.cpp common.cpp -lOpenCL -o meas
+	g++ -I/opt/AMDAPP/include meas.cpp common.cpp -lOpenCL -o meas
 # Other Targets
 clean:
 	-$(RM) meas
