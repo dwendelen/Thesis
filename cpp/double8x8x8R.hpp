@@ -12,14 +12,14 @@
 
 namespace cl_cpd {
 
-	class Double8x8x8ReMapped: public AbstractFKernel
+	class Double8x8x8ReMapped: public AbstractFKernel<double>
 	{
 	public:
 		Double8x8x8ReMapped(ContextQueue* cq):
 			AbstractFKernel(cq, "double8x8x8R", 2) {}
 	};
 
-	class Double8x8x8BufferFactory: public AbstractBufferFactory
+	class Double8x8x8BufferFactory: public AbstractBufferFactory<double>
 	{
 	public:
 		Double8x8x8BufferFactory(ContextQueue* cq):

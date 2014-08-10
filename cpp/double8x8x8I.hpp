@@ -12,7 +12,7 @@
 
 namespace cl_cpd {
 
-	class Double8x8x8Isolated: public AbstractFKernel
+	class Double8x8x8Isolated: public AbstractFKernel<double>
 	{
 	public:
 		Double8x8x8Isolated(ContextQueue* cq):

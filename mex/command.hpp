@@ -13,6 +13,7 @@
 #include "mex.h"
 #include "../cpp/common.hpp"
 #include "../cpp/double16x16x16.hpp"
+#include "../cpp/unittest.hpp"
 
 namespace cl_cpd
 {
@@ -46,6 +47,13 @@ namespace cl_cpd
 		bool convert(const mxArray* input);
 	};
 
+	class DoubleParameter: public XParameter<double>
+	{
+	public:
+		bool validate(const mxArray* input);
+		double convert(const mxArray* input);
+	};
+
 	class StringParameter: public XParameter<std::string>
 	{
 	public:
@@ -53,24 +61,24 @@ namespace cl_cpd
 		std::string convert(const mxArray* input);
 	};
 
-	class TParameter: public XParameter<T>
+	class TParameter: public XParameter<T<double> >
 	{
 	public:
 		bool validate(const mxArray* input);
-		T convert(const mxArray* input);
+		T<double> convert(const mxArray* input);
 	};
 
-	class UParameter: public XParameter<U>
+	class UParameter: public XParameter<U<double> >
 	{
 	public:
 		bool validate(const mxArray* input);
-		U convert(const mxArray* input);
+		U<double> convert(const mxArray* input);
 	};
 
 	class SumConverter
 	{
 	public:
-		mxArray* convert(const Sum* input);
+		mxArray* convert(const Sum<double>* input);
 	};
 
 	class Command
@@ -80,6 +88,32 @@ namespace cl_cpd
 		virtual std::vector<Parameter*> getParameters() = 0;
 		virtual std::vector<mxArray*> handle() = 0;
 		virtual ~Command() {};
+	};
+
+	class TestCommand: public Command
+		{
+		TParameter t;
+		UParameter u;
+		DoubleParameter f;
+		DoubleParameter delta;
+
+	public:
+		std::string getString()
+		{
+			return "test";
+		}
+
+		std::vector<Parameter*> getParameters()
+		{
+			std::vector<Parameter*> r(4);
+			r[0] = (Parameter*)&t;
+			r[1] = (Parameter*)&u;
+			r[2] = (Parameter*)&f;
+			r[3] = (Parameter*)&delta;
+			return r;
+		}
+
+		std::vector<mxArray*> handle();
 	};
 
 	class InitCommand: public Command

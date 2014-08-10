@@ -30,22 +30,22 @@ void operator delete (void* p, const std::nothrow_t&) throw()
 }
 void* operator new[](std::size_t size) throw(std::bad_alloc)
 {
-	mexPrintf("new[]");
+	//mexPrintf("new[]");
 	return operator new(size);
 }
 void operator delete[](void* ptr) throw()
 {
-	mexPrintf("delete[]");
+	//mexPrintf("delete[]");
 	operator delete(ptr);
 }
 void* operator new [](std::size_t size, const std::nothrow_t&) throw()
 {
-	mexPrintf("delete[]");
+	//mexPrintf("delete[]");
 	return operator new(size, std::nothrow_t());
 }
 void operator delete[](void* ptr, const std::nothrow_t&) throw()
 {
-	mexPrintf("delete[]");
+	//mexPrintf("delete[]");
 	operator delete[](ptr, std::nothrow_t());
 }
 
@@ -113,6 +113,7 @@ CommandRegister* buildCommandRegister()
 	cr->add(new SetUCommand);
 	cr->add(new RunCommand);
 	cr->add(new TimeCommand);
+	cr->add(new TestCommand);
 
 	return cr;
 }

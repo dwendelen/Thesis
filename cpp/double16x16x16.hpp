@@ -12,28 +12,28 @@
 
 namespace cl_cpd {
 
-	class Double16x16x16UnMapped: public AbstractFKernel
+	class Double16x16x16UnMapped: public AbstractFKernel<double>
 	{
 	public:
 		Double16x16x16UnMapped(ContextQueue* cq):
 			AbstractFKernel(cq, "double16x16x16", 4) {}
 	};
 
-	class Double16x16x16BufferFactory: public AbstractBufferFactory
+	class Double16x16x16BufferFactory: public AbstractBufferFactory<double>
 	{
 	public:
 		Double16x16x16BufferFactory(ContextQueue* cq):
 			AbstractBufferFactory(cq, 4){}
 	};
 
-	class Double16x16x16G: public AbstractGKernel
+	class Double16x16x16G: public AbstractGKernel<double>
 	{
 	public:
 		Double16x16x16G(ContextQueue* cq):
 			AbstractGKernel(cq, "double16x16x16G"){}
 	};
 
-	class Double16x16x16FGBufferFactory: public AbstractFGBufferFactory
+	class Double16x16x16FGBufferFactory: public AbstractFGBufferFactory<double>
 	{
 	public:
 		Double16x16x16FGBufferFactory(ContextQueue* cq):

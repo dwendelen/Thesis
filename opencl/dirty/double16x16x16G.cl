@@ -12,11 +12,8 @@ __kernel void KernelG1(__global const double2 *T,
     
     double2 sum = 0;
     
-    //  idxTFirstCacheItem = idxT1
     int idxTFirstCacheItem = get_global_id(1);
-    //__global const double2* idxTFirstCacheItem = T + get_global_id(1);
     int idxT;
-    //__global const double2* idxT;
     
     //  startIdxU2 =       idxR       * I2;
     int startIdxU2 = get_global_id(0) * I2;
@@ -65,13 +62,13 @@ __kernel void KernelG1(__global const double2 *T,
             	for(int j = 0; j < 8; j++)
 		    	{
 		        	temp = u2 * U3Cache[idxCache].x;
-		        	sum += temp.x * T[idxT];/*  *idxT;*/
-		        	sum += temp.y * T[idxT + jumpIdxTMode2]; /*  *(idxT + jumpIdxTMode2);*/
+		        	sum += temp.x * T[idxT];
+		        	sum += temp.y * T[idxT + jumpIdxTMode2];
 		        	idxT += jumpIdxTMode3;
 		        	
 		        	temp = u2 * U3Cache[idxCache++].y;
-		        	sum += temp.x * T[idxT];/*  *idxT;*/
-					sum += temp.y * T[idxT + jumpIdxTMode2]; /*  *(idxT + jumpIdxTMode2);*/
+		        	sum += temp.x * T[idxT];
+					sum += temp.y * T[idxT + jumpIdxTMode2];
             		idxT += jumpIdxTMode3;
 		    	}
             }
@@ -80,9 +77,9 @@ __kernel void KernelG1(__global const double2 *T,
         idxTFirstCacheItem += jumpIdxTForNextCache;
     }
     
-    //  idxU1 =       idxT1      + I0 * idxR
-    int idxU1 = get_global_id(1) + get_global_size(1) * get_global_id(0);
-    G1[idxU1] = sum;
+    //  idxG1 =       idxT1      +         I0         *     idxR
+    int idxG1 = get_global_id(1) + get_global_size(1) * get_global_id(0);
+    G1[idxG1] = sum;
 }
 
 __attribute__((reqd_work_group_size(8, 8, 1)))

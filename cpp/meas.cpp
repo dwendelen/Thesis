@@ -22,7 +22,7 @@ double bigU[320*10000];
 Double16x16x16UnMapped* f = NULL;
 Double16x16x16ReMapped* r = NULL;
 Double16x16x16Isolated* i = NULL;
-AbstractFKernel* p = NULL;
+AbstractFKernel<double>* p = NULL;
 
 Double16x16x16BufferFactory* b = NULL;
 Double16x16x16FGBufferFactory* bg = NULL;
@@ -54,14 +54,14 @@ void doo(int R, int I)
 	if(I % 16 != 0)
 		I16 = (I/16)*16 + 16;
 
-	T t;
+	T<double> t;
 	t.Ts = bigT;
 	t.I = vector<size_t>();
 	t.I.push_back(I16);
 	t.I.push_back(I16);
 	t.I.push_back(I16);
 
-	U u;
+	U<double> u;
 	u.Us = vector<double*>();
 	u.Us.push_back(bigU);
 	u.Us.push_back(bigU);
@@ -84,7 +84,7 @@ void doo(int R, int I)
 	if(R % 16 != 0)
 		R16 = (R/16)*16 + 16;
 
-	U u2 = u;
+	U<double> u2 = u;
 	u2.rank = R16;
 
 	bg->init(t, u2);
@@ -129,7 +129,7 @@ void dooo()
 	i8 = new Double8x8x8Isolated(cq);
 	i8->compile();
 
-	p = new AbstractFKernel(cq, "double16x16x16P", 4);
+	p = new AbstractFKernel<double>(cq, "double16x16x16P", 4);
 	p->compile();
 
 	g = new Double16x16x16G(cq);

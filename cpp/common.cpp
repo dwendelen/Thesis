@@ -92,18 +92,20 @@ ContextQueue::~ContextQueue()
 	delete device;
 }
 
-
-cl::Buffer* AbstractBufferFactory::createInitBuf(size_t nbBytes, void* p)
+template<typename type>
+cl::Buffer* AbstractBufferFactory<type>::createInitBuf(size_t nbBytes, void* p)
 {
 	return new cl::Buffer(*cq->getContext(), CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, nbBytes, p);
 }
 
-cl::Buffer* AbstractBufferFactory::createReadWriteBuf(size_t nbBytes)
+template<typename type>
+cl::Buffer* AbstractBufferFactory<type>::createReadWriteBuf(size_t nbBytes)
 {
 	return new cl::Buffer(*cq->getContext(), CL_MEM_READ_WRITE, nbBytes);
 }
 
-void AbstractBufferFactory::init(T t, U u)
+template<typename type>
+void AbstractBufferFactory<type>::init(T<type> t, U<type> u)
 {
 	if(t.I.size() != u.I.size())
 		throw SizesTandUDontMatchException();
@@ -128,7 +130,7 @@ void AbstractBufferFactory::init(T t, U u)
 
 	cleanUp();
 
-	size_t s = sizeof(double) * t.I[0] * t.I[1] * t.I[2];
+	size_t s = sizeof(type) * t.I[0] * t.I[1] * t.I[2];
 	this->t = createInitBuf(s, t.Ts);
 
 	this->rank = (cl_int) u.rank;
@@ -142,29 +144,31 @@ void AbstractBufferFactory::init(T t, U u)
 	this->i = new std::vector<size_t>(t.I);
 
 	s = (t.I[0]*t.I[1]*t.I[2])/(4*nbDoublesPerWorkitem*4*nbDoublesPerWorkitem*4*nbDoublesPerWorkitem);
-	this->sum = createReadWriteBuf(sizeof(double) * s);
+	this->sum = createReadWriteBuf(sizeof(type) * s);
 
 	nbElementsInSum = s;
 }
 
 
-
-void AbstractBufferFactory::updateU(U u)
+template<typename type>
+void AbstractBufferFactory<type>::updateU(U<type> u)
 {
 	cq->getQueue()->enqueueWriteBuffer(*(*this->u)[0],CL_FALSE, 0, u.size(0), u.Us[0]);
 	cq->getQueue()->enqueueWriteBuffer(*(*this->u)[1],CL_FALSE, 0, u.size(1), u.Us[1]);
 	cq->getQueue()->enqueueWriteBuffer(*(*this->u)[2],CL_FALSE, 0, u.size(2), u.Us[2]);
 }
 
-void AbstractBufferFactory::readSum(Sum sumArray)
+template<typename type>
+void AbstractBufferFactory<type>::readSum(Sum<type> sumArray)
 {
 	cq->getQueue()->enqueueReadBuffer(*sum, CL_TRUE, 0,
-			sumArray.nbElements*sizeof(double), sumArray.sum);
+			sumArray.nbElements*sizeof(type), sumArray.sum);
 }
 
 #define delNull(x) {delete x; x = NULL;}
 
-void AbstractBufferFactory::cleanUp()
+template<typename type>
+void AbstractBufferFactory<type>::cleanUp()
 {
 	delNull(t);
 	rank = 0;
@@ -179,7 +183,8 @@ void AbstractBufferFactory::cleanUp()
 	delNull(sum);
 }
 
-AbstractBufferFactory::~AbstractBufferFactory()
+template<typename type>
+AbstractBufferFactory<type>::~AbstractBufferFactory()
 {
 	delete t;
 	delete (*u)[0];
@@ -190,13 +195,14 @@ AbstractBufferFactory::~AbstractBufferFactory()
 	delete sum;
 }
 
-void AbstractFGBufferFactory::init(T t, U u)
+template<typename type>
+void AbstractFGBufferFactory<type>::init(T<type> t, U<type> u)
 {
-    AbstractBufferFactory::init(t, u);
+    AbstractBufferFactory<type>::init(t, u);
     
-    size_t s = sizeof(double) * t.I[0] * t.I[1] * t.I[2];
+    size_t s = sizeof(type) * t.I[0] * t.I[1] * t.I[2];
     
-    r = createReadWriteBuf(s);
+    r = AbstractBufferFactory<type>::createReadWriteBuf(s);
 
     g = new std::vector<cl::Buffer *>(3);
     (*g)[0] = createReadWriteBuf(u.size(0));
@@ -204,19 +210,21 @@ void AbstractFGBufferFactory::init(T t, U u)
     (*g)[2] = createReadWriteBuf(u.size(2));
 }
 
-void AbstractFGBufferFactory::readG(U g)
+template<typename type>
+void AbstractFGBufferFactory<type>::readG(U<type> g)
 {
-	cq->getQueue()->enqueueReadBuffer(*(*this->g)[0], CL_TRUE, 0,
+	AbstractBufferFactory<type>::cq->getQueue()->enqueueReadBuffer(*(*this->g)[0], CL_TRUE, 0,
 			g.size(0), g.Us[0]);
-	cq->getQueue()->enqueueReadBuffer(*(*this->g)[1], CL_TRUE, 0,
+	AbstractBufferFactory<type>::cq->getQueue()->enqueueReadBuffer(*(*this->g)[1], CL_TRUE, 0,
 				g.size(1), g.Us[1]);
-	cq->getQueue()->enqueueReadBuffer(*(*this->g)[2], CL_TRUE, 0,
+	AbstractBufferFactory<type>::cq->getQueue()->enqueueReadBuffer(*(*this->g)[2], CL_TRUE, 0,
 				g.size(2), g.Us[2]);
 }
 
-void AbstractFGBufferFactory::cleanUp()
+template<typename type>
+void AbstractFGBufferFactory<type>::cleanUp()
 {
-	AbstractBufferFactory::cleanUp();
+	AbstractBufferFactory<type>::cleanUp();
 
 	delNull(r);
 	if(g != NULL)
@@ -228,7 +236,8 @@ void AbstractFGBufferFactory::cleanUp()
 	}
 }
 
-AbstractFGBufferFactory::~AbstractFGBufferFactory()
+template<typename type>
+AbstractFGBufferFactory<type>::~AbstractFGBufferFactory()
 {
 	delete r;
 	if(g != NULL)
@@ -388,12 +397,14 @@ std::vector<cl::NDRange> BlockKernel::getGlobalSize()
 	return v;
 }
 
-void AbstractFKernel::setRank(cl_int rank)
+template<typename type>
+void AbstractFKernel<type>::setRank(cl_int rank)
 {
 	setArg(4, rank);
 }
 
-void AbstractFKernel::setU(vector<cl::Buffer*>* U)
+template<typename type>
+void AbstractFKernel<type>::setU(vector<cl::Buffer*>* U)
 {
 	if(!hasUValidNbOfDims(U))
 		throw InvalidSizeOfUException();
@@ -403,21 +414,26 @@ void AbstractFKernel::setU(vector<cl::Buffer*>* U)
 	setArg(3, *(*U)[2]);
 }
 
-bool AbstractFKernel::hasUValidNbOfDims(std::vector<cl::Buffer*>* U)
+template<typename type>
+bool AbstractFKernel<type>::hasUValidNbOfDims(std::vector<cl::Buffer*>* U)
 {
 	return U->size() == 3;
 }
 
-void AbstractFKernel::setSum(cl::Buffer* sum)
+template<typename type>
+void AbstractFKernel<type>::setSum(cl::Buffer* sum)
 {
 	setArg(5, *sum);
 }
 
-cl::NDRange AbstractGKernel::getLocalSize()
+template<typename type>
+cl::NDRange AbstractGKernel<type>::getLocalSize()
 {
 	return cl::NDRange(8,8);
 }
-std::vector<cl::NDRange> AbstractGKernel::getGlobalSize()
+
+template<typename type>
+std::vector<cl::NDRange> AbstractGKernel<type>::getGlobalSize()
 {
 	std::vector<cl::NDRange> v;
 	v.push_back(cl::NDRange((size_t)rank, (size_t)(*I)[0]/2));
@@ -426,11 +442,14 @@ std::vector<cl::NDRange> AbstractGKernel::getGlobalSize()
 	return v;
 }
 
-void AbstractGKernel::setR(cl::Buffer* R)
+template<typename type>
+void AbstractGKernel<type>::setR(cl::Buffer* R)
 {
 	setArg(0, *R);
 }
-void AbstractGKernel::setU(std::vector<cl::Buffer*>* U)
+
+template<typename type>
+void AbstractGKernel<type>::setU(std::vector<cl::Buffer*>* U)
 {
 	if(!hasUOrGValidNbOfDims(U))
 		throw InvalidSizeOfUException();
@@ -444,7 +463,9 @@ void AbstractGKernel::setU(std::vector<cl::Buffer*>* U)
 	getKernels()[2]->setArg(1, *(*U)[0]);
 	getKernels()[2]->setArg(2, *(*U)[1]);
 }
-void AbstractGKernel::setI(std::vector<size_t>* I)
+
+template<typename type>
+void AbstractGKernel<type>::setI(std::vector<size_t>* I)
 {
 	if(!isValidSizedI(I))
 		throw InvalidSizeOfIException(16);
@@ -461,7 +482,8 @@ void AbstractGKernel::setI(std::vector<size_t>* I)
 	getKernels()[2]->setArg(5, (cl_int)(*I)[1]/2);
 }
 
-bool AbstractGKernel::isValidSizedI(vector<size_t>* I)
+template<typename type>
+bool AbstractGKernel<type>::isValidSizedI(vector<size_t>* I)
 {
 	if(I->size() != 3)
 		return false;
@@ -477,12 +499,16 @@ bool AbstractGKernel::isValidSizedI(vector<size_t>* I)
 
 	return true;
 }
-bool AbstractGKernel::hasUOrGValidNbOfDims(std::vector<cl::Buffer*>* UorG)
+
+template<typename type>
+bool AbstractGKernel<type>::hasUOrGValidNbOfDims(std::vector<cl::Buffer*>* UorG)
 {
 	return UorG->size() == 3;
 }
 
-void AbstractGKernel::setG(std::vector<cl::Buffer*>* G)
+
+template<typename type>
+void AbstractGKernel<type>::setG(std::vector<cl::Buffer*>* G)
 {
 	if(!hasUOrGValidNbOfDims(G))
 		throw InvalidSizeOfUException();
@@ -491,14 +517,27 @@ void AbstractGKernel::setG(std::vector<cl::Buffer*>* G)
 	getKernels()[1]->setArg(2, *(*G)[1]);
 	getKernels()[2]->setArg(3, *(*G)[2]);
 }
-void AbstractGKernel::setRank(cl_int rank)
+
+template<typename type>
+void AbstractGKernel<type>::setRank(cl_int rank)
 {
 	this->rank = rank;
 }
 
-void AbstractTMapper::setTMapped(cl::Buffer* TMapped)
+template<typename type>
+void AbstractTMapper<type>::setTMapped(cl::Buffer* TMapped)
 {
 	setArg(1, TMapped);
 }
 
+template class AbstractBufferFactory<double>;
+template class AbstractBufferFactory<float>;
 
+template class AbstractFGBufferFactory<double>;
+template class AbstractFGBufferFactory<float>;
+
+template class AbstractFKernel<double>;
+template class AbstractFKernel<float>;
+
+template class AbstractGKernel<double>;
+template class AbstractGKernel<float>;

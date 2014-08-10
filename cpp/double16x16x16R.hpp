@@ -12,7 +12,7 @@
 
 namespace cl_cpd {
 
-	class Double16x16x16ReMapped: public AbstractFKernel
+	class Double16x16x16ReMapped: public AbstractFKernel<double>
 	{
 	public:
 		Double16x16x16ReMapped(ContextQueue* cq):

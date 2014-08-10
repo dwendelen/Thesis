@@ -18,28 +18,31 @@
 
 namespace cl_cpd
 {
+	template<typename type>
 	struct T
 	{
 		std::vector<size_t> I;
-		double* Ts;
+		type* Ts;
 	};
 
+	template<typename type>
 	struct U
 	{
 		size_t rank;
 		std::vector<size_t> I;
-		std::vector<double*> Us;
+		std::vector<type*> Us;
 
 		size_t size(size_t dim)
 		{
-			return sizeof(double) * rank * I[dim];
+			return sizeof(type) * rank * I[dim];
 		}
 	};
 
+	template<typename type>
 	struct Sum
 	{
 		size_t nbElements;
-		double* sum;
+		type* sum;
 	};
 
 	class ContextQueue
@@ -61,6 +64,7 @@ namespace cl_cpd
 			std::vector<cl::Device>* device;
 		};
 
+	template<typename type>
 	class AbstractBufferFactory
 	{
 	public:
@@ -68,9 +72,9 @@ namespace cl_cpd
 			cq(cq), t(NULL), rank(0), u(NULL), i(NULL), sum(NULL),
 			nbElementsInSum(0), nbDoublesPerWorkitem(nbDoublesPerWorkitem){}
 
-		virtual void init(T t, U u);
-		void updateU(U u);
-		void readSum(Sum sumArray);
+		virtual void init(T<type> t, U<type> u);
+		void updateU(U<type> u);
+		void readSum(Sum<type> sumArray);
 
 		cl::Buffer* getT(){return t;}
 		cl_int getRank(){return rank;}
@@ -95,18 +99,19 @@ namespace cl_cpd
 		u_int nbDoublesPerWorkitem;
 	};
 
+	template<typename type>
 	class AbstractFGBufferFactory:
-			public AbstractBufferFactory
+			public AbstractBufferFactory<type>
 	{
 	public:
 		AbstractFGBufferFactory(ContextQueue* cq, u_int nbDoublesPerWorkitem):
-					AbstractBufferFactory(cq, nbDoublesPerWorkitem),
+					AbstractBufferFactory<type>(cq, nbDoublesPerWorkitem),
 					r(NULL), g(NULL){}
-		void init(T t, U u);
+		void init(T<type> t, U<type> u);
 		cl::Buffer* getR(){return r;}
 		std::vector<cl::Buffer*>* getG(){return g;}
 
-		void readG(U g);
+		void readG(U<type> g);
 		virtual ~AbstractFGBufferFactory();
 	protected:
 		virtual void cleanUp();
@@ -123,6 +128,7 @@ namespace cl_cpd
 		void compile();
 		void run();
 		std::vector<double> getExecutionTimesLastRun();
+		std::string getName() {return file;}
 		double getExecutionTimeLastRun();
 		virtual ~Kernel();
 
@@ -163,6 +169,7 @@ namespace cl_cpd
 		u_int nbDoublesPerWorkitem;
 	};
 
+	template<typename type>
 	class AbstractFKernel: public BlockKernel
 	{
 	public:
@@ -175,7 +182,7 @@ namespace cl_cpd
 		void setU(std::vector<cl::Buffer*>* U);
 		bool hasUValidNbOfDims(std::vector<cl::Buffer*>* U);
 		void setSum(cl::Buffer* sum);
-		virtual void setBuffers(AbstractBufferFactory* b)
+		virtual void setBuffers(AbstractBufferFactory<type>* b)
 		{
 			setT(b->getT());
 			setRank(b->getRank());
@@ -185,21 +192,23 @@ namespace cl_cpd
 		}
 	};
 
-	class AbstractFGKernel: public AbstractFKernel
+	template<typename type>
+	class AbstractFGKernel: public AbstractFKernel<type>
 	{
 	public:
 		AbstractFGKernel(ContextQueue* cq, std::string file, u_int nbDoublesPerWorkitem):
-			AbstractFKernel(cq, file, nbDoublesPerWorkitem)
+			AbstractFKernel<type>(cq, file, nbDoublesPerWorkitem)
 		{}
 		void setR(cl::Buffer* R);
-		virtual void setBuffers(AbstractFGBufferFactory* b)
+		virtual void setBuffers(AbstractFGBufferFactory<type>* b)
 		{
-			AbstractFKernel::setBuffers(b);
+			AbstractFKernel<type>::setBuffers(b);
 			setR(b->getR());
 		}
 	};
 
 	//Uses T as G
+	template<typename type>
 	class AbstractGKernel: public Kernel
 	{
 	public:
@@ -223,7 +232,7 @@ namespace cl_cpd
 		bool hasUOrGValidNbOfDims(std::vector<cl::Buffer*>* UorG);
 		bool isValidSizedI(std::vector<size_t>* I);
 
-		virtual void setBuffers(AbstractFGBufferFactory* b)
+		virtual void setBuffers(AbstractFGBufferFactory<type>* b)
 		{
 			setR(b->getR());
 			setU(b->getU());
@@ -237,11 +246,12 @@ namespace cl_cpd
 		cl_int rank;
 	};
 
+	template<typename type>
 	class AbstractTMapper: public BlockKernel
 	{
 	public:
 		void setTMapped(cl::Buffer* TMapped);
-		virtual void setBuffers(AbstractBufferFactory* b)
+		virtual void setBuffers(AbstractBufferFactory<type>* b)
 		{
 			setT(b->getT());
 			setI(b->getI());

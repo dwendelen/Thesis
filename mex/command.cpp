@@ -15,6 +15,16 @@ namespace cl_cpd
 	Double16x16x16UnMapped *f = NULL;
 	Double16x16x16BufferFactory *b = NULL;
 
+	std::vector<mxArray*> TestCommand::handle()
+	{
+		UnitTest ut;
+		bool b = ut.test(t.val, u.val, f.val, delta.val);
+
+		std::vector<mxArray*> r(1);
+		r[0] = mxCreateLogicalScalar(b);
+		return r;
+	}
+
 	std::vector<mxArray*> InitCommand::handle()
 	{
 		delete cq;
@@ -40,7 +50,7 @@ namespace cl_cpd
 		b->init(t.val, u.val);
 
 		f->setT(b->getT());
-		f->setR(b->getR());
+		f->setRank(b->getRank());
 		f->setU(b->getU());
 		f->setI(b->getI());
 		f->setSum(b->getSum());
@@ -69,7 +79,7 @@ namespace cl_cpd
 		std::cout << "\n\n" << b->getNbElementsInSum() << "\n\n";
 		mxArray* m = mxCreateDoubleMatrix(b->getNbElementsInSum(), 1, mxREAL);
 
-		Sum s;
+		Sum<double> s;
 		s.nbElements = mxGetNumberOfElements(m);
 		s.sum = mxGetPr(m);
 
@@ -96,6 +106,18 @@ namespace cl_cpd
 		return mxGetLogicals(input)[0];
 	}
 
+	bool DoubleParameter::validate(const mxArray* input)
+	{
+		if(!mxIsDouble(input))
+			return false;
+
+		return mxGetNumberOfElements(input) == 1;
+	}
+	double DoubleParameter::convert(const mxArray* input)
+	{
+		return mxGetPr(input)[0];
+	}
+
 	bool StringParameter::validate(const mxArray* input)
 	{
 		if(!mxIsChar(input))
@@ -115,9 +137,9 @@ namespace cl_cpd
 	{
 		return mxIsDouble(input);
 	}
-	T TParameter::convert(const mxArray* input)
+	T<double> TParameter::convert(const mxArray* input)
 	{
-		T t;
+		T<double> t;
 		mwSize dims = mxGetNumberOfDimensions(input);
 		t.I = std::vector<size_t>(dims);
 		for(size_t i = 0; i < dims; i++)
@@ -162,9 +184,9 @@ namespace cl_cpd
 
 		return mxIsDouble(mxGetCell(input, 0));
 	}
-	U UParameter::convert(const mxArray* input)
+	U<double> UParameter::convert(const mxArray* input)
 	{
-		U u;
+		U<double> u;
 		mwSize dims = mxGetNumberOfElements(input);
 		u.I = std::vector<size_t>(dims);
 		u.Us = std::vector<double*>(dims);
