@@ -89,7 +89,7 @@ __kernel void Kernel(__global const float2 *T,
             sum1 += l[i];
         }
         
-        gId = get_group_id(0) + get_num_groups(0) * (get_group_id(1) + get_num_groups(1) * get_group_id(2));
+        int gId = get_group_id(0) + get_num_groups(0) * (get_group_id(1) + get_num_groups(1) * get_group_id(2));
         sum[gId] = sum1;
 	}
 }

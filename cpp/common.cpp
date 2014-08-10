@@ -256,7 +256,7 @@ void Kernel::compile()
 	s.push_back(make_pair(c.c_str(), c.length()));
 	cl::Program p(*cq->getContext(), s);
 	try{
-	p.build(*cq->getDevice(), "-cl-opt-disable -g -s \"../opencl/double16x16x16G.cl\"");
+	p.build(*cq->getDevice());
 	}catch (cl::Error &e) {
 		cout << p.getBuildInfo<CL_PROGRAM_BUILD_LOG>((*cq->getDevice())[0]);
 	}

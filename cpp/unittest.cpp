@@ -29,6 +29,7 @@ namespace cl_cpd
 		for (uint i = 0; i<a.I.size(); i++)
 			l *= a.I[i];
 
+		b.Ts = new float[l];
 		for (int i = 0; i<l; i++)
 			b.Ts[i] = (float)a.Ts[i];
 	}
@@ -37,8 +38,10 @@ namespace cl_cpd
 	{
 		b.I = a.I;
 		b.rank = a.rank;
+		b.Us = std::vector<float*>(3);
 		for(int i = 0; i<a.Us.size(); i++)
 		{
+			b.Us[i] = new float[a.rank * a.I[i]];
 			for(uint j=0; j< a.rank * a.I[i]; j++)
 			{
 				b.Us[i][j] = (float)a.Us[i][j];
