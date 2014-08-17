@@ -106,9 +106,9 @@ namespace cl_cpd
 	public:
 		AbstractFGBufferFactory(ContextQueue* cq, u_int nbDoublesPerWorkitem):
 					AbstractBufferFactory<type>(cq, nbDoublesPerWorkitem),
-					r(NULL), g(NULL){}
+					f(NULL), g(NULL){}
 		void init(T<type> t, U<type> u);
-		cl::Buffer* getR(){return r;}
+		cl::Buffer* getF(){return f;}
 		std::vector<cl::Buffer*>* getG(){return g;}
 
 		void readG(U<type> g);
@@ -116,7 +116,7 @@ namespace cl_cpd
 	protected:
 		virtual void cleanUp();
 	private:
-		cl::Buffer* r;
+		cl::Buffer* f;
 		std::vector<cl::Buffer*>* g;
 	};
 
@@ -199,12 +199,13 @@ namespace cl_cpd
 		AbstractFGKernel(ContextQueue* cq, std::string file, u_int nbDoublesPerWorkitem):
 			AbstractFKernel<type>(cq, file, nbDoublesPerWorkitem)
 		{}
-		void setR(cl::Buffer* R);
+		void setF(cl::Buffer* F);
 		virtual void setBuffers(AbstractFGBufferFactory<type>* b)
 		{
 			AbstractFKernel<type>::setBuffers(b);
-			setR(b->getR());
+			setF(b->getF());
 		}
+		virtual ~AbstractFGKernel(){};
 	};
 
 	//Uses T as G
@@ -223,7 +224,7 @@ namespace cl_cpd
 		cl::NDRange getLocalSize();
 		virtual std::vector<cl::NDRange> getGlobalSize();
 
-		void setR(cl::Buffer* R);
+		void setF(cl::Buffer* F);
 		void setU(std::vector<cl::Buffer*>*);
 		void setI(std::vector<size_t>* I);
 		void setG(std::vector<cl::Buffer*>*);
@@ -234,7 +235,7 @@ namespace cl_cpd
 
 		virtual void setBuffers(AbstractFGBufferFactory<type>* b)
 		{
-			setR(b->getR());
+			setF(b->getF());
 			setU(b->getU());
 			setI(b->getI());
 			setG(b->getG());

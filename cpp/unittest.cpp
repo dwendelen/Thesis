@@ -39,7 +39,7 @@ namespace cl_cpd
 		b.I = a.I;
 		b.rank = a.rank;
 		b.Us = std::vector<float*>(3);
-		for(int i = 0; i<a.Us.size(); i++)
+		for(uint i = 0; i<a.Us.size(); i++)
 		{
 			b.Us[i] = new float[a.rank * a.I[i]];
 			for(uint j=0; j< a.rank * a.I[i]; j++)
@@ -108,7 +108,76 @@ namespace cl_cpd
 
 	}
 
-	bool UnitTest::test(T<double> t, U<double> u, double f, double delta)
+	bool compareG(U<double> r, U<double> e, double delta)
+	{
+		for(uint i = 0; i < 3; i++)
+		{
+			for(uint j = 0; j < (r.rank * r.I[i]); j++)
+			{
+				if ((r.Us[i][j] < e.Us[i][j] + delta) && (r.Us[i][j] > e.Us[i][j] - delta))
+				{
+					//niks doen
+				}
+				else
+				{
+					std::cout << e.Us[i][j] << " echt: " << r.Us[i][j];
+					return false;
+				}
+			}
+		}
+		return false;
+	}
+
+	void testG(T<double> t, U<double> u, double f, double deltaF, U<double> g, double deltaG, bool& bb)
+	{
+		AbstractFGBufferFactory<double> *b = new AbstractFGBufferFactory<double>(cqq, 4);
+		b->init(t, u);
+
+		AbstractFGKernel<double>* k1 = new AbstractFGKernel<double>(cqq, "double16x16x16FG", 4);
+		AbstractGKernel<double>* k2 = new AbstractGKernel<double>(cqq, "double16x16x16G");
+
+		k2->compile();
+		k2->setBuffers(b);
+
+
+		testF(k1, b, f, deltaF, bb);
+
+		k2->run();
+
+		U<double> uu;
+		uu.I = u.I;
+		uu.rank = u.rank;
+
+		uu.Us = std::vector<double*>(3);
+		uu.Us[0] = new double[uu.I[0] * uu.rank];
+		uu.Us[1] = new double[uu.I[1] * uu.rank];
+		uu.Us[2] = new double[uu.I[2] * uu.rank];
+
+		b->readG(uu);
+
+		bool bbb = compareG(uu, g, deltaG);
+
+		std::cout << k2->getName() << " ";
+		if(bbb)
+			std::cout << "OK";
+		else
+		{
+			bb = false;
+			std::cout << "FAIL";
+		}
+
+		std::cout << "\n";
+
+		delete uu.Us[0];
+		delete uu.Us[1];
+		delete uu.Us[2];
+
+		delete b;
+		delete k1;
+		delete k2;
+	}
+
+	bool UnitTest::test(T<double> t, U<double> u, double f, double deltaF, U<double> g, double deltaG)
 	{
 		cqq = new ContextQueue();
 		cqq->init(false);
@@ -118,7 +187,7 @@ namespace cl_cpd
 		std::cout << "\n";
 
 		bool bb = true;
-		testDouble(t, u, f, delta, bb);
+		testDouble(t, u, f, deltaF, bb);
 
 		T<float> tt;
 		U<float> uu;
@@ -126,7 +195,9 @@ namespace cl_cpd
 		convertT(t, tt);
 		convertU(u, uu);
 
-		testFloat(tt, uu, f, delta, bb);
+		testFloat(tt, uu, f, deltaF, bb);
+
+		testG(t, u, f, deltaF, g, deltaG, bb);
 
 		delete cqq;
 

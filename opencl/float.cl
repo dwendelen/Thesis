@@ -1,10 +1,7 @@
-__attribute__((reqd_work_group_size(64, 1, 1)))
 __kernel void Kernel(__global const float* T,
     __global const float* U1, __global const float* U2, __global const float* U3,
-    const int R, __global float* sum, const int I1, const int I2, const int I3)
+    const int R, __global float* sum, const int I1, const int I2, const int I3, local float* l)
 {
-	__local float l[64];
-	
 	float temp;
 	float c;
 	
@@ -36,8 +33,7 @@ __kernel void Kernel(__global const float* T,
 	barrier(CLK_LOCAL_MEM_FENCE);
 	if(lIdx == 0)
 	{        
-        #pragma unroll
-        for(int i = 1; i < 64; i++)
+        for(int i = 1; i < get_local_size(0); i++)
         {
             sum1 += l[i];
         }

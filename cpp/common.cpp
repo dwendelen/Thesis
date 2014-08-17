@@ -202,7 +202,7 @@ void AbstractFGBufferFactory<type>::init(T<type> t, U<type> u)
     
     size_t s = sizeof(type) * t.I[0] * t.I[1] * t.I[2];
     
-    r = AbstractBufferFactory<type>::createReadWriteBuf(s);
+    f = AbstractBufferFactory<type>::createReadWriteBuf(s);
 
     g = new std::vector<cl::Buffer *>(3);
     (*g)[0] = createReadWriteBuf(u.size(0));
@@ -221,12 +221,14 @@ void AbstractFGBufferFactory<type>::readG(U<type> g)
 				g.size(2), g.Us[2]);
 }
 
+
+
 template<typename type>
 void AbstractFGBufferFactory<type>::cleanUp()
 {
 	AbstractBufferFactory<type>::cleanUp();
 
-	delNull(r);
+	delNull(f);
 	if(g != NULL)
 	{
 		delNull((*g)[0]);
@@ -239,7 +241,7 @@ void AbstractFGBufferFactory<type>::cleanUp()
 template<typename type>
 AbstractFGBufferFactory<type>::~AbstractFGBufferFactory()
 {
-	delete r;
+	delete f;
 	if(g != NULL)
 	{
 		delete (*g)[0];
@@ -415,6 +417,12 @@ void AbstractFKernel<type>::setU(vector<cl::Buffer*>* U)
 }
 
 template<typename type>
+void AbstractFGKernel<type>::setF(cl::Buffer* F)
+{
+	Kernel::setArg(6, *F);
+}
+
+template<typename type>
 bool AbstractFKernel<type>::hasUValidNbOfDims(std::vector<cl::Buffer*>* U)
 {
 	return U->size() == 3;
@@ -443,9 +451,9 @@ std::vector<cl::NDRange> AbstractGKernel<type>::getGlobalSize()
 }
 
 template<typename type>
-void AbstractGKernel<type>::setR(cl::Buffer* R)
+void AbstractGKernel<type>::setF(cl::Buffer* F)
 {
-	setArg(0, *R);
+	setArg(0, *F);
 }
 
 template<typename type>
@@ -538,6 +546,9 @@ template class AbstractFGBufferFactory<float>;
 
 template class AbstractFKernel<double>;
 template class AbstractFKernel<float>;
+
+template class AbstractFGKernel<double>;
+template class AbstractFGKernel<float>;
 
 template class AbstractGKernel<double>;
 template class AbstractGKernel<float>;

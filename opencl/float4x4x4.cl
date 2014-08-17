@@ -1,7 +1,7 @@
 __attribute__((reqd_work_group_size(4, 4, 4)))
-__kernel void Kernel(__global const float *T,
-    __global const float *U1, __global const float *U2, __global const float *U3,
-    const int R, __global float *sum)
+__kernel void Kernel(__global const float* T,
+    __global const float* U1, __global const float* U2, __global const float* U3,
+    const int R, __global float* sum)
 {
 	__local float l[64];
 	

@@ -13,7 +13,7 @@ namespace cl_cpd
 	class UnitTest
 	{
 	public:
-		bool test(T<double> t, U<double> u, double f, double delta);
+		bool test(T<double> t, U<double> u, double f, double deltaF, U<double> g, double deltaG);
 	};
 }
 
