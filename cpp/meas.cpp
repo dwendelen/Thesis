@@ -210,9 +210,9 @@ void dooo()
 	f16->compile();
 
 	doo(16, 16);
-	doo(16, 6000);
-	doo(320, 16);
-	doo(320, 6000);
+	doo(6000, 16);
+	doo(16, 320);
+	doo(6000, 320);
 
 	delete b1d1;
 	delete b1d32;
