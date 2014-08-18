@@ -78,6 +78,36 @@ namespace cl_cpd
 		delete sum.sum;
 	}
 
+	template<typename type>
+	void testF1D(OneDRangeKernel<type>* kernel, OneDRangeBufferFactory<type>* bf, double exp, double delta, bool& bb)
+	{
+		kernel->compile();
+		kernel->setBuffers(bf);
+		kernel->setL(bf->getL());
+		kernel->run();
+
+		Sum<type> sum;
+		sum.nbElements = bf->getNbElementsInSum();
+		sum.sum = new type[sum.nbElements];
+
+		bf->readSum(sum);
+
+		bool b = compareSum(sum.sum, sum.nbElements, exp, delta);
+
+		std::cout << kernel->getName() << " ";
+		if(b)
+			std::cout << "OK";
+		else
+		{
+			bb = false;
+			std::cout << "FAIL";
+		}
+
+		std::cout << "\n";
+
+		delete sum.sum;
+	}
+
 	void testDouble(T<double> t, U<double> u, double f, double delta, bool& bb)
 	{
 		Double16x16x16BufferFactory* b = new Double16x16x16BufferFactory(cqq);
@@ -109,16 +139,9 @@ namespace cl_cpd
 		testF(new AbstractFKernel<float>(cqq, "float8x8x8", 2), b8, f, delta, bb);
 		testF(new AbstractFKernel<float>(cqq, "float4x4x4", 1), b4, f, delta, bb);
 
-		OneDRangeKernel<float>* a;
-		a = new OneDRangeKernel<float>(cqq, "float", 16);
-		a->setL(b1d16->getL());
-		testF(a, b1d16, f, delta, bb);
-		delete a;
 
-		a = new OneDRangeKernel<float>(cqq, "float64", 64);
-		a->setL(b64->getL());
-		testF(a, b64, f, delta, bb);
-		delete a;
+		testF1D(new OneDRangeKernel<float>(cqq, "float", 16), b1d16, f, delta, bb);
+		testF(new OneDRangeKernel<float>(cqq, "float64", 16), b64, f, delta, bb);
 
 		delete b;
 		delete b8;
