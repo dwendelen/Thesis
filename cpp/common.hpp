@@ -187,7 +187,10 @@ namespace cl_cpd
 		u_int nbWorkitems;
 	public:
 		OneDRangeKernel(ContextQueue* cq, std::string file, u_int nbWorkitems):
-			Kernel<type>(cq, file), I(NULL), nbWorkitems(nbWorkitems){}
+			Kernel<type>(cq, file), I(NULL), nbWorkitems(nbWorkitems)
+			{
+				Kernel<type>::kernelNames.push_back("Kernel");
+			}
 
 		virtual cl::NDRange getLocalSize();
 		virtual std::vector<cl::NDRange> getGlobalSize();
