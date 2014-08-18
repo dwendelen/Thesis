@@ -119,12 +119,12 @@ void doo(int R, int I)
 	b1d32->init(t, u);
 	f1d32->setBuffers(b1d32);
 	f1d32->setL(b1d32->getL());
-	run(f1d32, "Float32", ops);
+	run(f1d32, "Float 32", ops);
 
 	b1d64->init(t, u);
 	f1d64->setBuffers(b1d64);
 	f1d64->setL(b1d64->getL());
-	run(f1d64, "Float64(fake)", ops);
+	run(f1d64, "Float 64", ops);
 
 	f64->setBuffers(b1d64);
 	run(f64, "Float64", ops);
