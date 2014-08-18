@@ -113,14 +113,17 @@ void doo(int R, int I)
 
 	b1d1->init(t, u);
 	f1d1->setBuffers(b1d1);
+	f1d1->setL(b1d1->getL());
 	run(f1d1, "Float1", ops);
 
 	b1d32->init(t, u);
 	f1d32->setBuffers(b1d32);
+	f1d32->setL(b1d32->getL());
 	run(f1d32, "Float32", ops);
 
 	b1d64->init(t, u);
 	f1d64->setBuffers(b1d64);
+	f1d64->setL(b1d64->getL());
 	run(f1d64, "Float64(fake)", ops);
 
 	f64->setBuffers(b1d64);

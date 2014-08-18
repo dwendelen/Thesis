@@ -182,6 +182,8 @@ void OneDRangeBufferFactory<type>::init(T<type> t, U<type> u)
 
 	this->i = new std::vector<size_t>(t.I);
 
+	this->L = cl::Buffer(*cq->getContext(), 0, sizeof(type) * nbWorkitems);
+
 	s = (t.I[0]*t.I[1]*t.I[2])/nbWorkitems;
 	BufferFactory<type>::sum = BufferFactory<type>::createReadWriteBuf(sizeof(type) * s);
 
@@ -427,6 +429,13 @@ void OneDRangeKernel<type>::setI(vector<size_t>* I)
 	Kernel<type>::setArg(7, (cl_int) (*I)[1]);
 	Kernel<type>::setArg(8, (cl_int) (*I)[2]);
 }
+
+template<typename type>
+void OneDRangeKernel<type>::setL(cl::Buffer* L)
+{
+	Kernel<type>::setArg(9, *L);
+}
+
 template<typename type>
 void OneDRangeKernel<type>::setSum(cl::Buffer* sum)
 {
