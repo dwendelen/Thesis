@@ -109,15 +109,16 @@ namespace cl_cpd
 	template<typename type>
 	class OneDRangeBufferFactory: public BufferFactory<type>
 	{
-		cl::Buffer* L;
+
 	public:
 		OneDRangeBufferFactory(ContextQueue* cq, u_int nbWorkitems):
 			BufferFactory<type>(cq), nbWorkitems(nbWorkitems), L(NULL){}
 		virtual void init(T<type> t, U<type> u);
 		cl::Buffer* getL() {return L;}
 		virtual ~OneDRangeBufferFactory(){}
-	private:
+	protected:
 		u_int nbWorkitems;
+		cl::Buffer* L;
 	};
 
 	template<typename type>

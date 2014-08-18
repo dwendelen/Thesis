@@ -182,7 +182,7 @@ void OneDRangeBufferFactory<type>::init(T<type> t, U<type> u)
 
 	this->i = new std::vector<size_t>(t.I);
 
-	this->L = cl::Buffer(*cq->getContext(), 0, sizeof(type) * nbWorkitems);
+	this->L = new cl::Buffer(*BufferFactory<type>::cq->getContext(), 0, sizeof(type) * nbWorkitems);
 
 	s = (t.I[0]*t.I[1]*t.I[2])/nbWorkitems;
 	BufferFactory<type>::sum = BufferFactory<type>::createReadWriteBuf(sizeof(type) * s);
