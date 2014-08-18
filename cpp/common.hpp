@@ -112,13 +112,13 @@ namespace cl_cpd
 
 	public:
 		OneDRangeBufferFactory(ContextQueue* cq, u_int nbWorkitems):
-			BufferFactory<type>(cq), nbWorkitems(nbWorkitems), L(NULL){}
+			BufferFactory<type>(cq), nbWorkitems(nbWorkitems){}
 		virtual void init(T<type> t, U<type> u);
-		cl::Buffer* getL() {return L;}
+		cl::LocalSpaceArg getL() {return L;}
 		virtual ~OneDRangeBufferFactory(){}
 	protected:
 		u_int nbWorkitems;
-		cl::Buffer* L;
+		cl::LocalSpaceArg L;
 	};
 
 	template<typename type>
@@ -202,7 +202,7 @@ namespace cl_cpd
 		void setU(std::vector<cl::Buffer*>* U);
 		void setI(std::vector<size_t>* I);
 		void setSum(cl::Buffer* sum);
-		void setL(cl::Buffer* L);
+		void setL(cl::LocalSpaceArg L);
 
 		virtual void setBuffers(BufferFactory<type>* b)
 		{

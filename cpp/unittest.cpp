@@ -116,7 +116,7 @@ namespace cl_cpd
 		delete a;
 
 		a = new OneDRangeKernel<float>(cqq, "float64", 64);
-		a->setL(b1d16->getL());
+		a->setL(b64->getL());
 		testF(a, b64, f, delta, bb);
 		delete a;
 
