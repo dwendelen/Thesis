@@ -209,6 +209,30 @@ void dooo()
 	f16 = new AbstractFKernel<float>(cq, "float16x16x16", 4);
 	f16->compile();
 
+	doo(16, 16);
+	doo(16, 6000);
+	doo(320, 16);
+	doo(320, 6000);
+
+	delete b1d1;
+	delete b1d32;
+	delete b1d64;
+
+	delete f1d1;
+	delete f1d32;
+	delete f1d64;
+
+	delete f64;
+
+	delete b4;
+	delete b8;
+	delete b16;
+
+	delete f4;
+	delete f8;
+	delete f16;
+
+
 	/*
 	b = new Double16x16x16BufferFactory(cq);
 	b8 = new Double8x8x8BufferFactory(cq);
