@@ -434,6 +434,20 @@ void OneDRangeKernel<type>::setSum(cl::Buffer* sum)
 }
 
 template<typename type>
+cl::NDRange OneDRangeKernel<type>::getLocalSize()
+{
+	return cl::NDRange(nbWorkitems);
+}
+
+template<typename type>
+std::vector<cl::NDRange> OneDRangeKernel<type>::getGlobalSize()
+{
+	std::vector<cl::NDRange> v;
+	v.push_back(cl::NDRange((*I)[0] * (*I)[1] * (*I)[2]));
+	return v;
+}
+
+template<typename type>
 void BlockKernel<type>::setT(cl::Buffer* T)
 {
 	Kernel<type>::setArg(0, *T);
