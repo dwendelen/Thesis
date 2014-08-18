@@ -18,7 +18,7 @@ namespace cl_cpd
 	std::vector<mxArray*> TestCommand::handle()
 	{
 		UnitTest ut;
-		bool b = ut.test(t.val, u.val, f.val, delta.val);
+		bool b = ut.test(t.val, u.val, f.val, deltaF.val, g.val, deltaG.val);
 
 		std::vector<mxArray*> r(1);
 		r[0] = mxCreateLogicalScalar(b);

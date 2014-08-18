@@ -93,13 +93,13 @@ ContextQueue::~ContextQueue()
 }
 
 template<typename type>
-cl::Buffer* AbstractBufferFactory<type>::createInitBuf(size_t nbBytes, void* p)
+cl::Buffer* BufferFactory<type>::createInitBuf(size_t nbBytes, void* p)
 {
 	return new cl::Buffer(*cq->getContext(), CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, nbBytes, p);
 }
 
 template<typename type>
-cl::Buffer* AbstractBufferFactory<type>::createReadWriteBuf(size_t nbBytes)
+cl::Buffer* BufferFactory<type>::createReadWriteBuf(size_t nbBytes)
 {
 	return new cl::Buffer(*cq->getContext(), CL_MEM_READ_WRITE, nbBytes);
 }
@@ -128,7 +128,7 @@ void AbstractBufferFactory<type>::init(T<type> t, U<type> u)
 	if(t.I[2] % (nbDoublesPerWorkitem * 4) != 0)
 			throw InvalidSizeOfIException(nbDoublesPerWorkitem * 4);
 
-	cleanUp();
+	BufferFactory<type>::cleanUp();
 
 	size_t s = sizeof(type) * t.I[0] * t.I[1] * t.I[2];
 	this->t = createInitBuf(s, t.Ts);
@@ -144,14 +144,52 @@ void AbstractBufferFactory<type>::init(T<type> t, U<type> u)
 	this->i = new std::vector<size_t>(t.I);
 
 	s = (t.I[0]*t.I[1]*t.I[2])/(4*nbDoublesPerWorkitem*4*nbDoublesPerWorkitem*4*nbDoublesPerWorkitem);
-	this->sum = createReadWriteBuf(sizeof(type) * s);
+	BufferFactory<type>::sum = BufferFactory<type>::createReadWriteBuf(sizeof(type) * s);
 
-	nbElementsInSum = s;
+	BufferFactory<type>::nbElementsInSum = s;
 }
 
+template<typename type>
+void OneDRangeBufferFactory<type>::init(T<type> t, U<type> u)
+{
+	if(t.I.size() != u.I.size())
+		throw SizesTandUDontMatchException();
+
+	if(u.I.size() != 3)
+		throw InvalidSizeOfUException();
+
+	if(!equal(t.I.begin(), t.I.end(), u.I.begin()))
+		throw SizesTandUDontMatchException();
+
+	if(u.I.size() != u.Us.size())
+		throw SizesUDontMatchException();
+
+	if(t.I[0]*t.I[1]*t.I[2] % nbWorkitems != 0)
+		throw InvalidSizeOfIException(nbWorkitems);
+
+	BufferFactory<type>::cleanUp();
+
+	size_t s = sizeof(type) * t.I[0] * t.I[1] * t.I[2];
+	this->t = createInitBuf(s, t.Ts);
+
+	this->rank = (cl_int) u.rank;
+
+	this->u = new std::vector<cl::Buffer *>(3);
+
+	(*this->u)[0] = createInitBuf(u.size(0), u.Us[0]);
+	(*this->u)[1] = createInitBuf(u.size(1), u.Us[1]);
+	(*this->u)[2] = createInitBuf(u.size(2), u.Us[2]);
+
+	this->i = new std::vector<size_t>(t.I);
+
+	s = (t.I[0]*t.I[1]*t.I[2])/nbWorkitems;
+	BufferFactory<type>::sum = BufferFactory<type>::createReadWriteBuf(sizeof(type) * s);
+
+	BufferFactory<type>::nbElementsInSum = s;
+}
 
 template<typename type>
-void AbstractBufferFactory<type>::updateU(U<type> u)
+void BufferFactory<type>::updateU(U<type> u)
 {
 	cq->getQueue()->enqueueWriteBuffer(*(*this->u)[0],CL_FALSE, 0, u.size(0), u.Us[0]);
 	cq->getQueue()->enqueueWriteBuffer(*(*this->u)[1],CL_FALSE, 0, u.size(1), u.Us[1]);
@@ -159,7 +197,7 @@ void AbstractBufferFactory<type>::updateU(U<type> u)
 }
 
 template<typename type>
-void AbstractBufferFactory<type>::readSum(Sum<type> sumArray)
+void BufferFactory<type>::readSum(Sum<type> sumArray)
 {
 	cq->getQueue()->enqueueReadBuffer(*sum, CL_TRUE, 0,
 			sumArray.nbElements*sizeof(type), sumArray.sum);
@@ -168,7 +206,7 @@ void AbstractBufferFactory<type>::readSum(Sum<type> sumArray)
 #define delNull(x) {delete x; x = NULL;}
 
 template<typename type>
-void AbstractBufferFactory<type>::cleanUp()
+void BufferFactory<type>::cleanUp()
 {
 	delNull(t);
 	rank = 0;
@@ -184,7 +222,7 @@ void AbstractBufferFactory<type>::cleanUp()
 }
 
 template<typename type>
-AbstractBufferFactory<type>::~AbstractBufferFactory()
+BufferFactory<type>::~BufferFactory()
 {
 	delete t;
 	delete (*u)[0];
@@ -202,7 +240,7 @@ void AbstractFGBufferFactory<type>::init(T<type> t, U<type> u)
     
     size_t s = sizeof(type) * t.I[0] * t.I[1] * t.I[2];
     
-    f = AbstractBufferFactory<type>::createReadWriteBuf(s);
+    f = BufferFactory<type>::createReadWriteBuf(s);
 
     g = new std::vector<cl::Buffer *>(3);
     (*g)[0] = createReadWriteBuf(u.size(0));
@@ -213,11 +251,11 @@ void AbstractFGBufferFactory<type>::init(T<type> t, U<type> u)
 template<typename type>
 void AbstractFGBufferFactory<type>::readG(U<type> g)
 {
-	AbstractBufferFactory<type>::cq->getQueue()->enqueueReadBuffer(*(*this->g)[0], CL_TRUE, 0,
+	BufferFactory<type>::cq->getQueue()->enqueueReadBuffer(*(*this->g)[0], CL_TRUE, 0,
 			g.size(0), g.Us[0]);
-	AbstractBufferFactory<type>::cq->getQueue()->enqueueReadBuffer(*(*this->g)[1], CL_TRUE, 0,
+	BufferFactory<type>::cq->getQueue()->enqueueReadBuffer(*(*this->g)[1], CL_TRUE, 0,
 				g.size(1), g.Us[1]);
-	AbstractBufferFactory<type>::cq->getQueue()->enqueueReadBuffer(*(*this->g)[2], CL_TRUE, 0,
+	BufferFactory<type>::cq->getQueue()->enqueueReadBuffer(*(*this->g)[2], CL_TRUE, 0,
 				g.size(2), g.Us[2]);
 }
 
@@ -226,7 +264,7 @@ void AbstractFGBufferFactory<type>::readG(U<type> g)
 template<typename type>
 void AbstractFGBufferFactory<type>::cleanUp()
 {
-	AbstractBufferFactory<type>::cleanUp();
+	BufferFactory<type>::cleanUp();
 
 	delNull(f);
 	if(g != NULL)
@@ -251,7 +289,8 @@ AbstractFGBufferFactory<type>::~AbstractFGBufferFactory()
 	delete g;
 }
 
-void Kernel::compile()
+template<typename type>
+void Kernel<type>::compile()
 {
 	string c = this->getCode();
 	cl::Program::Sources s;
@@ -277,7 +316,8 @@ void Kernel::compile()
 		}
 	}
 }
-string Kernel::getCode()
+template<typename type>
+string Kernel<type>::getCode()
 {
 	string f = "../opencl/" + file + ".cl";
 	ifstream ifs (f.c_str());
@@ -290,7 +330,8 @@ string Kernel::getCode()
 
 	return content;
 }
-void Kernel::run()
+template<typename type>
+void Kernel<type>::run()
 {
 	std::vector<cl::Event> es;
 	cl::Event e;
@@ -324,12 +365,13 @@ void Kernel::run()
 	}
 
 }
-std::vector<double> Kernel::getExecutionTimesLastRun()
+template<typename type>
+std::vector<double> Kernel<type>::getExecutionTimesLastRun()
 {
 	return nanoTimes;
 }
-
-double Kernel::getExecutionTimeLastRun()
+template<typename type>
+double Kernel<type>::getExecutionTimeLastRun()
 {
 	double sum = 0;
 	for(std::vector<double>::iterator it = nanoTimes.begin(); it < nanoTimes.end(); ++it)
@@ -338,15 +380,17 @@ double Kernel::getExecutionTimeLastRun()
 	return sum;
 }
 
+template <typename type>
 template <typename T>
-void Kernel::setArg(cl_uint index, T value)
+void Kernel<type>::setArg(cl_uint index, T value)
 {
 	for(std::vector<cl::Kernel*>::iterator it = kernels.begin();
 						it < kernels.end(); ++it)
 		(*it)->setArg(index, value);
 }
 
-Kernel::~Kernel()
+template<typename type>
+Kernel<type>::~Kernel()
 {
 	for(std::vector<cl::Kernel*>::iterator it = kernels.begin();
 					it < kernels.end(); ++it)
@@ -356,13 +400,47 @@ Kernel::~Kernel()
 {
 	return kernel;
 }*/
-
-void BlockKernel::setT(cl::Buffer* T)
+template<typename type>
+void OneDRangeKernel<type>::setT(cl::Buffer* T)
 {
-	setArg(0, *T);
+	Kernel<type>::setArg(0, *T);
+}
+template<typename type>
+void OneDRangeKernel<type>::setRank(cl_int rank)
+{
+	Kernel<type>::setArg(4, rank);
 }
 
-void BlockKernel::setI(vector<size_t>* I)
+template<typename type>
+void OneDRangeKernel<type>::setU(vector<cl::Buffer*>* U)
+{
+	Kernel<type>::setArg(1, *(*U)[0]);
+	Kernel<type>::setArg(2, *(*U)[1]);
+	Kernel<type>::setArg(3, *(*U)[2]);
+}
+
+template<typename type>
+void OneDRangeKernel<type>::setI(vector<size_t>* I)
+{
+	this->I = I;
+	Kernel<type>::setArg(6, (cl_int) (*I)[0]);
+	Kernel<type>::setArg(7, (cl_int) (*I)[1]);
+	Kernel<type>::setArg(8, (cl_int) (*I)[2]);
+}
+template<typename type>
+void OneDRangeKernel<type>::setSum(cl::Buffer* sum)
+{
+	Kernel<type>::setArg(5, *sum);
+}
+
+template<typename type>
+void BlockKernel<type>::setT(cl::Buffer* T)
+{
+	Kernel<type>::setArg(0, *T);
+}
+
+template<typename type>
+void BlockKernel<type>::setI(vector<size_t>* I)
 {
 	if(!isValidSizedI(I))
 		throw InvalidSizeOfIException(nbDoublesPerWorkitem * 4);
@@ -370,7 +448,8 @@ void BlockKernel::setI(vector<size_t>* I)
 	this->I = I;
 }
 
-bool BlockKernel::isValidSizedI(vector<size_t>* I)
+template<typename type>
+bool BlockKernel<type>::isValidSizedI(vector<size_t>* I)
 {
 	if(I->size() != 3)
 		return false;
@@ -387,12 +466,14 @@ bool BlockKernel::isValidSizedI(vector<size_t>* I)
 	return true;
 }
 
-cl::NDRange BlockKernel::getLocalSize()
+template<typename type>
+cl::NDRange BlockKernel<type>::getLocalSize()
 {
 	return cl::NDRange(4, 4, 4);
 }
 
-std::vector<cl::NDRange> BlockKernel::getGlobalSize()
+template<typename type>
+std::vector<cl::NDRange> BlockKernel<type>::getGlobalSize()
 {
 	std::vector<cl::NDRange> v;
 	v.push_back(cl::NDRange((*I)[0]/nbDoublesPerWorkitem,(*I)[1]/nbDoublesPerWorkitem,(*I)[2]/nbDoublesPerWorkitem));
@@ -402,7 +483,7 @@ std::vector<cl::NDRange> BlockKernel::getGlobalSize()
 template<typename type>
 void AbstractFKernel<type>::setRank(cl_int rank)
 {
-	setArg(4, rank);
+	Kernel<type>::setArg(4, rank);
 }
 
 template<typename type>
@@ -411,15 +492,15 @@ void AbstractFKernel<type>::setU(vector<cl::Buffer*>* U)
 	if(!hasUValidNbOfDims(U))
 		throw InvalidSizeOfUException();
 
-	setArg(1, *(*U)[0]);
-	setArg(2, *(*U)[1]);
-	setArg(3, *(*U)[2]);
+	Kernel<type>::setArg(1, *(*U)[0]);
+	Kernel<type>::setArg(2, *(*U)[1]);
+	Kernel<type>::setArg(3, *(*U)[2]);
 }
 
 template<typename type>
 void AbstractFGKernel<type>::setF(cl::Buffer* F)
 {
-	Kernel::setArg(6, *F);
+	Kernel<type>::setArg(6, *F);
 }
 
 template<typename type>
@@ -431,7 +512,7 @@ bool AbstractFKernel<type>::hasUValidNbOfDims(std::vector<cl::Buffer*>* U)
 template<typename type>
 void AbstractFKernel<type>::setSum(cl::Buffer* sum)
 {
-	setArg(5, *sum);
+	Kernel<type>::setArg(5, *sum);
 }
 
 template<typename type>
@@ -453,7 +534,7 @@ std::vector<cl::NDRange> AbstractGKernel<type>::getGlobalSize()
 template<typename type>
 void AbstractGKernel<type>::setF(cl::Buffer* F)
 {
-	setArg(0, *F);
+	Kernel<type>::setArg(0, *F);
 }
 
 template<typename type>
@@ -462,14 +543,14 @@ void AbstractGKernel<type>::setU(std::vector<cl::Buffer*>* U)
 	if(!hasUOrGValidNbOfDims(U))
 		throw InvalidSizeOfUException();
 
-	getKernels()[0]->setArg(2, *(*U)[1]);
-	getKernels()[0]->setArg(3, *(*U)[2]);
+	Kernel<type>::getKernels()[0]->setArg(2, *(*U)[1]);
+	Kernel<type>::getKernels()[0]->setArg(3, *(*U)[2]);
 
-	getKernels()[1]->setArg(1, *(*U)[0]);
-	getKernels()[1]->setArg(3, *(*U)[2]);
+	Kernel<type>::getKernels()[1]->setArg(1, *(*U)[0]);
+	Kernel<type>::getKernels()[1]->setArg(3, *(*U)[2]);
 
-	getKernels()[2]->setArg(1, *(*U)[0]);
-	getKernels()[2]->setArg(2, *(*U)[1]);
+	Kernel<type>::getKernels()[2]->setArg(1, *(*U)[0]);
+	Kernel<type>::getKernels()[2]->setArg(2, *(*U)[1]);
 }
 
 template<typename type>
@@ -480,14 +561,14 @@ void AbstractGKernel<type>::setI(std::vector<size_t>* I)
 
 	this->I = I;
 
-	getKernels()[0]->setArg(4, (cl_int)(*I)[1]/2);
-	getKernels()[0]->setArg(5, (cl_int)(*I)[2]/2);
+	Kernel<type>::getKernels()[0]->setArg(4, (cl_int)(*I)[1]/2);
+	Kernel<type>::getKernels()[0]->setArg(5, (cl_int)(*I)[2]/2);
 
-	getKernels()[1]->setArg(4, (cl_int)(*I)[0]/2);
-	getKernels()[1]->setArg(5, (cl_int)(*I)[2]/2);
+	Kernel<type>::getKernels()[1]->setArg(4, (cl_int)(*I)[0]/2);
+	Kernel<type>::getKernels()[1]->setArg(5, (cl_int)(*I)[2]/2);
 
-	getKernels()[2]->setArg(4, (cl_int)(*I)[0]/2);
-	getKernels()[2]->setArg(5, (cl_int)(*I)[1]/2);
+	Kernel<type>::getKernels()[2]->setArg(4, (cl_int)(*I)[0]/2);
+	Kernel<type>::getKernels()[2]->setArg(5, (cl_int)(*I)[1]/2);
 }
 
 template<typename type>
@@ -521,9 +602,9 @@ void AbstractGKernel<type>::setG(std::vector<cl::Buffer*>* G)
 	if(!hasUOrGValidNbOfDims(G))
 		throw InvalidSizeOfUException();
 
-	getKernels()[0]->setArg(1, *(*G)[0]);
-	getKernels()[1]->setArg(2, *(*G)[1]);
-	getKernels()[2]->setArg(3, *(*G)[2]);
+	Kernel<type>::getKernels()[0]->setArg(1, *(*G)[0]);
+	Kernel<type>::getKernels()[1]->setArg(2, *(*G)[1]);
+	Kernel<type>::getKernels()[2]->setArg(3, *(*G)[2]);
 }
 
 template<typename type>
@@ -535,17 +616,29 @@ void AbstractGKernel<type>::setRank(cl_int rank)
 template<typename type>
 void AbstractTMapper<type>::setTMapped(cl::Buffer* TMapped)
 {
-	setArg(1, TMapped);
+	Kernel<type>::setArg(1, TMapped);
 }
+
+template class BufferFactory<double>;
+template class BufferFactory<float>;
 
 template class AbstractBufferFactory<double>;
 template class AbstractBufferFactory<float>;
 
+template class OneDRangeBufferFactory<double>;
+template class OneDRangeBufferFactory<float>;
+
 template class AbstractFGBufferFactory<double>;
 template class AbstractFGBufferFactory<float>;
 
+template class Kernel<double>;
+template class Kernel<float>;
+
 template class AbstractFKernel<double>;
 template class AbstractFKernel<float>;
+
+template class OneDRangeKernel<float>;
+template class OneDRangeKernel<double>;
 
 template class AbstractFGKernel<double>;
 template class AbstractFGKernel<float>;

@@ -65,16 +65,12 @@ namespace cl_cpd
 		};
 
 	template<typename type>
-	class AbstractBufferFactory
+	class BufferFactory
 	{
 	public:
-		AbstractBufferFactory(ContextQueue* cq, u_int nbDoublesPerWorkitem):
-			cq(cq), t(NULL), rank(0), u(NULL), i(NULL), sum(NULL),
-			nbElementsInSum(0), nbDoublesPerWorkitem(nbDoublesPerWorkitem){}
-
-		virtual void init(T<type> t, U<type> u);
+		BufferFactory(ContextQueue* cq): cq(cq), t(NULL), rank(0), u(NULL), i(NULL), sum(NULL),
+				nbElementsInSum(0){}
 		void updateU(U<type> u);
-		void readSum(Sum<type> sumArray);
 
 		cl::Buffer* getT(){return t;}
 		cl_int getRank(){return rank;}
@@ -82,21 +78,44 @@ namespace cl_cpd
 		std::vector<size_t>* getI(){return i;}
 		cl::Buffer* getSum(){return sum;}
 		size_t getNbElementsInSum(){return nbElementsInSum;}
+		void readSum(Sum<type> sumArray);
 
-		virtual ~AbstractBufferFactory();
+		virtual ~BufferFactory();
 	protected:
 		cl::Buffer* createInitBuf(size_t nbBytes, void* p);
 		cl::Buffer* createReadWriteBuf(size_t nbBytes);
 		virtual void cleanUp();
 		ContextQueue* cq;
-	private:
 		cl::Buffer* t;
 		cl_int rank;
 		std::vector<cl::Buffer*>* u;
 		std::vector<size_t>* i;
 		cl::Buffer* sum;
 		size_t nbElementsInSum;
+	};
+
+	template<typename type>
+	class AbstractBufferFactory: public BufferFactory<type>
+	{
+	public:
+		AbstractBufferFactory(ContextQueue* cq, u_int nbDoublesPerWorkitem):
+			BufferFactory<type>(cq), nbDoublesPerWorkitem(nbDoublesPerWorkitem){}
+		virtual void init(T<type> t, U<type> u);
+		virtual ~AbstractBufferFactory(){}
+	private:
 		u_int nbDoublesPerWorkitem;
+	};
+
+	template<typename type>
+	class OneDRangeBufferFactory: public BufferFactory<type>
+	{
+	public:
+		OneDRangeBufferFactory(ContextQueue* cq, u_int nbWorkitems):
+			BufferFactory<type>(cq), nbWorkitems(nbWorkitems){}
+		virtual void init(T<type> t, U<type> u);
+		virtual ~OneDRangeBufferFactory(){}
+	private:
+		u_int nbWorkitems;
 	};
 
 	template<typename type>
@@ -120,10 +139,11 @@ namespace cl_cpd
 		std::vector<cl::Buffer*>* g;
 	};
 
+	template<typename type>
 	class Kernel
 	{
 	public:
-		Kernel(ContextQueue* cq, std::string file):
+		Kernel<type>(ContextQueue* cq, std::string file):
 			cq(cq), file(file){}
 		void compile();
 		void run();
@@ -131,6 +151,7 @@ namespace cl_cpd
 		std::string getName() {return file;}
 		double getExecutionTimeLastRun();
 		virtual ~Kernel();
+		virtual void setBuffers(BufferFactory<type>* b) = 0;
 
 	protected:
 		std::string getCode();
@@ -150,16 +171,52 @@ namespace cl_cpd
 
 	};
 
+	/*template<typename type>
+		class FKernel: public virtual Kernel<type>
+	{
+	public:
+		FKernel(){}
+		virtual void setBuffers(BufferFactory<type>* b) = 0;
+		virtual ~FKernel(){}
+	};*/
 
+	template<typename type>
+	class OneDRangeKernel: public Kernel<type>
+	{
+		std::vector<size_t>* I;
+		u_int nbWorkitems;
+	public:
+		OneDRangeKernel(ContextQueue* cq, std::string file, u_int nbWorkitems):
+			Kernel<type>(cq, file), I(NULL), nbWorkitems(nbWorkitems){}
 
-	class BlockKernel: public Kernel
+		virtual cl::NDRange getLocalSize();
+		virtual std::vector<cl::NDRange> getGlobalSize();
+		void setT(cl::Buffer* T);
+		void setRank(cl_int rank);
+		void setU(std::vector<cl::Buffer*>* U);
+		void setI(std::vector<size_t>* I);
+		void setSum(cl::Buffer* sum);
+		virtual void setBuffers(BufferFactory<type>* b)
+		{
+			setT(b->getT());
+			setRank(b->getRank());
+			setU(b->getU());
+			setI(b->getI());
+			setSum(b->getSum());
+		}
+		virtual ~OneDRangeKernel(){}
+	};
+
+	template<typename type>
+	class BlockKernel: public Kernel<type>
 	{
 	public:
 		BlockKernel(ContextQueue* cq, std::string file, u_int nbDoublesPerWorkitem):
-			Kernel(cq, file), I(NULL), nbDoublesPerWorkitem(nbDoublesPerWorkitem){}
+			Kernel<type>(cq, file), I(NULL), nbDoublesPerWorkitem(nbDoublesPerWorkitem){}
 		void setT(cl::Buffer* T);
 		void setI(std::vector<size_t>* I);
 		bool isValidSizedI(std::vector<size_t>* I);
+		virtual ~BlockKernel(){}
 	protected:
 		cl::NDRange getLocalSize();
 		virtual std::vector<cl::NDRange> getGlobalSize();
@@ -170,19 +227,19 @@ namespace cl_cpd
 	};
 
 	template<typename type>
-	class AbstractFKernel: public BlockKernel
+	class AbstractFKernel: public BlockKernel<type>
 	{
 	public:
 		AbstractFKernel(ContextQueue* cq, std::string file, u_int nbDoublesPerWorkitem):
-			BlockKernel(cq, file, nbDoublesPerWorkitem)
+			BlockKernel<type>(cq, file, nbDoublesPerWorkitem)
 		{
-			kernelNames.push_back("Kernel");
+			BlockKernel<type>::kernelNames.push_back("Kernel");
 		}
 		void setRank(cl_int R);
 		void setU(std::vector<cl::Buffer*>* U);
 		bool hasUValidNbOfDims(std::vector<cl::Buffer*>* U);
 		void setSum(cl::Buffer* sum);
-		virtual void setBuffers(AbstractBufferFactory<type>* b)
+		virtual void setBuffers(BufferFactory<type>* b)
 		{
 			setT(b->getT());
 			setRank(b->getRank());
@@ -190,6 +247,7 @@ namespace cl_cpd
 			setI(b->getI());
 			setSum(b->getSum());
 		}
+		virtual ~AbstractFKernel(){}
 	};
 
 	template<typename type>
@@ -210,16 +268,16 @@ namespace cl_cpd
 
 	//Uses T as G
 	template<typename type>
-	class AbstractGKernel: public Kernel
+	class AbstractGKernel: public Kernel<type>
 	{
 	public:
 		AbstractGKernel(ContextQueue* cq, std::string file):
-			Kernel(cq, file), I(NULL), rank(0)
+			Kernel<type>(cq, file), I(NULL), rank(0)
 		{
-			kernelNames.clear();
-			kernelNames.push_back("KernelG1");
-			kernelNames.push_back("KernelG2");
-			kernelNames.push_back("KernelG3");
+			Kernel<type>::kernelNames.clear();
+			Kernel<type>::kernelNames.push_back("KernelG1");
+			Kernel<type>::kernelNames.push_back("KernelG2");
+			Kernel<type>::kernelNames.push_back("KernelG3");
 		}
 		cl::NDRange getLocalSize();
 		virtual std::vector<cl::NDRange> getGlobalSize();
@@ -233,6 +291,8 @@ namespace cl_cpd
 		bool hasUOrGValidNbOfDims(std::vector<cl::Buffer*>* UorG);
 		bool isValidSizedI(std::vector<size_t>* I);
 
+		virtual void setBuffers(BufferFactory<type>* b){}
+
 		virtual void setBuffers(AbstractFGBufferFactory<type>* b)
 		{
 			setF(b->getF());
@@ -242,13 +302,15 @@ namespace cl_cpd
 			setRank(b->getRank());
 
 		}
+
+		virtual ~AbstractGKernel(){}
 	private:
 		std::vector<size_t>* I;
 		cl_int rank;
 	};
 
 	template<typename type>
-	class AbstractTMapper: public BlockKernel
+	class AbstractTMapper: public BlockKernel<type>
 	{
 	public:
 		void setTMapped(cl::Buffer* TMapped);
@@ -258,6 +320,8 @@ namespace cl_cpd
 			setI(b->getI());
 			throw "TMapped moet ng gefixt worden";
 		}
+
+		virtual ~AbstractTMapper(){}
 	};
 }
 #endif /* CL_CPD_COMMON_HPP_ */

@@ -95,7 +95,9 @@ namespace cl_cpd
 		TParameter t;
 		UParameter u;
 		DoubleParameter f;
-		DoubleParameter delta;
+		DoubleParameter deltaF;
+		UParameter g;
+		DoubleParameter deltaG;
 
 	public:
 		std::string getString()
@@ -105,11 +107,13 @@ namespace cl_cpd
 
 		std::vector<Parameter*> getParameters()
 		{
-			std::vector<Parameter*> r(4);
+			std::vector<Parameter*> r(6);
 			r[0] = (Parameter*)&t;
 			r[1] = (Parameter*)&u;
 			r[2] = (Parameter*)&f;
-			r[3] = (Parameter*)&delta;
+			r[3] = (Parameter*)&deltaF;
+			r[4] = (Parameter*)&g;
+			r[5] = (Parameter*)&deltaG;
 			return r;
 		}
 

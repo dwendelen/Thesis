@@ -1,7 +1,5 @@
 __attribute__((reqd_work_group_size(4, 4, 4)))
-__kernel void Kernel(__global const float* T,
-    __global const float* U1, __global const float* U2, __global const float* U3,
-    const int R, __global float* sum)
+__kernel void Kernel(__global const float* T, __global const float* U1, __global const float* U2, __global const float* U3, const int R, __global float* sum)
 {
 	__local float l[64];
 	
@@ -36,7 +34,6 @@ __kernel void Kernel(__global const float* T,
 	sum1 = temp * temp;
 	
 	int lIdx = get_local_id(0) + 4 * get_local_id(1) + 16 * get_local_id(2);
-	
 	l[lIdx] = sum1;
 	
 	barrier(CLK_LOCAL_MEM_FENCE);

@@ -19,6 +19,10 @@ using namespace std;
 double bigT[320*320*320];
 double bigU[320*10000];
 
+float bigTf[320*320*320];
+float bigUf[320*10000];
+
+/*
 Double16x16x16UnMapped* f = NULL;
 Double16x16x16ReMapped* r = NULL;
 Double16x16x16Isolated* i = NULL;
@@ -32,8 +36,28 @@ Double8x8x8Isolated* i8 = NULL;
 Double8x8x8BufferFactory* b8 = NULL;
 
 Double16x16x16G* g = NULL;
+*/
+//
+OneDRangeBufferFactory<float>* b1d1 = NULL;
+OneDRangeBufferFactory<float>* b1d32 = NULL;
+OneDRangeBufferFactory<float>* b1d64 = NULL;
 
-void run(Kernel* kernel, string name, double ops){
+OneDRangeKernel<float>* f1d1 = NULL;
+OneDRangeKernel<float>* f1d32 = NULL;
+OneDRangeKernel<float>* f1d64 = NULL;
+
+OneDRangeKernel<float>* f64 = NULL;
+
+AbstractBufferFactory<float>* b4 = NULL;
+AbstractBufferFactory<float>* b8 = NULL;
+AbstractBufferFactory<float>* b16 = NULL;
+
+AbstractFKernel<float>* f4 = NULL;
+AbstractFKernel<float>* f8 = NULL;
+AbstractFKernel<float>* f16 = NULL;
+
+template<typename T>
+void run(Kernel<T>* kernel, string name, double ops){
 	cout << name << "\n";
 
 	kernel->run();
@@ -50,11 +74,14 @@ void doo(int R, int I)
 
 	cout << "\nR: " << R << " I: " << I << "\n";
 
+
+
 	int I16 = I;
 	if(I % 16 != 0)
 		I16 = (I/16)*16 + 16;
 
-	T<double> t;
+
+	/*T<double> t;
 	t.Ts = bigT;
 	t.I = vector<size_t>();
 	t.I.push_back(I16);
@@ -67,8 +94,50 @@ void doo(int R, int I)
 	u.Us.push_back(bigU);
 	u.Us.push_back(bigU);
 	u.I = t.I;
+	u.rank = R;*/
+
+	T<float> t;
+	t.Ts = bigTf;
+	t.I = vector<size_t>();
+	t.I.push_back(I16);
+	t.I.push_back(I16);
+	t.I.push_back(I16);
+
+	U<float> u;
+	u.Us = vector<float*>();
+	u.Us.push_back(bigUf);
+	u.Us.push_back(bigUf);
+	u.Us.push_back(bigUf);
+	u.I = t.I;
 	u.rank = R;
 
+	b1d1->init(t, u);
+	f1d1->setBuffers(b1d1);
+	run(f1d1, "Float1", ops);
+
+	b1d32->init(t, u);
+	f1d32->setBuffers(b1d32);
+	run(f1d32, "Float32", ops);
+
+	b1d64->init(t, u);
+	f1d64->setBuffers(b1d64);
+	run(f1d64, "Float64(fake)", ops);
+
+	f64->setBuffers(b1d64);
+	run(f64, "Float64", ops);
+
+	b4->init(t, u);
+	f4->setBuffers(b4);
+	run(f4, "Float4x4x4", ops);
+
+	b8->init(t, u);
+	f8->setBuffers(b8);
+	run(f8, "Float8x8x8", ops);
+
+	b16->init(t, u);
+	f16->setBuffers(b16);
+	run(f16, "Float16x16x16", ops);
+/*
 	b->init(t, u);
 	f->setBuffers(b);
 	r->setBuffers(b);
@@ -107,6 +176,7 @@ void doo(int R, int I)
 
 	run(r8, "8x8x8 Remapped", ops);
 	//run(i8, "8x8x8 Isolated", ops); I needs extra memory
+	 */
 }
 
 void dooo()
@@ -114,6 +184,32 @@ void dooo()
 	ContextQueue* cq = new ContextQueue();
 	cq->init(true);
 
+	b1d1 = new OneDRangeBufferFactory<float>(cq, 1);
+	b1d32 = new OneDRangeBufferFactory<float>(cq, 32);
+	b1d64 = new OneDRangeBufferFactory<float>(cq, 64);
+
+	f1d1 = new OneDRangeKernel<float>(cq, "float", 1);
+	f1d1->compile();
+	f1d32 = new OneDRangeKernel<float>(cq, "float", 32);
+	f1d32->compile();
+	f1d64 = new OneDRangeKernel<float>(cq, "float", 64);
+	f1d64->compile();
+
+	f64 = new OneDRangeKernel<float>(cq, "float64", 64);
+	f64->compile();
+
+	b4 = new AbstractBufferFactory<float>(cq, 1);
+	b8 = new AbstractBufferFactory<float>(cq, 2);
+	b16 = new AbstractBufferFactory<float>(cq, 4);
+
+	f4 = new AbstractFKernel<float>(cq, "float4x4x4", 1);
+	f4->compile();
+	f8 = new AbstractFKernel<float>(cq, "float8x8x8", 2);
+	f8->compile();
+	f16 = new AbstractFKernel<float>(cq, "float16x16x16", 4);
+	f16->compile();
+
+	/*
 	b = new Double16x16x16BufferFactory(cq);
 	b8 = new Double8x8x8BufferFactory(cq);
 	bg = new Double16x16x16FGBufferFactory(cq);
@@ -169,6 +265,7 @@ void dooo()
 	delete b8;
 	delete r8;
 	delete i8;
+	*/
 }
 int main()
 {

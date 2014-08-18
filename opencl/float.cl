@@ -1,9 +1,8 @@
 __kernel void Kernel(__global const float* T,
-    __global const float* U1, __global const float* U2, __global const float* U3,
-    const int R, __global float* sum, const int I1, const int I2, const int I3, local float* l)
+    __global const float* U1, __global const float* U2, __global const float* U3, const int R, __global float* sum, const int I1, const int I2, const int I3, local float* l)
 {
 	float temp;
-	float c;
+	float c = 0;
 	
 	int idxT = get_global_id(0);
 	int idxU1 = idxT % I1;

@@ -50,7 +50,7 @@ namespace cl_cpd
 	}
 
 	template<typename type>
-	void testF(AbstractFKernel<type>* kernel, AbstractBufferFactory<type>* bf, double exp, double delta, bool& bb)
+	void testF(Kernel<type>* kernel, BufferFactory<type>* bf, double exp, double delta, bool& bb)
 	{
 		kernel->compile();
 		kernel->setBuffers(bf);
@@ -94,17 +94,30 @@ namespace cl_cpd
 		AbstractBufferFactory<float> * b = new AbstractBufferFactory<float>(cqq, 4);
 		AbstractBufferFactory<float> * b8 = new AbstractBufferFactory<float>(cqq, 2);
 		AbstractBufferFactory<float> * b4 = new AbstractBufferFactory<float>(cqq, 1);
+
+		OneDRangeBufferFactory<float>* b1d16 = new OneDRangeBufferFactory<float>(cqq, 16);
+		OneDRangeBufferFactory<float>* b64 = new OneDRangeBufferFactory<float>(cqq, 16);
+
 		b->init(t, u);
 		b8->init(t, u);
 		b4->init(t, u);
+
+		b1d16->init(t, u);
+		b64->init(t, u);
 
 		testF(new AbstractFKernel<float>(cqq, "float16x16x16", 4), b, f, delta, bb);
 		testF(new AbstractFKernel<float>(cqq, "float8x8x8", 2), b8, f, delta, bb);
 		testF(new AbstractFKernel<float>(cqq, "float4x4x4", 1), b4, f, delta, bb);
 
+		testF(new OneDRangeKernel<float>(cqq, "float", 16), b1d16, f, delta, bb);
+		testF(new OneDRangeKernel<float>(cqq, "float64", 64), b64, f, delta, bb);
+
 		delete b;
 		delete b8;
 		delete b4;
+
+		delete b1d16;
+		delete b64;
 
 	}
 
