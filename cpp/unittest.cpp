@@ -126,7 +126,7 @@ namespace cl_cpd
 		AbstractBufferFactory<float> * b4 = new AbstractBufferFactory<float>(cqq, 1);
 
 		OneDRangeBufferFactory<float>* b1d16 = new OneDRangeBufferFactory<float>(cqq, 16);
-		OneDRangeBufferFactory<float>* b64 = new OneDRangeBufferFactory<float>(cqq, 16);
+		OneDRangeBufferFactory<float>* b64 = new OneDRangeBufferFactory<float>(cqq, 64);
 
 		b->init(t, u);
 		b8->init(t, u);
@@ -141,7 +141,7 @@ namespace cl_cpd
 
 
 		testF1D(new OneDRangeKernel<float>(cqq, "float", 16), b1d16, f, delta, bb);
-		testF(new OneDRangeKernel<float>(cqq, "float64", 16), b64, f, delta, bb);
+		testF(new OneDRangeKernel<float>(cqq, "float64", 64), b64, f, delta, bb);
 
 		delete b;
 		delete b8;
