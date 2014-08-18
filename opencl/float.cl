@@ -30,7 +30,7 @@ __kernel void Kernel(__global const float* T,
 	l[get_local_id(0)] = sum1;
 	
 	barrier(CLK_LOCAL_MEM_FENCE);
-	if(lIdx == 0)
+	if(get_local_id(0) == 0)
 	{        
         for(int i = 1; i < get_local_size(0); i++)
         {

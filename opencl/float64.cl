@@ -32,7 +32,7 @@ __kernel void Kernel(__global const float* T, __global const float* U1, __global
 	l[get_local_id(0)] = sum1;
 	
 	barrier(CLK_LOCAL_MEM_FENCE);
-	if(lIdx == 0)
+	if(get_local_id(0) == 0)
 	{        
         #pragma unroll
         for(int i = 1; i < 64; i++)
