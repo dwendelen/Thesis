@@ -38,11 +38,11 @@ Double8x8x8BufferFactory* b8 = NULL;
 Double16x16x16G* g = NULL;
 */
 //
-OneDRangeBufferFactory<float>* b1d1 = NULL;
+//OneDRangeBufferFactory<float>* b1d1 = NULL;
 OneDRangeBufferFactory<float>* b1d32 = NULL;
 OneDRangeBufferFactory<float>* b1d64 = NULL;
 
-OneDRangeKernel<float>* f1d1 = NULL;
+//OneDRangeKernel<float>* f1d1 = NULL;
 OneDRangeKernel<float>* f1d32 = NULL;
 OneDRangeKernel<float>* f1d64 = NULL;
 
@@ -111,10 +111,10 @@ void doo(int R, int I)
 	u.I = t.I;
 	u.rank = R;
 
-	b1d1->init(t, u);
+	/*b1d1->init(t, u);
 	f1d1->setBuffers(b1d1);
 	f1d1->setL(b1d1->getL());
-	run(f1d1, "Float1", ops);
+	run(f1d1, "Float1", ops);*/
 
 	b1d32->init(t, u);
 	f1d32->setBuffers(b1d32);
@@ -187,12 +187,12 @@ void dooo()
 	ContextQueue* cq = new ContextQueue();
 	cq->init(true);
 
-	b1d1 = new OneDRangeBufferFactory<float>(cq, 1);
+	//b1d1 = new OneDRangeBufferFactory<float>(cq, 1);
 	b1d32 = new OneDRangeBufferFactory<float>(cq, 32);
 	b1d64 = new OneDRangeBufferFactory<float>(cq, 64);
 
-	f1d1 = new OneDRangeKernel<float>(cq, "float", 1);
-	f1d1->compile();
+	/*f1d1 = new OneDRangeKernel<float>(cq, "float", 1);
+	f1d1->compile();*/
 	f1d32 = new OneDRangeKernel<float>(cq, "float", 32);
 	f1d32->compile();
 	f1d64 = new OneDRangeKernel<float>(cq, "float", 64);
@@ -217,11 +217,11 @@ void dooo()
 	doo(16, 320);
 	doo(6000, 320);
 
-	delete b1d1;
+	//delete b1d1;
 	delete b1d32;
 	delete b1d64;
 
-	delete f1d1;
+	//delete f1d1;
 	delete f1d32;
 	delete f1d64;
 
