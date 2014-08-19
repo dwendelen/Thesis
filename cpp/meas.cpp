@@ -56,6 +56,8 @@ AbstractFKernel<float>* f4 = NULL;
 AbstractFKernel<float>* f8 = NULL;
 AbstractFKernel<float>* f16 = NULL;
 
+AbstractFKernel<float>* f16c = NULL;
+
 template<typename T>
 void run(Kernel<T>* kernel, string name, double ops){
 	cout << name << "\n";
@@ -140,6 +142,9 @@ void doo(int R, int I)
 	b16->init(t, u);
 	f16->setBuffers(b16);
 	run(f16, "Float16x16x16", ops);
+
+	f16c->setBuffers(b16);
+	run(f16, "Float16x16x16C", ops);
 /*
 	b->init(t, u);
 	f->setBuffers(b);
@@ -211,6 +216,10 @@ void dooo()
 	f8->compile();
 	f16 = new AbstractFKernel<float>(cq, "float16x16x16", 4);
 	f16->compile();
+
+	f16c = new AbstractFKernel<float>(cq, "float16x16x16C", 4);
+	f16c->compile();
+
 
 	doo(16, 16);
 	doo(6000, 16);
