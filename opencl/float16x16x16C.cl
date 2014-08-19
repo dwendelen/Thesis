@@ -71,7 +71,7 @@ __kernel void Kernel(__global const float4* T,
 	float4 sum4 = 0;
 
     #pragma unroll
-    for(int j = 0; j < 16; j++)
+    for(int j = 0; i1 < 16; j++)
     {
 		sum4 += c[j]*c[j];
     }
