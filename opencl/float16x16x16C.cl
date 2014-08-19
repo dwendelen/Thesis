@@ -67,19 +67,6 @@ __kernel void Kernel(__global const float4* T,
         idxU2 += I2;
         idxU3 += I3;
     }
-    int gId1 = get_global_id(0);
-    int gId2 = get_global_id(1);
-    int gId3 = get_global_id(2);
-    
-    int jumpIdxTMode2 = I1;
-    int jumpIdxTMode3 = 4*I1*I2;
-    
-    int idxT = gId1 + 
-        4*gId2 * jumpIdxTMode2 +
-        4*gId3 * jumpIdxTMode3;
-
-    int jumpNextIdxTMode2 = jumpIdxTMode2;
-	int jumpNextIdxTMode3 = jumpIdxTMode3 - 4*jumpIdxTMode2;
 
 	float4 sum4 = 0;
 
