@@ -139,10 +139,9 @@ namespace cl_cpd
 		testF(new AbstractFKernel<float>(cqq, "float8x8x8", 2), b8, f, delta, bb);
 		testF(new AbstractFKernel<float>(cqq, "float4x4x4", 1), b4, f, delta, bb);
 
+
 		testF1D(new OneDRangeKernel<float>(cqq, "float", 16), b1d16, f, delta, bb);
 		testF(new OneDRangeKernel<float>(cqq, "float64", 64), b64, f, delta, bb);
-
-		testF(new AbstractFKernel<float>(cqq, "float16x16x16C", 4), b, f, delta, bb);
 
 		delete b;
 		delete b8;
