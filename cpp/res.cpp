@@ -102,7 +102,7 @@ namespace cl_cpd
 		data.R.push_back(400);
 		data.R.push_back(4000);
 
-		data.I = vector(40);
+		data.I = vector<int>(40);
 		vector<int> I8(40);
 		vector<int> I16(40);
 
