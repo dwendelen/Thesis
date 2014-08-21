@@ -127,6 +127,7 @@ namespace cl_cpd
 		u.Us.push_back(bUf);
 		u.Us.push_back(bUf);
 
+		data.nbKernels = 5;
 		data.data = new double[data.size()];
 		double* p = data.data;
 
