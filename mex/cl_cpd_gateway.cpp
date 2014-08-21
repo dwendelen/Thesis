@@ -115,6 +115,7 @@ CommandRegister* buildCommandRegister()
 	cr->add(new TimeCommand);
 	cr->add(new TestCommand);
 	cr->add(new InvlRCommand);
+	cr->add(new MeasureFCommand);
 
 	return cr;
 }

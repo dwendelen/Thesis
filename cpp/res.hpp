@@ -25,15 +25,22 @@ namespace cl_cpd
 		std::vector<line> lines;
 	};
 
+	struct Data
+	{
+		std::vector<int> R;
+		std::vector<int> I;
+		int nbKernels;
+		//data[R][I][kernel]
+		double* data;
+
+		size_t size()
+		{
+			return R.size() * I.size() * nbKernels;
+		}
+	};
 
 	void invlR(std::vector<graph>& gs);
-	void fl16Pack(std::vector<graph>& gs);
-
-	void fl8Pack(std::vector<graph>& gs);
-
-	void fl816(std::vector<graph>& gs);
-	void fl816Pack(std::vector<graph>& gs);
-
+	void measureF(Data data);
 }
 
 

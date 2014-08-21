@@ -88,6 +88,12 @@ namespace cl_cpd
 		mxArray* convert(const std::vector<graph> input);
 	};
 
+	class DataConverter
+	{
+	public:
+		mxArray* convert(Data input);
+	};
+
 	class Command
 	{
 	public:
@@ -225,6 +231,21 @@ namespace cl_cpd
 		std::string getString()
 		{
 			return "InvlR";
+		}
+		std::vector<Parameter*> getParameters()
+		{
+			return std::vector<Parameter*>(0);
+		}
+
+		std::vector<mxArray*> handle();
+	};
+
+	class MeasureFCommand: public Command
+	{
+	public:
+		std::string getString()
+		{
+			return "measureF";
 		}
 		std::vector<Parameter*> getParameters()
 		{

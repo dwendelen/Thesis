@@ -109,6 +109,18 @@ namespace cl_cpd
 		return r;
 	}
 
+	std::vector<mxArray*> MeasureFCommand::handle()
+	{
+		Data data;
+		measureF(data);
+
+		DataConverter dc;
+
+		std::vector<mxArray*> r (1);
+		r[0] = dc.convert(data);
+		return r;
+	}
+
 	bool BoolParameter::validate(const mxArray* input)
 	{
 		return mxIsLogicalScalar(input);
@@ -259,6 +271,18 @@ namespace cl_cpd
 
 		return graphs;
 	}
+
+
+	mxArray* DataConverter::convert(Data data)
+	{
+		size_t s[] = {data.I.size, data.R.size(), data.nbKernels};
+		mxArray* r = mxCreateNumericArray(3, s, mxDOUBLE_CLASS, mxREAL);
+
+		std::copy(data.data, data.data + data.size(), mxGetPr(r));
+
+		return r;
+	}
+
 
 
 	/*Sum SumConverter::convert(const mxArray* input)
