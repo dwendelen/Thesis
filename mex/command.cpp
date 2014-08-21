@@ -275,7 +275,7 @@ namespace cl_cpd
 
 	mxArray* DataConverter::convert(Data data)
 	{
-		size_t s[] = {data.I.size(), data.R.size(), data.nbKernels};
+		const mwSize s[] = {data.I.size(), data.R.size(), data.nbKernels};
 		mxArray* r = mxCreateNumericArray(3, s, mxDOUBLE_CLASS, mxREAL);
 
 		std::copy(data.data, data.data + data.size(), mxGetPr(r));
