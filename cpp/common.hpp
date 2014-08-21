@@ -346,10 +346,8 @@ namespace cl_cpd
 		}
 		virtual void setMBuffers(AbstractMappedBufferFactory<type>* b)
 		{
-			std::cout << b->getTUnMapped();
 			setT(b->getTUnMapped());
 			setI(b->getI());
-			std::cout << b->getT();
 			setTMapped(b->getT());
 		}
 
