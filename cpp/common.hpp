@@ -346,7 +346,7 @@ namespace cl_cpd
 		}
 		virtual void setMBuffers(AbstractMappedBufferFactory<type>* b)
 		{
-			setT(b->getTUnMapped());
+			BlockKernel<type>::setT(b->getTUnMapped());
 			setI(b->getI());
 			setTMapped(b->getT());
 		}
