@@ -14,6 +14,7 @@
 #include "../cpp/common.hpp"
 #include "../cpp/double16x16x16.hpp"
 #include "../cpp/unittest.hpp"
+#include "../cpp/res.hpp"
 
 namespace cl_cpd
 {
@@ -79,6 +80,12 @@ namespace cl_cpd
 	{
 	public:
 		mxArray* convert(const Sum<double>* input);
+	};
+
+	class GraphConverter
+	{
+	public:
+		mxArray* convert(const std::vector<graph> input);
 	};
 
 	class Command
@@ -212,6 +219,20 @@ namespace cl_cpd
 		std::vector<mxArray*> handle();
 	};
 
+	class InvlRCommand: public Command
+	{
+	public:
+		std::string getString()
+		{
+			return "InvlR";
+		}
+		std::vector<Parameter*> getParameters()
+		{
+			return std::vector<Parameter*>(0);
+		}
+
+		std::vector<mxArray*> handle();
+	};
 }
 
 

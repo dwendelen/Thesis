@@ -97,6 +97,20 @@ namespace cl_cpd
 		return r;
 	}
 
+	std::vector<mxArray*> InvlRCommand::handle()
+	{
+		std::vector<mxArray*> r (1);
+
+		std::vector<graph> gs;
+		invlR(gs);
+
+		GraphConverter gc;
+
+		std::vector<mxArray*> r (1);
+		r.push_back(gc.convert(gs));
+		return r[0];
+	}
+
 	bool BoolParameter::validate(const mxArray* input)
 	{
 		return mxIsLogicalScalar(input);
@@ -200,6 +214,53 @@ namespace cl_cpd
 
 		return u;
 	}
+
+	void convertLine(line l, mxArray* lines, int idxL)
+	{
+		mxArray* name = mxCreateString(l.name.c_str());
+		mxArray* x = mxCreateDoubleMatrix(l.x.size(), 1, mxREAL);
+		mxArray* y = mxCreateDoubleMatrix(l.y.size(), 1, mxREAL);
+
+		mxSetField(lines, idxL, "name", name);
+		mxSetField(lines, idxL, "x", x);
+		mxSetField(lines, idxL, "y", y);
+
+		std::copy(l.x.begin(), l.x.end(), mxGetPr(x));
+		std::copy(l.y.begin(), l.y.end(), mxGetPr(y));
+	}
+
+	void convertGraph(graph g, mxArray* graphs, int idxG)
+	{
+		mxArray* val = mxCreateDoubleScalar(g.val);
+
+		const char** f =  {"name", "x", "y"};
+		mxArray* lines =
+			mxCreateStructMatrix(g.lines.size(),1, 3, f);
+
+		mxSetField(graphs, idxG, "val", val);
+		mxSetField(graphs, idxG, "lines", lines);
+
+		for(size_t idxL = 0; idxL < g.lines.size(); idxL++)
+		{
+			convertLine(g.lines[idxL], lines, idxL);
+		}
+
+	}
+
+	mxArray* GraphConverter::convert(const std::vector<graph> input)
+	{
+		const char** f =  {"val", "lines"};
+
+		mxArray* graphs = mxCreateStructMatrix(input.size(), 1, 2, f);
+
+		for(size_t idxG = 0; idxG < input.size(); idxG++)
+		{
+			convertGraph(input[idxG], graphs, idxG);
+		}
+
+		return graphs;
+	}
+
 
 	/*Sum SumConverter::convert(const mxArray* input)
 	{
