@@ -61,7 +61,7 @@ __kernel void Kernel(__global const float4* T,
     #pragma unroll
     for(int i = 0; i < 16; i++)
     {
-        temp = c[j] - T[idxT];
+        temp = c[i] - T[idxT];
 		sum2 += temp*temp;
 			
         idxT += 64;
@@ -80,6 +80,6 @@ __kernel void Kernel(__global const float4* T,
             sum1 += l[i];
         }
         
-        sum[gId] = sum1;
+        sum[gIdx] = sum1;
 	}
 }

@@ -1,6 +1,10 @@
 __attribute__((reqd_work_group_size(4, 4, 4)))
 __kernel void Kernel(__global const float4 *T, __global float4 *TMapped)
 {	
+    int I1 = get_global_size(0);
+    int I2 = get_global_size(1);
+    int I3 = get_global_size(2);
+    
     int gId1 = get_global_id(0);
     int gId2 = get_global_id(1);
     int gId3 = get_global_id(2);
