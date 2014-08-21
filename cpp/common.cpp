@@ -318,7 +318,6 @@ void Kernel<type>::compile()
 	}catch (cl::Error &e) {
 		cout << p.getBuildInfo<CL_PROGRAM_BUILD_LOG>((*cq->getDevice())[0]);
 	}
-	cout << p.getBuildInfo<CL_PROGRAM_BUILD_LOG>((*cq->getDevice())[0]);
 
 	for(std::vector<std::string>::iterator it = kernelNames.begin();
 			it < kernelNames.end(); ++it)
