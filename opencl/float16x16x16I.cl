@@ -58,7 +58,7 @@ __kernel void Kernel(__global const float4* T,
 
     int idxT =  8192 * (gIdx/8) + 16*channel + 128*lIdx;    
 
-    float2 sum2 = 0;
+    float4 sum4 = 0;
 
     #pragma unroll
     for(int i = 0; i < 16; i++)
@@ -69,7 +69,7 @@ __kernel void Kernel(__global const float4* T,
         idxT++;
     }
 
-    float sum1 = sum2.x + sum2.y;
+    float sum1 = sum4.x + sum4.y + sum4.z + sum4.w;
 	
 	l[lIdx] = sum1;
 	
