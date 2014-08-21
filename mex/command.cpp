@@ -106,9 +106,8 @@ namespace cl_cpd
 
 		GraphConverter gc;
 
-		std::vector<mxArray*> r (1);
 		r.push_back(gc.convert(gs));
-		return r[0];
+		return r;
 	}
 
 	bool BoolParameter::validate(const mxArray* input)
@@ -233,7 +232,8 @@ namespace cl_cpd
 	{
 		mxArray* val = mxCreateDoubleScalar(g.val);
 
-		const char** f =  {"name", "x", "y"};
+		const char* f[] = {"name", "x", "y"};
+
 		mxArray* lines =
 			mxCreateStructMatrix(g.lines.size(),1, 3, f);
 
@@ -249,7 +249,7 @@ namespace cl_cpd
 
 	mxArray* GraphConverter::convert(const std::vector<graph> input)
 	{
-		const char** f =  {"val", "lines"};
+		const char* f[] =  {"val", "lines"};
 
 		mxArray* graphs = mxCreateStructMatrix(input.size(), 1, 2, f);
 
