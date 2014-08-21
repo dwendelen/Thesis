@@ -154,30 +154,36 @@ namespace cl_cpd
 				b.init(t, u);
 
 				f.setBuffers(&b);
+				cout << "buffset";
 				f.run();
 				f.run();
-				*p++ = f.getExecutionTimeLastRun();
+				*p = f.getExecutionTimeLastRun();
+				p++;
 
 				fr.setBuffers(&b);
 				fr.run();
 				fr.run();
-				*p++ = f.getExecutionTimeLastRun();
+				*p = f.getExecutionTimeLastRun();
+				p++;
 
 				fi.setBuffers(&b);
 				fi.run();
 				fi.run();
-				*p++ = f.getExecutionTimeLastRun();
+				*p = f.getExecutionTimeLastRun();
+				p++;
 
 				b8.init(t,u);
 				f8.setBuffers(&b8);
 				f8.run();
 				f8.run();
-				*p++ = f8.getExecutionTimeLastRun();
+				*p = f.getExecutionTimeLastRun();
+				p++;
 
 				f8r.setBuffers(&b8);
 				f8r.run();
 				f8r.run();
-				*p++ = f.getExecutionTimeLastRun();
+				*p = f.getExecutionTimeLastRun();
+				p++;
 			}
 		}
 	}
