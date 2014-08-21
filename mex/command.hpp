@@ -91,7 +91,7 @@ namespace cl_cpd
 	class DataConverter
 	{
 	public:
-		mxArray* convert(Data input);
+		std::vector<mxArray*> convert(Data input);
 	};
 
 	class Command

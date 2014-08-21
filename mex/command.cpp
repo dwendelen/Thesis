@@ -117,8 +117,7 @@ namespace cl_cpd
 		DataConverter dc;
 
 		std::vector<mxArray*> r (1);
-		r[0] = dc.convert(data);
-		return r;
+		return dc.convert(data);
 	}
 
 	bool BoolParameter::validate(const mxArray* input)
@@ -273,12 +272,20 @@ namespace cl_cpd
 	}
 
 
-	mxArray* DataConverter::convert(Data data)
+	std::vector<mxArray*> DataConverter::convert(Data data)
 	{
+		std::vector<mxArray*> r;
 		const mwSize s[] = {data.I.size(), data.R.size(), data.nbKernels};
-		mxArray* r = mxCreateNumericArray(3, s, mxDOUBLE_CLASS, mxREAL);
+		mxArray* d = mxCreateNumericArray(3, s, mxDOUBLE_CLASS, mxREAL);
 
-		std::copy(data.data, data.data + data.size(), mxGetPr(r));
+		std::copy(data.data, data.data + data.size(), mxGetPr(d));
+
+		r.push_back(d);
+
+		mxArray* i = mxCreateDoubleMatrix(data.I.size(), 1, mxREAL);
+		std::copy(data.I.begin(), data.I.end(), mxGetPr(i));
+
+		r.push_back(i);
 
 		return r;
 	}
