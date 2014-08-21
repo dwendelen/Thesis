@@ -337,7 +337,11 @@ namespace cl_cpd
 	{
 	public:
 		AbstractTMapper(ContextQueue* cq, std::string file, u_int nbDoublesPerWorkitem):
-			BlockKernel<type>(cq, file, nbDoublesPerWorkitem){}
+			BlockKernel<type>(cq, file, nbDoublesPerWorkitem)
+		{
+			BlockKernel<type>::kernelNames.push_back("Kernel");
+		}
+
 
 		void setTUnMapped(cl::Buffer* TUnMapped);
 		void setTMapped(cl::Buffer* TMapped);
