@@ -72,7 +72,7 @@ namespace cl_cpd
 				nbElementsInSum(0){}
 		void updateU(U<type> u);
 
-		cl::Buffer* getT(){return t;}
+		virtual cl::Buffer* getT(){return t;}
 		cl_int getRank(){return rank;}
 		std::vector<cl::Buffer*>* getU(){return u;}
 		std::vector<size_t>* getI(){return i;}
@@ -104,6 +104,21 @@ namespace cl_cpd
 		virtual ~AbstractBufferFactory(){}
 	private:
 		u_int nbDoublesPerWorkitem;
+	};
+
+	template<typename type>
+	class AbstractMappedBufferFactory: public AbstractBufferFactory<type>
+	{
+		private:
+		cl::Buffer* tMapped;
+	public:
+		AbstractMappedBufferFactory(ContextQueue* cq, u_int nbDoublesPerWorkitem):
+			AbstractBufferFactory<type>(cq, nbDoublesPerWorkitem), tMapped(NULL){}
+		virtual void init(T<type> t, U<type> u);
+		cl::Buffer* getTUnMapped(){return AbstractBufferFactory<type>::getT();}
+		virtual cl::Buffer* getT(){return tMapped;}
+		virtual ~AbstractMappedBufferFactory(){delete tMapped;}
+
 	};
 
 	template<typename type>
@@ -321,12 +336,19 @@ namespace cl_cpd
 	class AbstractTMapper: public BlockKernel<type>
 	{
 	public:
+		AbstractTMapper(ContextQueue* cq, std::string file, u_int nbDoublesPerWorkitem):
+			BlockKernel<type>(cq, file, nbDoublesPerWorkitem){}
 		void setTMapped(cl::Buffer* TMapped);
-		virtual void setBuffers(AbstractBufferFactory<type>* b)
+		virtual void setBuffers(BufferFactory<type>* b)
 		{
-			setT(b->getT());
 			setI(b->getI());
-			throw "TMapped moet ng gefixt worden";
+			setTMapped(b->getT());
+		}
+		virtual void setBuffers(AbstractMappedBufferFactory<type>* b)
+		{
+			setT(b->getTUnMapped());
+			setI(b->getI());
+			setTMapped(b->getT());
 		}
 
 		virtual ~AbstractTMapper(){}

@@ -150,6 +150,18 @@ void AbstractBufferFactory<type>::init(T<type> t, U<type> u)
 }
 
 template<typename type>
+void AbstractMappedBufferFactory<type>::init(T<type> t, U<type> u)
+{
+	AbstractBufferFactory<type>::init(t, u);
+
+	size_t s = sizeof(type) * t.I[0] * t.I[1] * t.I[2];
+
+	delete tMapped;
+	tMapped = AbstractBufferFactory<type>::createReadWriteBuf(s);
+}
+
+
+template<typename type>
 void OneDRangeBufferFactory<type>::init(T<type> t, U<type> u)
 {
 	if(t.I.size() != u.I.size())
@@ -668,3 +680,6 @@ template class AbstractFGKernel<float>;
 
 template class AbstractGKernel<double>;
 template class AbstractGKernel<float>;
+
+template class AbstractTMapper<double>;
+template class AbstractTMapper<float>;
