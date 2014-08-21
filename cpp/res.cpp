@@ -26,7 +26,7 @@ namespace cl_cpd
 		Is.push_back(320);
 
 		vector<int> Rs;
-		for(int i = 1; i <= 160 ; i += 1)
+		for(int i = 1; i <= 320 ; i += 1)
 			Rs.push_back(i);
 
 		g.val = 0;
