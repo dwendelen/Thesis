@@ -119,14 +119,17 @@ namespace cl_cpd
 			i += 8;
 		}
 
-		T<float> t;
-		t.Ts = bTf;
+		T<float> t16;
+		t16.Ts = bTf;
 
-		U<float> u;
-		u.Us = vector<float*>();
-		u.Us.push_back(bUf);
-		u.Us.push_back(bUf);
-		u.Us.push_back(bUf);
+		U<float> u16;
+		u16.Us = vector<float*>();
+		u16.Us.push_back(bUf);
+		u16.Us.push_back(bUf);
+		u16.Us.push_back(bUf);
+
+		T<float> t8 = t16;
+		U<float> u8 = u16;
 
 		data.nbKernels = 5;
 		cout << data.size();
@@ -136,25 +139,29 @@ namespace cl_cpd
 		for(size_t i = 0; i < data.I.size(); i++)
 		{
 			cout << "\nI: " << i << "\n";
-			int I = data.I[i];
 
-			t.I = vector<size_t>();
-			t.I.push_back(I);
-			t.I.push_back(I);
-			t.I.push_back(I);
+			t16.I = vector<size_t>();
+			t16.I.push_back(I16[i]);
+			t16.I.push_back(I16[i]);
+			t16.I.push_back(I16[i]);
 
-			u.I = t.I;
+			u16.I = t16.I;
+
+			t8.I = vector<size_t>();
+			t8.I.push_back(I8[i]);
+			t8.I.push_back(I8[i]);
+			t8.I.push_back(I8[i]);
+
+			u8.I = t8.I;
 
 			cout << "voor R";
 			for(size_t r = 0; r < data.R.size(); r++)
 			{
 				int R = data.R[r];
-				u.rank = R;
-				cout << ".";
-				b.init(t, u);
-				cout << "init";
-				f.setBuffers(&b);
-				cout << "buffset";
+				u16.rank = R;
+				u8.rank = R;
+
+				b.init(t16, u16);
 				f.run();
 				f.run();
 				*p = f.getExecutionTimeLastRun();
@@ -172,7 +179,7 @@ namespace cl_cpd
 				*p = f.getExecutionTimeLastRun();
 				p++;
 
-				b8.init(t,u);
+				b8.init(t8,u8);
 				f8.setBuffers(&b8);
 				f8.run();
 				f8.run();
