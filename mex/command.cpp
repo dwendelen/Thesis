@@ -99,14 +99,13 @@ namespace cl_cpd
 
 	std::vector<mxArray*> InvlRCommand::handle()
 	{
-		std::vector<mxArray*> r (1);
-
 		std::vector<graph> gs;
 		invlR(gs);
 
 		GraphConverter gc;
 
-		r.push_back(gc.convert(gs));
+		std::vector<mxArray*> r (1);
+		r[0] = gc.convert(gs);
 		return r;
 	}
 
