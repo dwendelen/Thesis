@@ -640,8 +640,8 @@ void AbstractGKernel<type>::setG(std::vector<cl::Buffer*>* G)
 		throw InvalidSizeOfUException();
 
 	Kernel<type>::getKernels()[0]->setArg(1, *(*G)[0]);
-	Kernel<type>::getKernels()[1]->setArg(2, *(*G)[1]);
-	Kernel<type>::getKernels()[2]->setArg(3, *(*G)[2]);
+	Kernel<type>::getKernels()[1]->setArg(1, *(*G)[1]);
+	Kernel<type>::getKernels()[2]->setArg(1, *(*G)[2]);
 }
 
 template<typename type>
