@@ -340,10 +340,11 @@ namespace cl_cpd
 		void setTMapped(cl::Buffer* TMapped);
 		virtual void setBuffers(BufferFactory<type>* b)
 		{
+			throw "error";
 			setI(b->getI());
 			setTMapped(b->getT());
 		}
-		virtual void setBuffers(AbstractMappedBufferFactory<type>* b)
+		virtual void setMBuffers(AbstractMappedBufferFactory<type>* b)
 		{
 			setT(b->getTUnMapped());
 			setI(b->getI());
