@@ -400,6 +400,7 @@ template <typename type>
 template <typename T>
 void Kernel<type>::setArg(cl_uint index, T value)
 {
+std::cout << "Arg " << index << "\n";
 	for(std::vector<cl::Kernel*>::iterator it = kernels.begin();
 						it < kernels.end(); ++it)
 		(*it)->setArg(index, value);
@@ -640,8 +641,8 @@ void AbstractGKernel<type>::setG(std::vector<cl::Buffer*>* G)
 		throw InvalidSizeOfUException();
 
 	Kernel<type>::getKernels()[0]->setArg(1, *(*G)[0]);
-	Kernel<type>::getKernels()[1]->setArg(1, *(*G)[1]);
-	Kernel<type>::getKernels()[2]->setArg(1, *(*G)[2]);
+	Kernel<type>::getKernels()[1]->setArg(2, *(*G)[1]);
+	Kernel<type>::getKernels()[2]->setArg(3, *(*G)[2]);
 }
 
 template<typename type>
