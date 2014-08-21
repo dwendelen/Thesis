@@ -666,6 +666,9 @@ template class OneDRangeBufferFactory<float>;
 template class AbstractFGBufferFactory<double>;
 template class AbstractFGBufferFactory<float>;
 
+template class AbstractMappedBufferFactory<double>;
+template class AbstractMappedBufferFactory<float>;
+
 template class Kernel<double>;
 template class Kernel<float>;
 
