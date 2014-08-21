@@ -400,6 +400,7 @@ template <typename type>
 template <typename T>
 void Kernel<type>::setArg(cl_uint index, T value)
 {
+std::cout << "Arg " << index << "\n";
 	for(std::vector<cl::Kernel*>::iterator it = kernels.begin();
 						it < kernels.end(); ++it)
 		(*it)->setArg(index, value);

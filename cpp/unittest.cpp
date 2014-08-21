@@ -224,7 +224,8 @@ namespace cl_cpd
 				}
 				else
 				{
-					std::cout << "In G " + (i+1);
+					std::cout << "In G " << (i+1);
+					std::cout << "El " << j;
 					std::cout << e.Us[i][j] << " echt: " << r.Us[i][j];
 					kill = false;
 					break;
@@ -242,12 +243,40 @@ namespace cl_cpd
 		AbstractFGKernel<double>* k1 = new AbstractFGKernel<double>(cqq, "double16x16x16FG", 4);
 		AbstractGKernel<double>* k2 = new AbstractGKernel<double>(cqq, "double16x16x16G");
 
-		k2->compile();
+		
+
+
+        k1->compile();
+		k1->setBuffers(b);
+		std::cout << "Buff GF set";
+		k1->run();
+		
+		std::cout << "GF ran";
+
+		Sum<double> sum;
+		sum.nbElements = b->getNbElementsInSum();
+		sum.sum = new double[sum.nbElements];
+
+		b->readSum(sum);
+
+		bool bbb = compareSum(sum.sum, sum.nbElements, f, deltaF);
+
+		std::cout << k1->getName() << " ";
+		if(bbb)
+			std::cout << "OK";
+		else
+		{
+			bb = false;
+			std::cout << "FAIL";
+		}
+
+		std::cout << "\n";
+
+		delete sum.sum;
+
+        k2->compile();
 		k2->setBuffers(b);
-
-
-		testF(k1, b, f, deltaF, bb);
-
+		std::cout << "Buff G set";
 		k2->run();
 
 		U<double> uu;
@@ -261,7 +290,7 @@ namespace cl_cpd
 
 		b->readG(uu);
 
-		bool bbb = compareG(uu, g, deltaG);
+		bbb = compareG(uu, g, deltaG);
 
 		std::cout << k2->getName() << " ";
 		if(bbb)
