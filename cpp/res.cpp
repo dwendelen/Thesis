@@ -97,6 +97,7 @@ namespace cl_cpd
 		f8.compile();
 		f8r.compile();
 
+		data.R = vector<int>();
 		data.R.push_back(8);
 		data.R.push_back(16);
 		data.R.push_back(400);
@@ -134,7 +135,7 @@ namespace cl_cpd
 
 		for(size_t i = 0; i < data.I.size(); i++)
 		{
-			cout << i << "\n";
+			cout << "\nI: " << i << "\n";
 			int I = data.I[i];
 
 			t.I = vector<size_t>();
@@ -144,12 +145,12 @@ namespace cl_cpd
 
 			u.I = t.I;
 
-
+			cout << "voor R";
 			for(size_t r = 0; r < data.R.size(); r++)
 			{
 				int R = data.R[r];
 				u.rank = R;
-
+				cout << ".";
 				b.init(t, u);
 
 				f.setBuffers(&b);
