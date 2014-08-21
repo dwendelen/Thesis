@@ -116,7 +116,6 @@ namespace cl_cpd
 			AbstractBufferFactory<type>(cq, nbDoublesPerWorkitem), tUnMapped(NULL){}
 		virtual void init(T<type> t, U<type> u);
 		cl::Buffer* getTUnMapped(){return tUnMapped;}
-		virtual cl::Buffer* getT(){return t;}
 		virtual ~AbstractMappedBufferFactory(){delete tUnMapped;}
 
 	};
