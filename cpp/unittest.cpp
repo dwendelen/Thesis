@@ -154,21 +154,21 @@ namespace cl_cpd
 		AbstractTMapper<float>* m = new AbstractTMapper<float>(cqq, "float8x8x8Mapper", 2);
 		m->compile();
 		m->setMBuffers(b8M);
-		m->run();
+		//m->run();
 		testF(new AbstractFKernel<float>(cqq, "float8x8x8R", 2), b8M, f, delta, bb);
 		delete m;
 
 		m = new AbstractTMapper<float>(cqq, "float16x16x16Mapper", 4);
 		m->compile();
 		m->setMBuffers(b16M);
-		m->run();
+		//m->run();
 		testF(new AbstractFKernel<float>(cqq, "float16x16x16R", 4), b16M, f, delta, bb);
 		delete m;
 
 		m = new AbstractTMapper<float>(cqq, "float16x16x16MapperI", 4);
 		m->compile();
 		m->setMBuffers(b16M);
-		m->run();
+		//m->run();
 		testF(new AbstractFKernel<float>(cqq, "float16x16x16I", 4), b16M, f, delta, bb);
 		delete m;
 
