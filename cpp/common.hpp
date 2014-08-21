@@ -116,6 +116,7 @@ namespace cl_cpd
 			AbstractBufferFactory<type>(cq, nbDoublesPerWorkitem), tUnMapped(NULL){}
 		virtual void init(T<type> t, U<type> u);
 		cl::Buffer* getTUnMapped(){return tUnMapped;}
+		cl::Buffer* getTMapped(){return AbstractBufferFactory<type>::t;}
 		virtual ~AbstractMappedBufferFactory(){delete tUnMapped;}
 
 	};
@@ -337,7 +338,10 @@ namespace cl_cpd
 	public:
 		AbstractTMapper(ContextQueue* cq, std::string file, u_int nbDoublesPerWorkitem):
 			BlockKernel<type>(cq, file, nbDoublesPerWorkitem){}
+
+		void setTUnMapped(cl::Buffer* TUnMapped);
 		void setTMapped(cl::Buffer* TMapped);
+
 		virtual void setBuffers(BufferFactory<type>* b)
 		{
 			throw "error";

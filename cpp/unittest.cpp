@@ -79,6 +79,42 @@ namespace cl_cpd
 	}
 
 	template<typename type>
+	void testFM(AbstractTMapper<type>* m, AbstractFKernel<type>* kernel, AbstractMappedBufferFactory<type>* bf, double exp, double delta, bool& bb)
+	{
+		m->compile();
+		m->setMBuffers(bf);
+		m->setTMapped(bf->getTMapped());
+		m->setTUnMapped(bf->getTUnMapped());
+		m->run();
+
+		kernel->compile();
+		kernel->setBuffers(bf);
+		kernel->setT(bf->getTMapped());
+		kernel->run();
+
+		Sum<type> sum;
+		sum.nbElements = bf->getNbElementsInSum();
+		sum.sum = new type[sum.nbElements];
+
+		bf->readSum(sum);
+
+		bool b = compareSum(sum.sum, sum.nbElements, exp, delta);
+
+		std::cout << kernel->getName() << " ";
+		if(b)
+			std::cout << "OK";
+		else
+		{
+			bb = false;
+			std::cout << "FAIL";
+		}
+
+		std::cout << "\n";
+
+		delete sum.sum;
+	}
+
+	template<typename type>
 	void testF1D(OneDRangeKernel<type>* kernel, OneDRangeBufferFactory<type>* bf, double exp, double delta, bool& bb)
 	{
 		kernel->compile();
@@ -151,26 +187,17 @@ namespace cl_cpd
 		testF1D(new OneDRangeKernel<float>(cqq, "float", 16), b1d16, f, delta, bb);
 		testF(new OneDRangeKernel<float>(cqq, "float64", 64), b64, f, delta, bb);
 
-		AbstractTMapper<float>* m = new AbstractTMapper<float>(cqq, "float8x8x8Mapper", 2);
-		m->compile();
-		m->setMBuffers(b8M);
-		//m->run();
-		testF(new AbstractFKernel<float>(cqq, "float8x8x8R", 2), b8M, f, delta, bb);
-		delete m;
+		testFM(	new AbstractTMapper<float>(cqq, "float8x8x8Mapper", 2),
+				new AbstractFKernel<float>(cqq, "float8x8x8R", 2),
+				b8M, f, delta, bb);
 
-		m = new AbstractTMapper<float>(cqq, "float16x16x16Mapper", 4);
-		m->compile();
-		m->setMBuffers(b16M);
-		//m->run();
-		testF(new AbstractFKernel<float>(cqq, "float16x16x16R", 4), b16M, f, delta, bb);
-		delete m;
+		testFM(	new AbstractTMapper<float>(cqq, "float16x16x16Mapper", 4),
+				new AbstractFKernel<float>(cqq, "float16x16x16R", 4),
+				b16M, f, delta, bb);
 
-		m = new AbstractTMapper<float>(cqq, "float16x16x16MapperI", 4);
-		m->compile();
-		m->setMBuffers(b16M);
-		//m->run();
-		testF(new AbstractFKernel<float>(cqq, "float16x16x16I", 4), b16M, f, delta, bb);
-		delete m;
+		testFM(	new AbstractTMapper<float>(cqq, "float16x16x16MapperI", 4),
+				new AbstractFKernel<float>(cqq, "float16x16x16RI", 4),
+				b16M, f, delta, bb);
 
 		delete b;
 		delete b8;

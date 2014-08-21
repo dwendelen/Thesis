@@ -156,8 +156,8 @@ void AbstractMappedBufferFactory<type>::init(T<type> tt, U<type> u)
 
 	size_t s = sizeof(type) * tt.I[0] * tt.I[1] * tt.I[2];
 
-	delete BufferFactory<type>::t;
-	BufferFactory<type>::t = AbstractBufferFactory<type>::createReadWriteBuf(s);
+	delete AbstractBufferFactory<type>::t;
+	AbstractBufferFactory<type>::t = AbstractBufferFactory<type>::createReadWriteBuf(s);
 
 	delete tUnMapped;
 	this->tUnMapped = createInitBuf(s, tt.Ts);
@@ -649,6 +649,12 @@ template<typename type>
 void AbstractGKernel<type>::setRank(cl_int rank)
 {
 	this->rank = rank;
+}
+
+template<typename type>
+void AbstractTMapper<type>::setTUnMapped(cl::Buffer* TUnMapped)
+{
+	Kernel<type>::setArg(0, TUnMapped);
 }
 
 template<typename type>
