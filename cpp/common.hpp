@@ -110,14 +110,14 @@ namespace cl_cpd
 	class AbstractMappedBufferFactory: public AbstractBufferFactory<type>
 	{
 		private:
-		cl::Buffer* tMapped;
+		cl::Buffer* tUnMapped;
 	public:
 		AbstractMappedBufferFactory(ContextQueue* cq, u_int nbDoublesPerWorkitem):
-			AbstractBufferFactory<type>(cq, nbDoublesPerWorkitem), tMapped(NULL){}
+			AbstractBufferFactory<type>(cq, nbDoublesPerWorkitem), tUnMapped(NULL){}
 		virtual void init(T<type> t, U<type> u);
-		cl::Buffer* getTUnMapped(){return AbstractBufferFactory<type>::getT();}
-		virtual cl::Buffer* getT(){return tMapped;}
-		virtual ~AbstractMappedBufferFactory(){delete tMapped;}
+		cl::Buffer* getTUnMapped(){return tUnMapped;}
+		virtual cl::Buffer* getT(){return t;}
+		virtual ~AbstractMappedBufferFactory(){delete tUnMapped;}
 
 	};
 

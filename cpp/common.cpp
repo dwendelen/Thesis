@@ -156,8 +156,11 @@ void AbstractMappedBufferFactory<type>::init(T<type> t, U<type> u)
 
 	size_t s = sizeof(type) * t.I[0] * t.I[1] * t.I[2];
 
-	delete tMapped;
-	tMapped = AbstractBufferFactory<type>::createReadWriteBuf(s);
+	delete t;
+	t = AbstractBufferFactory<type>::createReadWriteBuf(s);
+
+	delete tUnMapped;
+	this->tUnMapped = createInitBuf(s, t.Ts);
 }
 
 
