@@ -161,10 +161,10 @@ namespace cl_cpd
 		AbstractBufferFactory<float> * b8 = new AbstractBufferFactory<float>(cqq, 2);
 		AbstractBufferFactory<float> * b4 = new AbstractBufferFactory<float>(cqq, 1);
 
-		AbstractMappedBufferFactory<float>* b8M
+		/*AbstractMappedBufferFactory<float>* b8M
 			= new AbstractMappedBufferFactory<float>(cqq, 2);
 		AbstractMappedBufferFactory<float>* b16M
-			= new AbstractMappedBufferFactory<float>(cqq, 4);
+			= new AbstractMappedBufferFactory<float>(cqq, 4);*/
 
 		OneDRangeBufferFactory<float>* b1d16 = new OneDRangeBufferFactory<float>(cqq, 16);
 		OneDRangeBufferFactory<float>* b64 = new OneDRangeBufferFactory<float>(cqq, 64);
@@ -176,8 +176,8 @@ namespace cl_cpd
 		b1d16->init(t, u);
 		b64->init(t, u);
 
-		b8M->init(t, u);
-		b16M->init(t, u);
+		/*b8M->init(t, u);
+		b16M->init(t, u);*/
 
 		testF(new AbstractFKernel<float>(cqq, "float16x16x16", 4), b, f, delta, bb);
 		testF(new AbstractFKernel<float>(cqq, "float8x8x8", 2), b8, f, delta, bb);
@@ -187,7 +187,7 @@ namespace cl_cpd
 		testF1D(new OneDRangeKernel<float>(cqq, "float", 16), b1d16, f, delta, bb);
 		testF(new OneDRangeKernel<float>(cqq, "float64", 64), b64, f, delta, bb);
 
-		testFM(	new AbstractTMapper<float>(cqq, "float8x8x8Mapper", 2),
+		/*testFM(	new AbstractTMapper<float>(cqq, "float8x8x8Mapper", 2),
 				new AbstractFKernel<float>(cqq, "float8x8x8R", 2),
 				b8M, f, delta, bb);
 
@@ -197,7 +197,7 @@ namespace cl_cpd
 
 		testFM(	new AbstractTMapper<float>(cqq, "float16x16x16MapperI", 4),
 				new AbstractFKernel<float>(cqq, "float16x16x16RI", 4),
-				b16M, f, delta, bb);
+				b16M, f, delta, bb);*/
 
 		delete b;
 		delete b8;
@@ -206,8 +206,8 @@ namespace cl_cpd
 		delete b1d16;
 		delete b64;
 
-		delete b8M;
-		delete b16M;
+		/*delete b8M;
+		delete b16M;*/
 
 	}
 
