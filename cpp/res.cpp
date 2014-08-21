@@ -21,7 +21,7 @@ namespace cl_cpd
 		f.compile();
 
 		vector<int> Is;
-		Is.push_back(16);
+		Is.push_back(64);
 		Is.push_back(128);
 		Is.push_back(320);
 
