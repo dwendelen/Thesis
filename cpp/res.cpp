@@ -57,6 +57,7 @@ namespace cl_cpd
 
 			u.I = t.I;
 
+
 			for(size_t r = 0; r < Rs.size(); r++)
 			{
 				int R = Rs[r];
