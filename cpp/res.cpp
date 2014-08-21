@@ -107,17 +107,23 @@ namespace cl_cpd
 		vector<int> I8(40);
 		vector<int> I16(40);
 
+        int j = 0;
 		for(int i = 8; i <= 320 ;)
 		{
-			I8.push_back(i);
-			data.I.push_back(i);
+			I8[j] = i;
+			data.I[j] = i;
 			i += 8;
-			I16.push_back(i);
-			I16.push_back(i);
-			I8.push_back(i);
-			data.I.push_back(i);
+			j++;
+			I16[j-1] = i;
+			I16[j] = i;
+			I8[j] = i;
+			data.I[j] = i;
 			i += 8;
+			j++;
 		}
+
+        cout << I16[0];
+        cout << I8[0];
 
 		T<float> t16;
 		t16.Ts = bTf;
@@ -154,42 +160,42 @@ namespace cl_cpd
 
 			u8.I = t8.I;
 
-			cout << "voor R";
 			for(size_t r = 0; r < data.R.size(); r++)
 			{
 				int R = data.R[r];
 				u16.rank = R;
 				u8.rank = R;
-
+        
 				b.init(t16, u16);
+				f.setBuffers(&b);
 				f.run();
 				f.run();
 				*p = f.getExecutionTimeLastRun();
 				p++;
-
+                
 				fr.setBuffers(&b);
 				fr.run();
 				fr.run();
-				*p = f.getExecutionTimeLastRun();
+				*p = fr.getExecutionTimeLastRun();
 				p++;
-
+				
 				fi.setBuffers(&b);
 				fi.run();
 				fi.run();
-				*p = f.getExecutionTimeLastRun();
+				*p = fi.getExecutionTimeLastRun();
 				p++;
-
+                
 				b8.init(t8,u8);
 				f8.setBuffers(&b8);
 				f8.run();
 				f8.run();
-				*p = f.getExecutionTimeLastRun();
+				*p = f8.getExecutionTimeLastRun();
 				p++;
-
+				
 				f8r.setBuffers(&b8);
 				f8r.run();
 				f8r.run();
-				*p = f.getExecutionTimeLastRun();
+				*p = f8r.getExecutionTimeLastRun();
 				p++;
 			}
 		}
