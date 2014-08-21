@@ -153,7 +153,7 @@ namespace cl_cpd
 
 		AbstractTMapper<float>* m = new AbstractTMapper<float>(cqq, "float8x8x8Mapper", 2);
 		m->compile();
-		m->setBuffers(b8M);
+		m->setMBuffers(b8M);
 		m->run();
 		testF(new AbstractFKernel<float>(cqq, "float8x8x8R", 2), b, f, delta, bb);
 		delete m;
