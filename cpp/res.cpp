@@ -167,6 +167,7 @@ namespace cl_cpd
 				u8.rank = R;
         
 				b.init(t16, u16);
+
 				f.setBuffers(&b);
 				f.run();
 				f.run();
