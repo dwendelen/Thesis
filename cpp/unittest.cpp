@@ -213,6 +213,7 @@ namespace cl_cpd
 
 	bool compareG(U<double> r, U<double> e, double delta)
 	{
+		bool kill = true;
 		for(uint i = 0; i < 3; i++)
 		{
 			for(uint j = 0; j < (r.rank * r.I[i]); j++)
@@ -223,12 +224,14 @@ namespace cl_cpd
 				}
 				else
 				{
+					std::cout << "In G " + (i+1);
 					std::cout << e.Us[i][j] << " echt: " << r.Us[i][j];
-					return false;
+					kill = false;
+					break;
 				}
 			}
 		}
-		return false;
+		return kill;
 	}
 
 	void testG(T<double> t, U<double> u, double f, double deltaF, U<double> g, double deltaG, bool& bb)
