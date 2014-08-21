@@ -62,7 +62,7 @@ __kernel void Kernel(__global const float4* T,
     for(int i = 0; i < 16; i++)
     {
         temp = c[i] - T[idxT];
-		sum2 += temp*temp;
+		sum4 += temp*temp;
 			
         idxT += 64;
     }
