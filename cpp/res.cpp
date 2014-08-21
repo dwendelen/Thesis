@@ -152,7 +152,7 @@ namespace cl_cpd
 				u.rank = R;
 				cout << ".";
 				b.init(t, u);
-
+				cout << "init";
 				f.setBuffers(&b);
 				cout << "buffset";
 				f.run();
