@@ -128,11 +128,13 @@ namespace cl_cpd
 		u.Us.push_back(bUf);
 
 		data.nbKernels = 5;
+		cout << data.size();
 		data.data = new double[data.size()];
 		double* p = data.data;
 
 		for(size_t i = 0; i < data.I.size(); i++)
 		{
+			cout << i << "\n";
 			int I = data.I[i];
 
 			t.I = vector<size_t>();
