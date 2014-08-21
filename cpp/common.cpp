@@ -150,17 +150,17 @@ void AbstractBufferFactory<type>::init(T<type> t, U<type> u)
 }
 
 template<typename type>
-void AbstractMappedBufferFactory<type>::init(T<type> t, U<type> u)
+void AbstractMappedBufferFactory<type>::init(T<type> tt, U<type> u)
 {
-	AbstractBufferFactory<type>::init(t, u);
+	AbstractBufferFactory<type>::init(tt, u);
 
-	size_t s = sizeof(type) * t.I[0] * t.I[1] * t.I[2];
+	size_t s = sizeof(type) * tt.I[0] * tt.I[1] * tt.I[2];
 
-	delete t;
-	t = AbstractBufferFactory<type>::createReadWriteBuf(s);
+	delete BufferFactory<type>::t;
+	BufferFactory<type>::t = AbstractBufferFactory<type>::createReadWriteBuf(s);
 
 	delete tUnMapped;
-	this->tUnMapped = createInitBuf(s, t.Ts);
+	this->tUnMapped = createInitBuf(s, tt.Ts);
 }
 
 
