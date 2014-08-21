@@ -61,7 +61,6 @@ namespace cl_cpd
 
 	std::vector<mxArray*> SetUCommand::handle()
 	{
-		std::cout << "    mroeu    " ;
 		if(f == NULL || b == NULL)
 			mexErrMsgTxt("cl_cpd is not initialised.");
 
@@ -76,7 +75,6 @@ namespace cl_cpd
 			mexErrMsgTxt("cl_cpd is not initialised.");
 
 		f->run();
-		std::cout << "\n\n" << b->getNbElementsInSum() << "\n\n";
 		mxArray* m = mxCreateDoubleMatrix(b->getNbElementsInSum(), 1, mxREAL);
 
 		Sum<double> s;

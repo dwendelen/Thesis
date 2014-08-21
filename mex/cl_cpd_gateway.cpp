@@ -52,7 +52,6 @@ void operator delete[](void* ptr, const std::nothrow_t&) throw()
 
 void CommandRegister::add(Command* c)
 {
-	std::cout << "Added " << c->getString();
 	m[c->getString()] = c;
 }
 
@@ -86,11 +85,8 @@ void mexFunction(int nbOutput, mxArray *outputArray[],
 		try{
 			CommandRegister* cr = buildCommandRegister();
 			Command* command = getCommand(cr, nbInput, inputArray);
-			std::cout << "validateAndFillInput";
 			validateAndFillInput(command, nbInput, inputArray);
-			std::cout << "handle";
 			std::vector<mxArray *> output = command->handle();
-			std::cout << "output";
 			fillOutputArray(nbOutput, outputArray, output);
 		}
 		catch (cl::Error &e)
@@ -141,10 +137,8 @@ Command* getCommand(CommandRegister* cr, int nbInput, const mxArray *inputArray[
 
 void validateAndFillInput(Command* command, int nbInput, const mxArray * inputArray[])
 {
-	std::cout << 0;
 	if(((size_t)nbInput) < command->getParameters().size() + 1)
 	{
-		std::cout << 0.5;
 		std::stringstream ss;
 		ss << command->getString() << " requires ";
 		ss << command->getParameters().size() << " parameters, not ";
@@ -154,14 +148,12 @@ void validateAndFillInput(Command* command, int nbInput, const mxArray * inputAr
 
 	for(mwIndex i = 0; i < command->getParameters().size(); i++)
 	{
-		std::cout << 2;
 		if(!command->getParameters()[i]->validate(inputArray[i + 1]))
 		{
 			std::stringstream ss;
 			ss << "Parameter " << i << " is invalid.";
 			mexErrMsgTxt(ss.str().c_str());
 		}
-		std::cout << 3;
 		command->getParameters()[i]->setVal(inputArray[i + 1]);
 	}
 }
