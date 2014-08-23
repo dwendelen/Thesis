@@ -254,6 +254,21 @@ namespace cl_cpd
 
 		std::vector<mxArray*> handle();
 	};
+
+	class MeasureGCommand: public Command
+	{
+	public:
+		std::string getString()
+		{
+			return "measureG";
+		}
+		std::vector<Parameter*> getParameters()
+		{
+			return std::vector<Parameter*>(0);
+		}
+
+		std::vector<mxArray*> handle();
+	};
 }
 
 

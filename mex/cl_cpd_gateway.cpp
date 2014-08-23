@@ -112,6 +112,7 @@ CommandRegister* buildCommandRegister()
 	cr->add(new TestCommand);
 	cr->add(new InvlRCommand);
 	cr->add(new MeasureFCommand);
+	cr->add(new MeasureGCommand);
 
 	return cr;
 }

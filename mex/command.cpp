@@ -118,6 +118,17 @@ namespace cl_cpd
 		return dc.convert(data);
 	}
 
+	std::vector<mxArray*> MeasureGCommand::handle()
+	{
+		Data data;
+		measureF(data);
+
+		DataConverter dc;
+
+		std::vector<mxArray*> r (1);
+		return dc.convert(data);
+	}
+
 	bool BoolParameter::validate(const mxArray* input)
 	{
 		return mxIsLogicalScalar(input);
@@ -273,7 +284,7 @@ namespace cl_cpd
 	std::vector<mxArray*> DataConverter::convert(Data data)
 	{
 		std::vector<mxArray*> r;
-		const mwSize s[] = {data.I.size(), data.R.size(), data.nbKernels};
+		const mwSize s[] = {data.nbKernels, data.R.size(), data.I.size()};
 		mxArray* d = mxCreateNumericArray(3, s, mxDOUBLE_CLASS, mxREAL);
 
 		std::copy(data.data, data.data + data.size(), mxGetPr(d));

@@ -201,4 +201,68 @@ namespace cl_cpd
 			}
 		}
 	}
+	void measureG(Data& data)
+	{
+		ContextQueue cq;
+		cq.init(true);
+
+		AbstractFGBufferFactory<double> b(&cq, 4);
+		AbstractGKernel<double> f(&cq, "double16x16G");
+
+		f.compile();
+
+		data.R = vector<int>();
+		int j = 0;
+		for(int r = 16; r <= 1024 ; r += 16)
+		{
+			data.R.push_back(r);
+		}
+
+		data.I = vector<int>(40);
+
+		int j = 0;
+		for(int i = 16; i <= 320 ; i+=16)
+		{
+			data.I[j] = i;
+		}
+
+		T<double> t;
+		t.Ts = bT;
+
+		U<double> u;
+		u.Us = vector<double*>();
+		u.Us.push_back(bU);
+		u.Us.push_back(bU);
+		u.Us.push_back(bU);
+
+		data.nbKernels = 1;
+
+		data.data = new double[data.size()];
+		double* p = data.data;
+
+		for(size_t i = 0; i < data.I.size(); i++)
+		{
+			t.I = vector<size_t>();
+			t.I.push_back(data.I[i]);
+			t.I.push_back(data.I[i]);
+			t.I.push_back(data.I[i]);
+
+			u.I = t.I;
+
+
+			for(size_t r = 0; r < data.R.size(); r++)
+			{
+				int R = data.R[r];
+				u.rank = R;
+
+				b.init(t, u);
+
+				f.setBuffers(&b);
+				f.run();
+				f.run();
+				*p = f.getExecutionTimeLastRun();
+				p++;
+			}
+		}
+	}
 }
