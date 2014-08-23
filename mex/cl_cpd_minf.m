@@ -96,9 +96,15 @@ cl_cpd_gateway('setTAndU', T, U0);
 [U,output] = options.Algorithm(@f,@g,U,options);
 output.Name = func2str(options.Algorithm);
 
-function fval = f(U)
+function u(U)
     cl_cpd_gateway('setU', U);
+end
+function s = r()
     s = cl_cpd_gateway('run');
+end
+function fval = f(U)
+    u(U);
+    s = r();
     fval = 0.5 * sum(s);
 end
 
