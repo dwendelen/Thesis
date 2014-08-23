@@ -41,6 +41,7 @@ namespace cl_cpd
 
 	void invlR(std::vector<graph>& gs);
 	void measureF(Data& data);
+	void measureG(Data& data);
 }
 
 
