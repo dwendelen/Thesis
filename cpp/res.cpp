@@ -242,6 +242,7 @@ namespace cl_cpd
 
 		for(size_t i = 0; i < data.I.size(); i++)
 		{
+			cout << "\nI: " << i << "\n";
 			t.I = vector<size_t>();
 			t.I.push_back(data.I[i]);
 			t.I.push_back(data.I[i]);

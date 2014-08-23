@@ -111,10 +111,13 @@ namespace cl_cpd
 	{
 		Data data;
 		measureF(data);
+		delete data.data;
+		data.data = NULL;
 
 		DataConverter dc;
 
 		std::vector<mxArray*> r (1);
+		std::cout << "Convert";
 		return dc.convert(data);
 	}
 
@@ -122,6 +125,8 @@ namespace cl_cpd
 	{
 		Data data;
 		measureG(data);
+		delete data.data;
+		data.data = NULL;
 
 		DataConverter dc;
 
