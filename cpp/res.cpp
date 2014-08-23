@@ -220,7 +220,7 @@ namespace cl_cpd
 
 		data.I = vector<int>(40);
 
-		int j = 0;
+		j = 0;
 		for(int i = 16; i <= 320 ; i+=16)
 		{
 			data.I[j] = i;
