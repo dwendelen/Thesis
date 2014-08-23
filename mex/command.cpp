@@ -121,7 +121,7 @@ namespace cl_cpd
 	std::vector<mxArray*> MeasureGCommand::handle()
 	{
 		Data data;
-		measureF(data);
+		measureG(data);
 
 		DataConverter dc;
 
