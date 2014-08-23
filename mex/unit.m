@@ -2,7 +2,7 @@ compile
 
 N = 3;
 R = 16;
-T = rand(208,160,64);
+T = rand(208,160,80);
 U = cpd_rnd(size(T), R);
 
 M = arrayfun(@(n)tens2mat(T,n),1:N,'UniformOutput',false);
@@ -18,4 +18,4 @@ for n = 1:N
     grad{n} = G1-G2;
 end
 
-x = cl_cpd_gateway('test', T, U, e, 600, grad, 0)
+x = cl_cpd_gateway('test', T, U, e, 600, grad, 0.001)

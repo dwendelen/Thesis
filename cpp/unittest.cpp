@@ -241,7 +241,7 @@ namespace cl_cpd
 		b->init(t, u);
 
 		AbstractFGKernel<double>* k1 = new AbstractFGKernel<double>(cqq, "double16x16x16FG", 4);
-		AbstractGKernel<double>* k2 = new AbstractGKernel<double>(cqq, "double16x16x16G");
+		AbstractGKernel<double>* k2 = new AbstractGKernel<double>(cqq, "double16x16G");
 
 		
 
