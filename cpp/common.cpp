@@ -128,7 +128,7 @@ void AbstractBufferFactory<type>::init(T<type> t, U<type> u)
 	if(t.I[2] % (nbDoublesPerWorkitem * 4) != 0)
 			throw InvalidSizeOfIException(nbDoublesPerWorkitem * 4);
 
-	BufferFactory<type>::cleanUp();
+	this->cleanUp();
 
 	size_t s = sizeof(type) * t.I[0] * t.I[1] * t.I[2];
 	this->t = createInitBuf(s, t.Ts);
