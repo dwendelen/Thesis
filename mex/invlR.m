@@ -1,8 +1,8 @@
-compile
-[Data_invlR] = cl_cpd_gateway('InvlR');
-save Data_invlR;
+%compile
+%[Data_invlR] = cl_cpd_gateway('InvlR');
+%save Data_invlR;
 
-%load Data_invlR;
+load Data_invlR;
 
 g = Data_invlR(1);
 
