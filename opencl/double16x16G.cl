@@ -59,7 +59,7 @@ __kernel void KernelG1(__global const double2 *F, __global double2 *G1, __global
             	#pragma unroll
             	for(int j = 0; j < 8; j++)
 		    	{
-		    	    temp = u2 * U3Cache[idxCache++].y;
+		    	    temp = u2 * U3Cache[idxCache].x;
 		        	sum += temp.x * F[idxT];
 		        	sum += temp.y * F[idxT + jumpIdxTMode2];
 		        	idxT += jumpIdxTMode3;
@@ -169,7 +169,7 @@ __kernel void KernelG3(__global const double2 *F, __global const double2 *U1, __
     double2 U2Cache[32];
     int sizeCache;
     
-    double2 sum = 0;
+    double4 sum = 0;
     
     int idxR = get_global_id(0);
     int I3 = get_global_size(1);
@@ -177,7 +177,7 @@ __kernel void KernelG3(__global const double2 *F, __global const double2 *U1, __
     int jumpIdxTMode2 = I1;
     int jumpIdxTMode3 = 2 * I1 * I2;
     
-    int idxTFirstCacheItem = get_global_id(1)  * jumpIdxTMode3;
+    int idxTFirstCacheItem = get_global_id(1) * 2 * jumpIdxTMode3;
     int idxT;
     
     int startIdxU1 = idxR * I1;
@@ -222,13 +222,13 @@ __kernel void KernelG3(__global const double2 *F, __global const double2 *U1, __
             	for(int j = 0; j < 8; j++)
 		    	{
 		        	temp = u1 * U2Cache[idxCache].x;
-		        	sum += temp * F[idxT];
-		        	sum += temp * F[idxT + jumpIdxTMode3];
+		        	sum.xz += temp * F[idxT];
+		        	sum.yw += temp * F[idxT + jumpIdxTMode3];
 		        	idxT += jumpIdxTMode2;
 		        	
 		        	temp = u1 * U2Cache[idxCache++].y;
-		        	sum += temp * F[idxT];
-					sum += temp * F[idxT + jumpIdxTMode3];
+		        	sum.xz += temp * F[idxT];
+					sum.yw += temp * F[idxT + jumpIdxTMode3];
             		idxT += jumpIdxTMode2;
 		    	}
             }
@@ -239,5 +239,5 @@ __kernel void KernelG3(__global const double2 *F, __global const double2 *U1, __
     
     //  idxG3 =       idxT3      +         I3         *     idxR
     int idxG3 = get_global_id(1) + get_global_size(1) * get_global_id(0);
-    G3[idxG3] = sum;
+    G3[idxG3] = sum.xy + sum.zw;
 }
