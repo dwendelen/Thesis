@@ -7,6 +7,7 @@
 
 
 #include "command.hpp"
+#include <ostream>
 
 namespace cl_cpd
 {
@@ -110,28 +111,31 @@ namespace cl_cpd
 	std::vector<mxArray*> MeasureFCommand::handle()
 	{
 		Data data;
-		measureF(data);
-		delete data.data;
-		data.data = NULL;
+                measureF(data);
 
-		DataConverter dc;
+                DataConverter dc;
 
-		std::vector<mxArray*> r (1);
-		std::cout << "Convert";
-		return dc.convert(data);
+                std::vector<mxArray*> r = dc.convert(data);
+                
+                delete data.data;
+                data.data = NULL;
+
+                return r;
 	}
 
 	std::vector<mxArray*> MeasureGCommand::handle()
 	{
 		Data data;
 		measureG(data);
-		delete data.data;
-		data.data = NULL;
 
 		DataConverter dc;
 
-		std::vector<mxArray*> r (1);
-		return dc.convert(data);
+		std::vector<mxArray*> r = dc.convert(data);
+		
+		delete data.data;
+                data.data = NULL;
+
+		return r;
 	}
 
 	bool BoolParameter::validate(const mxArray* input)
@@ -288,14 +292,18 @@ namespace cl_cpd
 
 	std::vector<mxArray*> DataConverter::convert(Data data)
 	{
+		std::cout << "Coverting" << std::flush;
 		std::vector<mxArray*> r;
 		const mwSize s[] = {data.nbKernels, data.R.size(), data.I.size()};
+		std::cout << "Kernels: " << data.nbKernels;
+		std::cout << "R: " << data.R.size();
+		std::cout << "I: " << data.I.size();
 		mxArray* d = mxCreateNumericArray(3, s, mxDOUBLE_CLASS, mxREAL);
 
 		std::copy(data.data, data.data + data.size(), mxGetPr(d));
 
 		r.push_back(d);
-
+		std::cout << "Copy\n" << std::flush;
 		mxArray* i = mxCreateDoubleMatrix(data.I.size(), 1, mxREAL);
 		std::copy(data.I.begin(), data.I.end(), mxGetPr(i));
 
