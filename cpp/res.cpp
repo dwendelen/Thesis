@@ -218,12 +218,12 @@ namespace cl_cpd
 			data.R.push_back(r);
 		}
 
-        data.I = vector<int>(20);
+        data.I = vector<int>();
 
 		j = 0;
 		for(int i = 16; i <= 320 ; i+=16)
 		{
-			data.I[j] = i;
+            data.I.push_back(i);
 		}
 
 		T<double> t;
@@ -242,7 +242,7 @@ namespace cl_cpd
 
 		for(size_t i = 0; i < data.I.size(); i++)
 		{
-			cout << "\nI: " << i << "\n";
+            cout << "\nI: " << data.I[i] << "\n";
 			t.I = vector<size_t>();
 			t.I.push_back(data.I[i]);
 			t.I.push_back(data.I[i]);
@@ -253,6 +253,7 @@ namespace cl_cpd
 
 			for(size_t r = 0; r < data.R.size(); r++)
 			{
+                cout << "\nR: " << data.R[r] << "\n";
 				int R = data.R[r];
 				u.rank = R;
 
