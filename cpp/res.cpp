@@ -213,12 +213,12 @@ namespace cl_cpd
 
 		data.R = vector<int>();
 		int j = 0;
-		for(int r = 16; r <= 1024 ; r += 16)
+        for(int r = 16; r <= 1024 ; r += 64)
 		{
 			data.R.push_back(r);
 		}
 
-		data.I = vector<int>(40);
+        data.I = vector<int>(20);
 
 		j = 0;
 		for(int i = 16; i <= 320 ; i+=16)
