@@ -35,6 +35,8 @@ namespace cl_cpd
 
 		size_t size()
 		{
+            std::cout << "Nb Elements in data\n";
+            std::cout << R.size() * I.size() * nbKernels << "\n";
 			return R.size() * I.size() * nbKernels;
 		}
 	};

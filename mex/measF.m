@@ -1,5 +1,5 @@
 a = zeros(5, 4, 40);
-a(:) = Data_measureF(:);
+a(:) = Data_measureF_data(:);
 I = 16:16:320;
 
 i = 2
